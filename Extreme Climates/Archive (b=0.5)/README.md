@@ -1,0 +1,2 @@
+# Archive (b = 0.5)
+Before I found the actual maximum Perlin range, I believed the maximum possible Perlin sample was 1.0 at (0.5, 0.5, 0.5). Since Perlin octaves' b-values are independent of the coordinates one samples them from, I therefore thought the seeds with the most extreme climates would be those with Perlin b-values as close to 0.5 as possible. As it turns out, this was entirely wrong, but this is kept for historical reasons.
