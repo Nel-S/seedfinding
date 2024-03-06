@@ -102,7 +102,7 @@ const double MAX_OCTAVE_AMPLITUDE_SUMS[] = {990./511 * MAX_PERLIN_VALUE, 734./51
 /* Variable length (and thus runtime-initialized) lookup table. The ith position's jth octave's continental sample must be less than Cdouble[i][j] to still potentially be an 
 	nth-ring spawn (assuming no other climates have values extreme enough to influence the spawn fitness calculations, which is true most of the time).
    Derivable by the formula CDOUBLE[i][j] = MAX_OCTAVE_AMPLITUDE_SUMS[j] - (1100 + sqrt(FITNESS - COORDS[i][4]))/10000/(3./2)).*/
-double Cdouble[40][sizeof(MAX_OCTAVE_AMPLITUDE_SUMS)/sizeof(*MAX_OCTAVE_AMPLITUDE_SUMS)];
+double Cdouble[sizeof(COORDS)/sizeof(*COORDS)][sizeof(MAX_OCTAVE_AMPLITUDE_SUMS)/sizeof(*MAX_OCTAVE_AMPLITUDE_SUMS)];
 
 #if CHECK_DISTANCES
 // Admittedly copied from Cubiomes' finders.h so I can simply import Cubiomes' noise.c and below, instead of the entire Cubiomes library.
