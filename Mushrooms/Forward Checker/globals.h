@@ -1,7 +1,7 @@
 #ifndef _GLOBALS_H
 #define _GLOBALS_H
 // Imports settings
-#include "settings.h"
+#include "Settings.h"
 
 #include "../../cubiomes/finders.h"
 #include <limits.h>
@@ -14,7 +14,7 @@ const double MAX_PERLIN_VALUE = 1.0363538112118025;
 
 // Struct for interpreting the parameters sent to each thread's *checkSeed() function
 typedef struct {
-	uint64_t id;
+	uint64_t index;
 } Data;
 
 const double CONT_FITNESS_SQRT = MOST_POSITIVE_CONT < -0.11 ? 10000*MOST_POSITIVE_CONT + 1100 : 0;
