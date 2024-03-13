@@ -5,7 +5,7 @@ This is a Minecraft seedfinding program for finding spawns beyond a given distan
 <!-- At present two versions of this program exist after downloading this repository:
 - a [static version](Static%20Code) consisting of four `.c`/`.h` files. By changing the values in [settings.h](Static%20Code/settings.h), and then compiling with [GCC](https://gcc.gnu.org/) or another compiler of choice, this can take advantage of the optimizations that using strictly constant values in the program allows for.
 - a [precompiled dynamic version](spawnFinder.exe) which can have its values and flags specified with command-line arguments in one's terminal of choice. This does not require a compiler, but will generally run slower than the compiled static version. (The [source code for that precompiled version](Precompiled%20Executable%20Source%20Code.zip) is also provided for those wish to compile it themselves.) -->
-This program can be used by downloading the folder, changing the values in [settings.h](C/settings.h) to match one's criteria, and then compiling the files with [GCC](https://gcc.gnu.org/) or another compiler of choice. The Cubiomes library will also need to be linked.
+This program can be used by downloading the folder, changing the values in [settings.h](C/settings.h) to set one's criteria, and then compiling the files with [GCC](https://gcc.gnu.org/) or another compiler of choice. The Cubiomes library will also need to be linked.
 
 ## Using
 The program support two search modes:
