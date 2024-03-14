@@ -3,7 +3,6 @@
 // Imports settings
 #include "settings.h"
 
-#include "../../cubiomes/finders.h"
 #include "../../Utilities/Fast Climates.h"
 #include <limits.h>
 #include <time.h>

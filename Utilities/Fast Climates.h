@@ -1,24 +1,31 @@
 #include "../cubiomes/finders.h"
 #include <stdbool.h>
 
-extern bool LARGE_BIOMES_FLAG;
+extern const bool LARGE_BIOMES_FLAG;
 
 // 2*pi.
 const double U_TWO_PI = 6.2831853071795864769252866;
-// The maximum value that a Perlin sample can return. The minimum Perlin sample is the negative inverse of this.
+
+// The maximum value that a Perlin sample can return.
 const double U_MAX_PERLIN_VALUE = 1.0363538112118025;
+// The minimum value that a Perlin sample can return.
+const double U_MIN_PERLIN_VALUE = -U_MAX_PERLIN_VALUE;
+// The maximum value each climate sample can return.
+const double U_MAX_CLIMATE_AMPLITUDES[] = {20./9  * U_MAX_PERLIN_VALUE, 320./189 * U_MAX_PERLIN_VALUE, 267./73 * U_MAX_PERLIN_VALUE,
+										   75./31 * U_MAX_PERLIN_VALUE,   7./3   * U_MAX_PERLIN_VALUE,  20./7  * U_MAX_PERLIN_VALUE};
+// The minimum value each climate sample can return.
+const double U_MIN_CLIMATE_AMPLITUDES[] = {20./9  * U_MIN_PERLIN_VALUE, 320./189 * U_MIN_PERLIN_VALUE, 267./73 * U_MIN_PERLIN_VALUE,
+										   75./31 * U_MIN_PERLIN_VALUE,   7./3   * U_MIN_PERLIN_VALUE,  20./7  * U_MIN_PERLIN_VALUE};
+
 // The BiomeNoise-set amplitude for each climate.
 const double U_SET_CLIMATE_AMPLITUDES[] = {5./4, 10./9, 3./2, 25./18, 5./4, 5./4};
 
-const double U_MAX_CLIMATE_AMPLITUDES[] = {};
-
-
 // The maximum value that all continentalness Perlin octaves after the ith one can return.
 const double U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS[] = {990./511 * U_MAX_PERLIN_VALUE, 734./511 * U_MAX_PERLIN_VALUE, 606./511 * U_MAX_PERLIN_VALUE, 478./511 * U_MAX_PERLIN_VALUE,
-											 50./73  * U_MAX_PERLIN_VALUE, 222./511 * U_MAX_PERLIN_VALUE, 158./511 * U_MAX_PERLIN_VALUE,  94./511 * U_MAX_PERLIN_VALUE,
-											 62./511 * U_MAX_PERLIN_VALUE,  30./511 * U_MAX_PERLIN_VALUE,  22./511 * U_MAX_PERLIN_VALUE,   2./73  * U_MAX_PERLIN_VALUE,
-											 10./511 * U_MAX_PERLIN_VALUE,   6./511 * U_MAX_PERLIN_VALUE,   4./511 * U_MAX_PERLIN_VALUE,   2./511 * U_MAX_PERLIN_VALUE,
-											  1./511 * U_MAX_PERLIN_VALUE,   0};
+													50./73  * U_MAX_PERLIN_VALUE, 222./511 * U_MAX_PERLIN_VALUE, 158./511 * U_MAX_PERLIN_VALUE,  94./511 * U_MAX_PERLIN_VALUE,
+													62./511 * U_MAX_PERLIN_VALUE,  30./511 * U_MAX_PERLIN_VALUE,  22./511 * U_MAX_PERLIN_VALUE,   2./73  * U_MAX_PERLIN_VALUE,
+													10./511 * U_MAX_PERLIN_VALUE,   6./511 * U_MAX_PERLIN_VALUE,   4./511 * U_MAX_PERLIN_VALUE,   2./511 * U_MAX_PERLIN_VALUE,
+													 1./511 * U_MAX_PERLIN_VALUE,   0};
 
 
 // Lookup table containing each point that the first stage of the spawn algorithm checks.
