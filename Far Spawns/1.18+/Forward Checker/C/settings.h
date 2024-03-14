@@ -1,3 +1,6 @@
+#ifndef _SETTINGS_H
+#define _SETTINGS_H
+
 #include <inttypes.h>
 #include <stdbool.h>
 
@@ -51,4 +54,6 @@ const bool SAMPLE_ALL_CLIMATES = true;
 const uint8_t NUMBER_OF_THREADS = 4;
 
 // Set to 1 to time the program's runtime, or 0 to disable that feature.
-const bool TIME_PROGRAM = true;
+const bool TIME_PROGRAM = false;
+
+#endif

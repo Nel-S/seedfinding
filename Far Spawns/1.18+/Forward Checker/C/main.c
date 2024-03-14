@@ -36,19 +36,14 @@
 #include "functions.c"
 
 int main() {
-	// Initialize Cdouble table
-	for (uint8_t i = 0; i < RING_STARTING_INDEX; ++i) {
-		for (size_t j = 0; j < sizeof(MAX_OCTAVE_AMPLITUDE_SUMS)/sizeof(*MAX_OCTAVE_AMPLITUDE_SUMS); ++j) {
-			Cdouble[i][j]  = MAX_OCTAVE_AMPLITUDE_SUMS[j] - (1100 + sqrt(FITNESS - COORDS[i][4]))/(10000.*AMPLITUDES[2]);
-		}
-	}
+	initConstants();
 	pthread_t threads[NUMBER_OF_THREADS];
 	ThreadData data[NUMBER_OF_THREADS];
 	struct timespec startTime, endTime;
 	if (TIME_PROGRAM) clock_gettime(CLOCK_MONOTONIC, &startTime);
 	for (uint8_t i = 0; i < NUMBER_OF_THREADS; ++i) {
 		data[i].id = i;
-		pthread_create(&threads[i], NULL, checkSeed, &data[i]);
+		pthread_create(&threads[i], NULL, checkSeeds, &data[i]);
 	}
 	for (uint8_t i = 0; i < NUMBER_OF_THREADS; ++i) pthread_join(threads[i], NULL);
 	if (TIME_PROGRAM) {

@@ -1,27 +1,19 @@
+#ifndef _FUNCTIONS_C
+#define _FUNCTIONS_C
+
 #include "globals.h"
 
-// Clone of xPerlinInit that is static inlined and doesn't bother with the octave's amplitudes/lacunarities.
-static inline void initPerlin(PerlinNoise *octave, Xoroshiro *xoroshiro) {
-	octave->a = xNextDouble(xoroshiro) * 256.;
-	octave->b = xNextDouble(xoroshiro) * 256.;
-	octave->c = xNextDouble(xoroshiro) * 256.;
-	uint8_t *idx = octave->d;
-	for (int i = 0; i < 256; ++i) idx[i] = i;
-	for (int i = 0; i < 255; ++i) {
-		int j = xNextInt(xoroshiro, 256 - i) + i;
-		uint_fast8_t n = idx[i];
-		idx[i] = idx[j];
-		idx[j] = n;
+void initConstants() {
+	for (ringStartingIndex = 0; ringStartingIndex < sizeof(U_SPAWN_FIRST_STAGE_VALS)/sizeof(*U_SPAWN_FIRST_STAGE_VALS) && U_SPAWN_FIRST_STAGE_VALS[ringStartingIndex][4] <= FITNESS; ++ringStartingIndex);
+
+	for (uint_fast8_t i = 0; i < ringStartingIndex; ++i) {
+		for (size_t j = 0; j < sizeof(U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS)/sizeof(*U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS); ++j) {
+			Cdouble[i][j] = U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS[j] - (1100 + sqrt(FITNESS - U_SPAWN_FIRST_STAGE_VALS[i][4]))/15000.;
+		}
 	}
-	idx[256] = idx[0];
-    double i2 = floor(octave->b);
-    double d2 = octave->b - i2;
-    octave->h2 = (int) i2;
-    octave->d2 = d2;
-    octave->t2 = d2*d2*d2 * (d2 * (d2*6. - 15.) + 10.);
 }
 
-void *checkSeed(void *dat) {
+void *checkSeeds(void *dat) {
 	ThreadData *data = dat;
 	PerlinNoise oct[46];
 	Xoroshiro pxr, pxr2;
@@ -171,19 +163,10 @@ void *checkSeed(void *dat) {
 		if (Cdouble[0][17] <= npC) continue;
 
 		// If a 1st-ring spawn is all that is needed, we can stop here; otherwise, we repeat the process again for each position in each ring below the desired one.
-		for (uint_fast8_t i = 1; i < RING_STARTING_INDEX; ++i) {
-			double pz = 0;
-			if (!DELAY_SHIFT) {
-				px = COORDS[i][0] + 8./3 * (samplePerlin(&oct[34], COORDS[i][0]/8., 0, COORDS[i][2]/8., 0, 0) + samplePerlin(&oct[37], COORDS[i][1]/8., 0, COORDS[i][3]/8., 0, 0))
-								  + 4./3 * (samplePerlin(&oct[35], COORDS[i][0]/4., 0, COORDS[i][2]/4., 0, 0) + samplePerlin(&oct[38], COORDS[i][1]/4., 0, COORDS[i][3]/4., 0, 0))
-								  + 2./3 * (samplePerlin(&oct[36], COORDS[i][0]/2., 0, COORDS[i][2]/2., 0, 0) + samplePerlin(&oct[39], COORDS[i][1]/2., 0, COORDS[i][3]/2., 0, 0));
-				pz = COORDS[i][2] + 8./3 * (samplePerlin(&oct[34], COORDS[i][2]/8., COORDS[i][0]/8., 0, 0, 0) + samplePerlin(&oct[37], COORDS[i][3]/8., COORDS[i][1]/8., 0, 0, 0))
-								  + 4./3 * (samplePerlin(&oct[35], COORDS[i][2]/4., COORDS[i][0]/4., 0, 0, 0) + samplePerlin(&oct[38], COORDS[i][3]/4., COORDS[i][1]/4., 0, 0, 0))
-								  + 2./3 * (samplePerlin(&oct[36], COORDS[i][2]/2., COORDS[i][0]/2., 0, 0, 0) + samplePerlin(&oct[39], COORDS[i][3]/2., COORDS[i][1]/2., 0, 0, 0));
-			} else {
-				px = COORDS[i][0];
-				pz = COORDS[i][2];
-			}
+		double pz;
+		for (uint_fast8_t i = 1; i < ringStartingIndex; ++i) {
+			px = U_SPAWN_FIRST_STAGE_VALS[i][0], pz = U_SPAWN_FIRST_STAGE_VALS[i][2];
+			if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz);
 			npC = 256./511 * samplePerlin(&oct[8], px/(LARGE_BIOMES_FLAG ? 2048. : 512.), 0, pz/(LARGE_BIOMES_FLAG ? 2048. : 512.), 0, 0);
 			if (Cdouble[i][0] <= npC) goto skip;
 			npC += 256./511 * samplePerlin(&oct[17], px * (LARGE_BIOMES_FLAG ? 337./(331*2048) : 337./(331*512)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*2048) : 337./(331*512)), 0, 0);
@@ -353,78 +336,34 @@ void *checkSeed(void *dat) {
 		uint8_t minI = 0;
 		double fitness = INFINITY;
 		// TODO: Continue as soon as an individual samplePerlin pushes fit over fitness?
-		for (size_t i = 0; i < sizeof(COORDS)/sizeof(*COORDS); ++i) {
+		for (size_t i = 0; i < sizeof(U_SPAWN_FIRST_STAGE_VALS)/sizeof(*U_SPAWN_FIRST_STAGE_VALS); ++i) {
 			// Shift
-			px = COORDS[i][0] + 8./3 * (samplePerlin(&oct[34], COORDS[i][0]/8., 0, COORDS[i][2]/8., 0, 0) + samplePerlin(&oct[37], COORDS[i][1]/8., 0, COORDS[i][3]/8., 0, 0))
-				+ 4./3 * (samplePerlin(&oct[35], COORDS[i][0]/4., 0, COORDS[i][2]/4., 0, 0) + samplePerlin(&oct[38], COORDS[i][1]/4., 0, COORDS[i][3]/4., 0, 0))
-				+ 2./3 * (samplePerlin(&oct[36], COORDS[i][0]/2., 0, COORDS[i][2]/2., 0, 0) + samplePerlin(&oct[39], COORDS[i][1]/2., 0, COORDS[i][3]/2., 0, 0));
-			double pz = COORDS[i][2] + 8./3 * (samplePerlin(&oct[34], COORDS[i][2]/8., COORDS[i][0]/8., 0, 0, 0) + samplePerlin(&oct[37], COORDS[i][3]/8., COORDS[i][1]/8., 0, 0, 0))
-				+ 4./3 * (samplePerlin(&oct[35], COORDS[i][2]/4., COORDS[i][0]/4., 0, 0, 0) + samplePerlin(&oct[38], COORDS[i][3]/4., COORDS[i][1]/4., 0, 0, 0))
-				+ 2./3 * (samplePerlin(&oct[36], COORDS[i][2]/2., COORDS[i][0]/2., 0, 0, 0) + samplePerlin(&oct[39], COORDS[i][3]/2., COORDS[i][1]/2., 0, 0, 0));
+			px = U_SPAWN_FIRST_STAGE_VALS[i][0], pz = U_SPAWN_FIRST_STAGE_VALS[i][2];
+			U_sampleClimate(NP_SHIFT, oct, &px, &pz);
 			// Continentalness
-			npC = 256./511 * (samplePerlin(&oct[8], px/(LARGE_BIOMES_FLAG ? 2048. : 512.), 0, pz/(LARGE_BIOMES_FLAG ? 2048. : 512.), 0, 0)
-							+ samplePerlin(&oct[17], px * (LARGE_BIOMES_FLAG ? 337./(331*2048) : 337./(331*512)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*2048) : 337./(331*512)), 0, 0))
-				+ 128./511 * (samplePerlin(&oct[9], px/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, pz/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, 0)
-							+ samplePerlin(&oct[18], px * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, 0)
-							+ samplePerlin(&oct[10], px/(LARGE_BIOMES_FLAG ? 512. : 128.), 0, pz/(LARGE_BIOMES_FLAG ? 512. : 128.), 0, 0)
-							+ samplePerlin(&oct[19], px * (LARGE_BIOMES_FLAG ? 337./(331*512) : 337./(331*128)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*512) : 337./(331*128)), 0, 0))
-				+  64./511 * (samplePerlin(&oct[11], px/(LARGE_BIOMES_FLAG ? 256. : 64.), 0, pz/(LARGE_BIOMES_FLAG ? 256. : 64.), 0, 0)
-							+ samplePerlin(&oct[20], px * (LARGE_BIOMES_FLAG ? 337./(331*256) : 337./(331*64)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*256) : 337./(331*64)), 0, 0))
-				+  32./511 * (samplePerlin(&oct[12], px/(LARGE_BIOMES_FLAG ? 128. : 32.), 0, pz/(LARGE_BIOMES_FLAG ? 128. : 32.), 0, 0)
-							+ samplePerlin(&oct[21], px * (LARGE_BIOMES_FLAG ? 337./(331*128) : 337./(331*32)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*128) : 337./(331*32)), 0, 0))
-				+   8./511 * (samplePerlin(&oct[13], px/(LARGE_BIOMES_FLAG ? 64. : 16.), 0, pz/(LARGE_BIOMES_FLAG ? 64. : 16.), 0, 0)
-							+ samplePerlin(&oct[22], px * (LARGE_BIOMES_FLAG ? 337./(331*64) : 337./(331*16)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*64) : 337./(331*16)), 0, 0))
-				+   4./511 * (samplePerlin(&oct[14], px/(LARGE_BIOMES_FLAG ? 32. : 8.), 0, pz/(LARGE_BIOMES_FLAG ? 32. : 8.), 0, 0)
-							+ samplePerlin(&oct[23], px * (LARGE_BIOMES_FLAG ? 337./(331*32) : 337./(331*8)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*32) : 337./(331*8)), 0, 0))
-				+   2./511 * (samplePerlin(&oct[15], px/(LARGE_BIOMES_FLAG ? 16. : 4.), 0, pz/(LARGE_BIOMES_FLAG ? 16. : 4.), 0, 0)
-							+ samplePerlin(&oct[24], px * (LARGE_BIOMES_FLAG ? 337./(331*16) : 337./(331*4)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*16) : 337./(331*4)), 0, 0))
-				+   1./511 * (samplePerlin(&oct[16], px/(LARGE_BIOMES_FLAG ? 8. : 2.), 0, pz/(LARGE_BIOMES_FLAG ? 8. : 2.), 0, 0)
-							+ samplePerlin(&oct[25], px * (LARGE_BIOMES_FLAG ? 337./(331*8) : 337./(331*2)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*8) : 337./(331*2)), 0, 0));
-			double q = npC < -0.11/AMPLITUDES[2] ? 10000. * AMPLITUDES[2] * npC + 1100. : 1./AMPLITUDES[2] < npC ? 10000. * AMPLITUDES[2] * npC - 10000. : 0.;
-			double fit = COORDS[i][4] + q * q;
+			npC = U_sampleClimate(NP_CONTINENTALNESS, oct, &px, &pz);
+			double q = npC < -0.11/U_SET_CLIMATE_AMPLITUDES[2] ? 10000. * U_SET_CLIMATE_AMPLITUDES[2] * npC + 1100. : 1./U_SET_CLIMATE_AMPLITUDES[2] < npC ? 10000. * U_SET_CLIMATE_AMPLITUDES[2] * npC - 10000. : 0.;
+			double fit = U_SPAWN_FIRST_STAGE_VALS[i][4] + q * q;
             if (SAMPLE_ALL_CLIMATES) {
                 if (fit >= fitness) continue;
 				// Erosion
-                npC = fabs(
-                    16./31 * (samplePerlin(&oct[26], px/(LARGE_BIOMES_FLAG ? 2048. : 512.), 0, pz/(LARGE_BIOMES_FLAG ? 2048. : 512.), 0, 0)
-                            + samplePerlin(&oct[30], px * (LARGE_BIOMES_FLAG ? 337./(331*2048) : 337./(331*512)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*2048) : 337./(331*512)), 0, 0))
-                    +  8./31 * (samplePerlin(&oct[27], px/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, pz/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, 0)
-                            + samplePerlin(&oct[31], px * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, 0))
-                    +  2./31 * (samplePerlin(&oct[28], px/(LARGE_BIOMES_FLAG ? 256. : 64.), 0, pz/(LARGE_BIOMES_FLAG ? 256. : 64.), 0, 0)
-                            + samplePerlin(&oct[32], px * (LARGE_BIOMES_FLAG ? 337./(331*256) : 337./(331*64)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*256) : 337./(331*64)), 0, 0))
-                    +  1./31 * (samplePerlin(&oct[29], px/(LARGE_BIOMES_FLAG ? 128. : 32.), 0, pz/(LARGE_BIOMES_FLAG ? 128. : 32.), 0, 0)
-                            + samplePerlin(&oct[33], px * (LARGE_BIOMES_FLAG ? 337./(331*128) : 337./(331*32)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*128) : 337./(331*32)), 0, 0))
-                );
-                q = 1./AMPLITUDES[3] < npC ? 10000. * AMPLITUDES[3] * npC - 10000. : 0.;
+                npC = fabs(U_sampleClimate(NP_EROSION, oct, &px, &pz));
+                q = 1./U_SET_CLIMATE_AMPLITUDES[3] < npC ? 10000. * U_SET_CLIMATE_AMPLITUDES[3] * npC - 10000. : 0.;
                 fit += q * q;
                 if (fit >= fitness) continue;
 				// Weirdness
-                npC = fabs(
-                    32./63 * (samplePerlin(&oct[40], px/128., 0, pz/128., 0, 0) + samplePerlin(&oct[43], px * 337./(331*128), 0, pz * 337./(331*128), 0, 0)
-                            + samplePerlin(&oct[41], px/64., 0, pz/64., 0, 0)   + samplePerlin(&oct[44], px * 337./(331*64), 0, pz * 337./(331*64), 0, 0))
-                    +  8./63 * (samplePerlin(&oct[42], px/32., 0, pz/32., 0, 0)   + samplePerlin(&oct[45], px * 337./(331*32), 0, pz * 337./(331*32), 0, 0))
-                );
-                q = 1./AMPLITUDES[5] < npC ? 10000. * AMPLITUDES[5] * npC - 10000. : npC < 0.16/AMPLITUDES[5] ? 10000. * AMPLITUDES[5] * npC - 1600. : 0.;
+                npC = fabs(U_sampleClimate(NP_WEIRDNESS, oct, &px, &pz));
+                q = 1./U_SET_CLIMATE_AMPLITUDES[5] < npC ? 10000. * U_SET_CLIMATE_AMPLITUDES[5] * npC - 10000. : npC < 0.16/U_SET_CLIMATE_AMPLITUDES[5] ? 10000. * U_SET_CLIMATE_AMPLITUDES[5] * npC - 1600. : 0.;
                 fit += q * q;
                 if (fit >= fitness) continue;
 				// Temprature
-                npC = fabs(
-                    16./21 * (samplePerlin(&oct[0], px/(LARGE_BIOMES_FLAG ? 4096. : 1024.), 0, pz/(LARGE_BIOMES_FLAG ? 4096. : 1024.), 0, 0)
-                            + samplePerlin(&oct[2], px * (LARGE_BIOMES_FLAG ? 337./1355776 : 337./(331*1024)), 0, pz * (LARGE_BIOMES_FLAG ? 337./1355776 : 337./(331*1024)), 0, 0))
-                    +  8./63 * (samplePerlin(&oct[1], px/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, pz/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, 0)
-                            + samplePerlin(&oct[3], px * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, 0))
-                );
-                q = 1./AMPLITUDES[0] < npC ? 10000. * AMPLITUDES[0] * npC - 10000. : 0.;
+                npC = fabs(U_sampleClimate(NP_TEMPERATURE, oct, &px, &pz));
+                q = 1./U_SET_CLIMATE_AMPLITUDES[0] < npC ? 10000. * U_SET_CLIMATE_AMPLITUDES[0] * npC - 10000. : 0.;
                 fit += q * q;
                 if (fit >= fitness) continue;
 				// Humidity
-                npC = fabs(
-                    32./63 * (samplePerlin(&oct[4], px/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, pz/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, 0)
-                            + samplePerlin(&oct[6], px * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, 0))
-                    + 16./63 * (samplePerlin(&oct[5], px/(LARGE_BIOMES_FLAG ? 512. : 128.), 0, pz/(LARGE_BIOMES_FLAG ? 512. : 128.), 0, 0)
-                            + samplePerlin(&oct[7], px * (LARGE_BIOMES_FLAG ? 337./(331*512) : 337./(331*128)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*512) : 337./(331*128)), 0, 0))
-                );
-                q = 1./AMPLITUDES[1] < npC ? 10000. * AMPLITUDES[1] * npC - 10000. : 0.;
+                npC = fabs(U_sampleClimate(NP_HUMIDITY, oct, &px, &pz));
+                q = 1./U_SET_CLIMATE_AMPLITUDES[1] < npC ? 10000. * U_SET_CLIMATE_AMPLITUDES[1] * npC - 10000. : 0.;
                 fit += q * q;
             }
 			if (fit < fitness) {
@@ -438,85 +377,40 @@ void *checkSeed(void *dat) {
 		/* At this point, we know the seed is an nth ring spawn, so we now just need to ensure the second stage of the spawn algorithm places its spawn beyond
 		   (the square root of) MIN_DISTANCE_SQUARED blocks.*/
 		Pos p, approxSpawn;
-		p = approxSpawn = FIRST_STAGE_POINTS[minI];
+		p = approxSpawn = U_SPAWN_FIRST_STAGE_COORDS[minI];
 		for (double rad = 32.; rad <= 512.; rad += 32.) {
-			for (double ang = 0.; ang <= TWO_PI; ang += 32./rad) {
+			for (double ang = 0.; ang <= U_TWO_PI; ang += 32./rad) {
 				int x = p.x + (int)(sin(ang) * rad);
 				int z = p.z + (int)(cos(ang) * rad);
 				uint64_t d = x*(int64_t)x + z*(int64_t)z;
 				double fit = d*d/390625.;
 				if (fit >= fitness) continue;
-				int x2 = x >> 2, z2 = z >> 2;
+				px = x >> 2, pz = z >> 2;
 				// Shift
-				px = x2 + 8./3 * (samplePerlin(&oct[34], x2/8., 0, z2/8., 0, 0) + samplePerlin(&oct[37], x2*337./(331*8), 0, z2*337./(331*8), 0, 0))
-					    + 4./3 * (samplePerlin(&oct[35], x2/4., 0, z2/4., 0, 0) + samplePerlin(&oct[38], x2*337./(331*4), 0, z2*337./(331*4), 0, 0))
-					    + 2./3 * (samplePerlin(&oct[36], x2/2., 0, z2/2., 0, 0) + samplePerlin(&oct[39], x2*337./(331*2), 0, z2*337./(331*2), 0, 0));
-				double pz = z2 + 8./3 * (samplePerlin(&oct[34], z2/8., x2/8., 0, 0, 0) + samplePerlin(&oct[37], z2*337./(331*8), x2*337./(331*8), 0, 0, 0))
-							   + 4./3 * (samplePerlin(&oct[35], z2/4., x2/4., 0, 0, 0) + samplePerlin(&oct[38], z2*337./(331*4), x2*337./(331*4), 0, 0, 0))
-							   + 2./3 * (samplePerlin(&oct[36], z2/2., x2/2., 0, 0, 0) + samplePerlin(&oct[39], z2*337./(331*2), x2*337./(331*2), 0, 0, 0));
+				U_sampleClimate(NP_SHIFT, oct, &px, &pz);
 				// Continentalness
-				npC = 256./511 * (samplePerlin(&oct[8], px/(LARGE_BIOMES_FLAG ? 2048. : 512.), 0, pz/(LARGE_BIOMES_FLAG ? 2048. : 512.), 0, 0)
-								+ samplePerlin(&oct[17], px * (LARGE_BIOMES_FLAG ? 337./(331*2048) : 337./(331*512)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*2048) : 337./(331*512)), 0, 0))
-					+ 128./511 * (samplePerlin(&oct[9], px/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, pz/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, 0)
-								+ samplePerlin(&oct[18], px * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, 0)
-								+ samplePerlin(&oct[10], px/(LARGE_BIOMES_FLAG ? 512. : 128.), 0, pz/(LARGE_BIOMES_FLAG ? 512. : 128.), 0, 0)
-								+ samplePerlin(&oct[19], px * (LARGE_BIOMES_FLAG ? 337./(331*512) : 337./(331*128)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*512) : 337./(331*128)), 0, 0))
-					+  64./511 * (samplePerlin(&oct[11], px/(LARGE_BIOMES_FLAG ? 256. : 64.), 0, pz/(LARGE_BIOMES_FLAG ? 256. : 64.), 0, 0)
-								+ samplePerlin(&oct[20], px * (LARGE_BIOMES_FLAG ? 337./(331*256) : 337./(331*64)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*256) : 337./(331*64)), 0, 0))
-					+  32./511 * (samplePerlin(&oct[12], px/(LARGE_BIOMES_FLAG ? 128. : 32.), 0, pz/(LARGE_BIOMES_FLAG ? 128. : 32.), 0, 0)
-								+ samplePerlin(&oct[21], px * (LARGE_BIOMES_FLAG ? 337./(331*128) : 337./(331*32)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*128) : 337./(331*32)), 0, 0))
-					+   8./511 * (samplePerlin(&oct[13], px/(LARGE_BIOMES_FLAG ? 64. : 16.), 0, pz/(LARGE_BIOMES_FLAG ? 64. : 16.), 0, 0)
-								+ samplePerlin(&oct[22], px * (LARGE_BIOMES_FLAG ? 337./(331*64) : 337./(331*16)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*64) : 337./(331*16)), 0, 0))
-					+   4./511 * (samplePerlin(&oct[14], px/(LARGE_BIOMES_FLAG ? 32. : 8.), 0, pz/(LARGE_BIOMES_FLAG ? 32. : 8.), 0, 0)
-								+ samplePerlin(&oct[23], px * (LARGE_BIOMES_FLAG ? 337./(331*32) : 337./(331*8)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*32) : 337./(331*8)), 0, 0))
-					+   2./511 * (samplePerlin(&oct[15], px/(LARGE_BIOMES_FLAG ? 16. : 4.), 0, pz/(LARGE_BIOMES_FLAG ? 16. : 4.), 0, 0)
-								+ samplePerlin(&oct[24], px * (LARGE_BIOMES_FLAG ? 337./(331*16) : 337./(331*4)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*16) : 337./(331*4)), 0, 0))
-					+   1./511 * (samplePerlin(&oct[16], px/(LARGE_BIOMES_FLAG ? 8. : 2.), 0, pz/(LARGE_BIOMES_FLAG ? 8. : 2.), 0, 0)
-								+ samplePerlin(&oct[25], px * (LARGE_BIOMES_FLAG ? 337./(331*8) : 337./(331*2)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*8) : 337./(331*2)), 0, 0));
-				double q = npC < -0.11/AMPLITUDES[2] ? 10000. * AMPLITUDES[2] * npC + 1100. : 1./AMPLITUDES[2] < npC ? 10000. * AMPLITUDES[2] * npC - 10000. : 0.;
+				U_sampleClimate(NP_CONTINENTALNESS, oct, &px, &pz);
+				double q = npC < -0.11/U_SET_CLIMATE_AMPLITUDES[2] ? 10000. * U_SET_CLIMATE_AMPLITUDES[2] * npC + 1100. : 1./U_SET_CLIMATE_AMPLITUDES[2] < npC ? 10000. * U_SET_CLIMATE_AMPLITUDES[2] * npC - 10000. : 0.;
 				fit += q * q;
 				if (fit >= fitness) continue;
 				// Erosion
-				npC = fabs(
-					  16./31 * (samplePerlin(&oct[26], px/(LARGE_BIOMES_FLAG ? 2048. : 512.), 0, pz/(LARGE_BIOMES_FLAG ? 2048. : 512.), 0, 0)
-							  + samplePerlin(&oct[30], px * (LARGE_BIOMES_FLAG ? 337./(331*2048) : 337./(331*512)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*2048) : 337./(331*512)), 0, 0))
-					+  8./31 * (samplePerlin(&oct[27], px/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, pz/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, 0)
-							  + samplePerlin(&oct[31], px * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, 0))
-					+  2./31 * (samplePerlin(&oct[28], px/(LARGE_BIOMES_FLAG ? 256. : 64.), 0, pz/(LARGE_BIOMES_FLAG ? 256. : 64.), 0, 0)
-							  + samplePerlin(&oct[32], px * (LARGE_BIOMES_FLAG ? 337./(331*256) : 337./(331*64)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*256) : 337./(331*64)), 0, 0))
-					+  1./31 * (samplePerlin(&oct[29], px/(LARGE_BIOMES_FLAG ? 128. : 32.), 0, pz/(LARGE_BIOMES_FLAG ? 128. : 32.), 0, 0)
-							  + samplePerlin(&oct[33], px * (LARGE_BIOMES_FLAG ? 337./(331*128) : 337./(331*32)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*128) : 337./(331*32)), 0, 0))
-				);
-				q = 1./AMPLITUDES[3] < npC ? 10000. * AMPLITUDES[3] * npC - 10000. : 0.;
+				npC = fabs(U_sampleClimate(NP_EROSION, oct, &px, &pz));
+				q = 1./U_SET_CLIMATE_AMPLITUDES[3] < npC ? 10000. * U_SET_CLIMATE_AMPLITUDES[3] * npC - 10000. : 0.;
 				fit += q * q;
 				if (fit >= fitness) continue;
 				// Weirdness
-				npC = fabs(
-					  32./63 * (samplePerlin(&oct[40], px/128., 0, pz/128., 0, 0) + samplePerlin(&oct[43], px * 337./(331*128), 0, pz * 337./(331*128), 0, 0)
-							  + samplePerlin(&oct[41], px/64., 0, pz/64., 0, 0)   + samplePerlin(&oct[44], px * 337./(331*64), 0, pz * 337./(331*64), 0, 0))
-					+  8./63 * (samplePerlin(&oct[42], px/32., 0, pz/32., 0, 0)   + samplePerlin(&oct[45], px * 337./(331*32), 0, pz * 337./(331*32), 0, 0))
-				);
-				q = 1./AMPLITUDES[5] < npC ? 10000. * AMPLITUDES[5] * npC - 10000. : npC < 0.16/AMPLITUDES[5] ? 10000. * AMPLITUDES[5] * npC - 1600. : 0.;
+				npC = fabs(U_sampleClimate(NP_WEIRDNESS, oct, &px, &pz));
+				q = 1./U_SET_CLIMATE_AMPLITUDES[5] < npC ? 10000. * U_SET_CLIMATE_AMPLITUDES[5] * npC - 10000. : npC < 0.16/U_SET_CLIMATE_AMPLITUDES[5] ? 10000. * U_SET_CLIMATE_AMPLITUDES[5] * npC - 1600. : 0.;
 				fit += q * q;
 				if (fit >= fitness) continue;
 				// Temperature
-				npC = fabs(
-					  16./21 * (samplePerlin(&oct[0], px/(LARGE_BIOMES_FLAG ? 4096. : 1024.), 0, pz/(LARGE_BIOMES_FLAG ? 4096. : 1024.), 0, 0)
-							  + samplePerlin(&oct[2], px * (LARGE_BIOMES_FLAG ? 337./1355776 : 337./(331*1024)), 0, pz * (LARGE_BIOMES_FLAG ? 337./1355776 : 337./(331*1024)), 0, 0))
-					+  8./63 * (samplePerlin(&oct[1], px/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, pz/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, 0)
-							  + samplePerlin(&oct[3], px * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, 0))
-				);
-				q = 1./AMPLITUDES[0] < npC ? 10000. * AMPLITUDES[0] * npC - 10000. : 0.;
+				npC = fabs(U_sampleClimate(NP_TEMPERATURE, oct, &px, &pz));
+				q = 1./U_SET_CLIMATE_AMPLITUDES[0] < npC ? 10000. * U_SET_CLIMATE_AMPLITUDES[0] * npC - 10000. : 0.;
 				fit += q * q;
 				if (fit >= fitness) continue;
 				// Humidity
-				npC = fabs(
-					  32./63 * (samplePerlin(&oct[4], px/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, pz/(LARGE_BIOMES_FLAG ? 1024. : 256.), 0, 0)
-							  + samplePerlin(&oct[6], px * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*1024) : 337./(331*256)), 0, 0))
-					+ 16./63 * (samplePerlin(&oct[5], px/(LARGE_BIOMES_FLAG ? 512. : 128.), 0, pz/(LARGE_BIOMES_FLAG ? 512. : 128.), 0, 0)
-							  + samplePerlin(&oct[7], px * (LARGE_BIOMES_FLAG ? 337./(331*512) : 337./(331*128)), 0, pz * (LARGE_BIOMES_FLAG ? 337./(331*512) : 337./(331*128)), 0, 0))
-				);
-				q = 1./AMPLITUDES[1] < npC ? 10000. * AMPLITUDES[1] * npC - 10000. : 0.;
+				npC = fabs(U_sampleClimate(NP_HUMIDITY, oct, &px, &pz));
+				q = 1./U_SET_CLIMATE_AMPLITUDES[1] < npC ? 10000. * U_SET_CLIMATE_AMPLITUDES[1] * npC - 10000. : 0.;
 				fit += q * q;
 				if (fit < fitness) {
 					approxSpawn.x = x;
@@ -539,3 +433,5 @@ void *checkSeed(void *dat) {
 	}
 	return NULL;
 }
+
+#endif

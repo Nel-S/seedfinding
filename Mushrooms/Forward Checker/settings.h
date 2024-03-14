@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 // Sets the seed to start at and the number of seeds to iterate over.
-const uint64_t GLOBAL_START_SEED = 146188867240;
+const uint64_t GLOBAL_START_SEED = 154778801832;
 const uint64_t GLOBAL_SEEDS_TO_CHECK = -1;
 
 // The most positive effective continentalness to allow during the spawn algorithm.
@@ -31,6 +31,6 @@ const bool SAMPLE_ALL_CLIMATES = true;
 const uint8_t NUMBER_OF_THREADS = 4;
 
 // Set to true to time the program's runtime, or false otherwise.
-const bool TIME_PROGRAM = false;
+const bool TIME_PROGRAM = true;
 
 #endif
