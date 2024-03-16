@@ -1,4 +1,4 @@
-#include "../../cubiomes/biomenoise.h"
+#include "cubiomes/biomenoise.h"
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdio.h>

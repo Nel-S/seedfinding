@@ -1,4 +1,4 @@
-#include "../cubiomes/finders.h"
+#include "cubiomes/finders.h"
 #include "Brng.h"
 
 int getBedrockStructureConfig(const int structureType, const int mc, StructureConfig *sconf);

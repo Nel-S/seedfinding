@@ -3,7 +3,7 @@
 // Imports settings
 #include "settings.h"
 
-#include "../../Utilities/Fast Climates.h"
+#include "Utilities/Fast Climates.h"
 #include <limits.h>
 #include <time.h>
 

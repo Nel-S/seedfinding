@@ -1,9 +1,4 @@
-#include "../../cubiomes/finders.c"
-#include "../../cubiomes/generator.c"
-#include "../../cubiomes/biomenoise.c"
-#include "../../cubiomes/biometree.c"
-#include "../../cubiomes/layers.c"
-#include "../../cubiomes/noise.c"
+#include "cubiomes/finders.h"
 #include <math.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -14,7 +9,7 @@ const _Bool LARGE_BIOMES_FLAG = 0;
 const int SECOND_CHANCES = 0;
 const int MC_VERSION = MC_1_8;
 
-// const uint64_t g_spawn_biomes_17 = (1ULL << forest) | (1ULL << plains) | (1ULL << taiga) | (1ULL << taiga_hills) | (1ULL << wooded_hills) | (1ULL << jungle) |(1ULL << jungle_hills);
+const uint64_t g_spawn_biomes_17 = (1ULL << forest) | (1ULL << plains) | (1ULL << taiga) | (1ULL << taiga_hills) | (1ULL << wooded_hills) | (1ULL << jungle) |(1ULL << jungle_hills);
 const uint64_t g_spawn_biomes_1 = (1ULL << forest) | (1ULL << swamp) | (1ULL << taiga);
 
 uint64_t farthestDist = 0;

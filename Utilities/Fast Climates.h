@@ -1,4 +1,4 @@
-#include "../cubiomes/finders.h"
+#include "cubiomes/finders.h"
 #include <stdbool.h>
 
 extern const bool LARGE_BIOMES_FLAG;
@@ -86,7 +86,7 @@ const double U_SPAWN_FIRST_STAGE_VALS[][5] = {
 };
 
 
-// Clone of Cubiomes' xPerlinInit() that is static inlined and doesn't bother with the octave's amplitudes/lacunarities.
+// Clone of Cubiomes' xPerlinInit() that doesn't mess with the octave's amplitudes/lacunarities.
 static inline void U_initPerlin(PerlinNoise *octave, Xoroshiro *xoroshiro) {
 	octave->a = xNextDouble(xoroshiro) * 256.;
 	octave->b = xNextDouble(xoroshiro) * 256.;
@@ -108,6 +108,7 @@ static inline void U_initPerlin(PerlinNoise *octave, Xoroshiro *xoroshiro) {
 }
 
 // Initializes several 1.18+ BiomeNoise constants that Cubiomes chooses to regenerate each time instead of hardcoding (https://github.com/Cubitect/cubiomes/issues/82).
+// Note that Cubiomes' xPerlinInit() will wipe out the amplitudes and lacunarities; use U_initPerlin() instead.
 void U_manualBNinit(BiomeNoise *bn) {
     if (bn->mc < MC_1_18) return;
     bn->climate[NP_TEMPERATURE].amplitude = bn->climate[NP_SHIFT].amplitude = bn->climate[NP_WEIRDNESS].amplitude = 5./4;
@@ -130,6 +131,56 @@ void U_manualBNinit(BiomeNoise *bn) {
 	bn->climate[NP_CONTINENTALNESS].octA.octcnt = bn->climate[NP_CONTINENTALNESS].octB.octcnt = 9;
 	bn->climate[NP_EROSION].octA.octcnt = bn->climate[NP_EROSION].octB.octcnt = 4;
 	bn->climate[NP_SHIFT].octA.octcnt = bn->climate[NP_SHIFT].octB.octcnt = bn->climate[NP_WEIRDNESS].octA.octcnt = bn->climate[NP_WEIRDNESS].octB.octcnt = 3;
+	// Temperature
+	bn->oct[0].amplitude   = bn->oct[2].amplitude   = 16./21;
+	bn->oct[0].lacunarity  = bn->oct[2].lacunarity  = 1./(LARGE_BIOMES_FLAG ? 4096 : 1024);
+	bn->oct[1].amplitude   = bn->oct[3].amplitude   = 8./63;
+	bn->oct[1].lacunarity  = bn->oct[3].lacunarity  = 1./(LARGE_BIOMES_FLAG ? 1024 : 256);
+	// Humidity
+	bn->oct[4].amplitude   = bn->oct[6].amplitude   = 32./63;
+	bn->oct[4].lacunarity  = bn->oct[6].lacunarity  = 1./(LARGE_BIOMES_FLAG ? 1024 : 256);
+	bn->oct[5].amplitude   = bn->oct[7].amplitude   = 16./63;
+	bn->oct[5].lacunarity  = bn->oct[7].lacunarity  = 1./(LARGE_BIOMES_FLAG ? 512 : 128);
+	// Continentalness
+	bn->oct[8].amplitude   = bn->oct[17].amplitude  = 256./511;
+	bn->oct[8].lacunarity  = bn->oct[17].lacunarity = 1./(LARGE_BIOMES_FLAG ? 2048 : 512);
+	bn->oct[9].amplitude   = bn->oct[18].amplitude  = bn->oct[10].amplitude = bn->oct[19].amplitude  = 128./511;
+	bn->oct[9].lacunarity  = bn->oct[18].lacunarity = 1./(LARGE_BIOMES_FLAG ? 1024 : 256);
+	bn->oct[10].lacunarity = bn->oct[19].lacunarity = 1./(LARGE_BIOMES_FLAG ? 512 : 128);
+	bn->oct[11].amplitude  = bn->oct[20].amplitude  = 64./511;
+	bn->oct[11].lacunarity = bn->oct[20].lacunarity = 1./(LARGE_BIOMES_FLAG ? 256 : 64);
+	bn->oct[12].amplitude  = bn->oct[21].amplitude  = 32./511;
+	bn->oct[12].lacunarity = bn->oct[21].lacunarity = 1./(LARGE_BIOMES_FLAG ? 128 : 32);
+	bn->oct[13].amplitude  = bn->oct[22].amplitude  = 8./511;
+	bn->oct[13].lacunarity = bn->oct[22].lacunarity = 1./(LARGE_BIOMES_FLAG ? 64 : 16);
+	bn->oct[14].amplitude  = bn->oct[23].amplitude  = 4./511;
+	bn->oct[14].lacunarity = bn->oct[23].lacunarity = 1./(LARGE_BIOMES_FLAG ? 32 : 8);
+	bn->oct[15].amplitude  = bn->oct[24].amplitude  = 2./511;
+	bn->oct[15].lacunarity = bn->oct[24].lacunarity = 1./(LARGE_BIOMES_FLAG ? 16 : 4);
+	bn->oct[16].amplitude  = bn->oct[25].amplitude  = 1./511;
+	bn->oct[16].lacunarity = bn->oct[25].lacunarity = 1./(LARGE_BIOMES_FLAG ? 8 : 2);
+	// Erosion
+	bn->oct[26].amplitude  = bn->oct[30].amplitude  = 16./31;
+	bn->oct[26].lacunarity = bn->oct[30].lacunarity = 1./(LARGE_BIOMES_FLAG ? 2048 : 512);
+	bn->oct[27].amplitude  = bn->oct[31].amplitude  = 8./31;
+	bn->oct[27].lacunarity = bn->oct[31].lacunarity = 1./(LARGE_BIOMES_FLAG ? 1024 : 256);
+	bn->oct[28].amplitude  = bn->oct[32].amplitude  = 2./31;
+	bn->oct[28].lacunarity = bn->oct[32].lacunarity = 1./(LARGE_BIOMES_FLAG ? 256 : 64);
+	bn->oct[29].amplitude  = bn->oct[33].amplitude  = 1./31;
+	bn->oct[29].lacunarity = bn->oct[33].lacunarity = 1./(LARGE_BIOMES_FLAG ? 128 : 32);
+	// Shift
+	bn->oct[34].amplitude  = bn->oct[37].amplitude  = 8./3;
+	bn->oct[34].lacunarity = bn->oct[37].lacunarity = 1./8;
+	bn->oct[35].amplitude  = bn->oct[38].amplitude  = 4./3;
+	bn->oct[35].lacunarity = bn->oct[38].lacunarity = 1./4;
+	bn->oct[36].amplitude  = bn->oct[39].amplitude  = 2./3;
+	bn->oct[36].lacunarity = bn->oct[39].lacunarity = 1./2;
+	// Weirdness
+	bn->oct[40].amplitude  = bn->oct[43].amplitude  = bn->oct[41].amplitude = bn->oct[44].amplitude = 32./63;
+	bn->oct[40].lacunarity = bn->oct[43].lacunarity = 1./128;
+	bn->oct[41].lacunarity = bn->oct[44].lacunarity = 1./64;
+	bn->oct[42].amplitude  = bn->oct[45].amplitude  = 8./63;
+	bn->oct[42].lacunarity = bn->oct[45].lacunarity = 1./32;
 }
 
 // 

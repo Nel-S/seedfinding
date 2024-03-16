@@ -1,4 +1,4 @@
-#include "../../cubiomes/rng.h"
+#include "cubiomes/rng.h"
 #include <stdio.h>
 #include <queue>
 

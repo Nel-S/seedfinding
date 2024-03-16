@@ -1,4 +1,4 @@
-#include "../../cubiomes/noise.h"
+#include "cubiomes/noise.h"
 #include <pthread.h>
 
 typedef struct Coord {

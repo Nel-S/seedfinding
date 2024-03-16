@@ -1,4 +1,4 @@
-#include "../cubiomes/finders.h"
+#include "cubiomes/finders.h"
 #include <cinttypes>
 #include <cstdio>
 #include <pthread.h>

@@ -1,4 +1,4 @@
-#include "../../cubiomes/rng.h"
+#include "cubiomes/rng.h"
 #include <math.h>
 #include <pthread.h>
 #include <stdio.h>

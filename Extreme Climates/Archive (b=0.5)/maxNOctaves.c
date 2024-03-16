@@ -15,7 +15,7 @@
 	The code for initializing multiple threads is based on that from a blog post by Robert A. McDougal (https://ramcdougal.com/threads.html).
 */
 
-#include "../../cubiomes/layers.h"
+#include "cubiomes/layers.h"
 #include <math.h>
 #include <pthread.h>
 #include <stdio.h>

@@ -1,4 +1,4 @@
-#include "../cubiomes/rng.h"
+#include "cubiomes/rng.h"
 
 // enum {PLATFORM_UNDEF, PLATFORM_JAVA, PLATFORM_BEDROCK};
 
