@@ -1,18 +1,10 @@
-#include "cubiomes/noise.h"
-#include <pthread.h>
-
-typedef struct Coord {
-    int x, z;
-} Coord;
+#include "cubiomes/finders.h"
+#include <stdbool.h>
 
 typedef struct CheckData {
     int x, y, z;
-    _Bool snowPresent;
+    bool snowPresent;
 } CheckData;
-
-typedef struct ThreadData {
-    
-} ThreadData;
 
 enum Biomes {Cold_Taiga = -10, Cold_Taiga_Hills = Cold_Taiga,
              Frozen_Ocean = 0, Frozen_River = Frozen_Ocean, Ice_Mountains = Frozen_Ocean, Ice_Plains = Frozen_Ocean,
@@ -30,8 +22,10 @@ enum {noSnow, snow};
 
 const int BIOME = Extreme_Hills;
 const uint64_t SQUARE_RADIUS = 10000;
-const Coord CENTER = {0, 0};
-const uint8_t NUMBER_OF_THREADS = 4;
+const Pos CENTER = {0, 0};
+const int GLOBAL_NUMBER_OF_WORKERS = 4;
+const bool TIME_PROGRAM = false;
+const char *FILEPATH = NULL;
 CheckData CHECKS[] = {{-63,  5,  15, noSnow}, { 20,  5, -3 , noSnow}, // No snow at level minSnowtopY + 5
                       { 20,  4, -2 , noSnow}, // No snow at level minSnowtopY + 4 
                       { 0 ,  0,  0 , snow  }, // Snow at level minSnowtopY + 0
@@ -48,6 +42,8 @@ CheckData CHECKS[] = {{-63,  5,  15, noSnow}, { 20,  5, -3 , noSnow}, // No snow
                       { 0 ,  6, -1 , snow  }, {-1 ,  6, -1 , snow  }, { 20,  6, -4 , snow  }, {-15,  6, -7 , snow  }, {-20,  6, -11, snow  }, {-14,  6, -12, snow  }, {-19,  6, -12, snow  }, {-6 ,  6, -14, snow  }, {-16,  6, -14, snow  }, {-8 ,  6, -15, snow  }, // Snow at level minSnowtopY + 6
 };
 
+int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+
 const double SQRT_3 = 1.7320508075688772;
 const double MAX_PERLIN_AMPLITUDE = 140*SQRT_3/243;
 const int MIN_Y_SNOW_CAN_GENERATE  = ceil(30*BIOME - 26 - 4*MAX_PERLIN_AMPLITUDE);
@@ -56,7 +52,7 @@ int minY, maxY;
 size_t bestCount;
 PerlinNoise temperature;
 
-_Bool checkSnow(int x, int y, int z, _Bool snowPresent) {
+bool checkSnow(int x, int y, int z, bool snowPresent) {
     return (30*BIOME - 26 - 4*sampleSimplex2D(&temperature, x/8., z/8.) <= y) == snowPresent;
 }
 
@@ -68,8 +64,7 @@ size_t checkCoord(int x, int y, int z) {
     return count;
 }
 
-void *thread(void *dat) {
-    ThreadData *data = dat;
+void *thread(void *workerIndex) {
     int minSnowtopY;
 
     int x = 0, z = 0, i = 0, j = -1;
@@ -93,6 +88,7 @@ void *thread(void *dat) {
     return NULL;
 }
 
+// TODO: Move to initGlobals()
 int main() {
     uint64_t seed;
     setSeed(&seed, 1234);
@@ -113,13 +109,6 @@ int main() {
             if (currentCount > bestCount) bestCount = currentCount;
         }
     }
-    
-    pthread_t threads[NUMBER_OF_THREADS];
-    ThreadData data[NUMBER_OF_THREADS];
-    for (uint8_t i = 0; i < NUMBER_OF_THREADS; ++i) {
-        // Initialize data[i]
-        pthread_create(&threads[i], NULL, thread, &data[i]);
-    }
-    for (uint8_t i = 0; i < NUMBER_OF_THREADS; ++i) pthread_join(threads[i], NULL);
-    return 0;
+
+    // Pthreads...
 }

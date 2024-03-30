@@ -8,6 +8,8 @@ Between Beta 1.8 and 1.12, Minecraft: Java Edition searched for a valid biome in
 
 Due to terrain and algorithm differences, Beta 1.8, 1.0, 1.1-1.6, and 1.7-1.12 will likely have different farthest spawnpoints. Minor versions may also differ.
 
+See [the repository's parent README](../../README.md) for compilation instructions.
+
 ## Contributors
 - Cubitect - implemented (port of) the spawn algorithm in [Cubiomes](https://github.com/Cubitect/cubiomes)
 - NelS - created C/CUDA programs

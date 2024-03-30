@@ -5,15 +5,21 @@
 #include <stdbool.h>
 
 // The seed to start from.
-const uint64_t START_SEED = 3366025373172;
+const uint64_t GLOBAL_START_SEED = 3366025373172;
+// const uint64_t GLOBAL_START_SEED = 159316728991;
 // The number of seeds to iterate over.
-const uint64_t SEEDS_TO_CHECK = -1;
 // (Note to self: redoing 2481627134962 up to 2612082682250 might be needed worst-case scenario, but I seriously doubt any candidates were missed)
+const uint64_t GLOBAL_SEEDS_TO_CHECK = -1;
+// If running with multithreading/multiprocessing, sets the number of workers to create.
+const int GLOBAL_NUMBER_OF_WORKERS = 4;
 
-/* Setting this to 0 will have the program search for spawns within a particular "ring", given the spawn algorithm initially
+// The filepath to print results to. If NULL, defaults to stdout.
+const char *FILEPATH = NULL;
+
+/* Setting this to false will have the program search for spawns within a particular "ring", given the spawn algorithm initially
 	  checks five spaced-out "rings" of points to determine what approximate distance range the spawn will be from the origin.
 	  Faster, but allows less precision in terms of distance from the origin.
-   Setting this to 1 will have the program search for spawns with approximate locations beyond a specified radial distance
+   Setting this to true will have the program search for spawns with approximate locations beyond a specified radial distance
       from the origin.
 	  Slower, but allows more precision in terms of distance from the origin.*/
 #define CHECK_DISTANCES true
@@ -22,9 +28,11 @@ const uint64_t SEEDS_TO_CHECK = -1;
 /* Keep in mind that the program does not model the last stage of the spawn algorithm, so results may be off from their true
    radial distance by at most 88sqrt(2) ~ 124.5 blocks.*/
 const double MIN_RADIAL_DISTANCE = 1759.01819 - 88*1.41421356237309505; //1634.567398;
+// const double MIN_RADIAL_DISTANCE = 2389.66629469 - 88*1.41421356237309505; //1634.567398;
 
 // For the same reason, results may be off from their true larger axial distance by at most 88 blocks.
-const double MIN_AXIAL_DISTANCE = 1673 - 88;
+const double MIN_AXIAL_DISTANCE = 1728 - 88;
+// const double MIN_AXIAL_DISTANCE = 2363 - 88;
 
 const double MOST_POSITIVE_CONT = -0.0;
 #else
@@ -41,17 +49,16 @@ const uint8_t MIN_DESIRED_RING = 3;
 
 // Set to false for normal generation, or true for Large Biomes generation.
 const bool LARGE_BIOMES_FLAG = false;
+// const bool LARGE_BIOMES_FLAG = true;
 
 // Set to true to ignore shift for the initial continentalness checks, or false to still sample it.
 // (Speeds up the search at the cost of slight accuracy.)
+// TODO: Decide whether to keep or not
 const bool DELAY_SHIFT = true;
 
 // Set to true to sample temperature, humidity, etc. when emulating the spawn algorithm.
 // (Slows down the search with the benefit being far better accuracy.)
 const bool SAMPLE_ALL_CLIMATES = true;
-
-// If running with multithreading, sets the number of threads to create.
-const uint8_t NUMBER_OF_THREADS = 4;
 
 // Set to 1 to time the program's runtime, or 0 to disable that feature.
 const bool TIME_PROGRAM = false;

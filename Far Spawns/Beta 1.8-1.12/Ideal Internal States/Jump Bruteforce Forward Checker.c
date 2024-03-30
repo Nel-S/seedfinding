@@ -1,24 +1,25 @@
-#include "cubiomes/rng.h"
+#include "cubiomes/finders.h"
 #include <math.h>
-#include <pthread.h>
-#include <stdio.h>
+#include <stdbool.h>
 
-const uint64_t START_SEED = 0;
-const uint64_t SEEDS_TO_CHECK = (1ULL << 48) - START_SEED;
-const uint8_t NUMBER_OF_THREADS = 4;
+const uint64_t GLOBAL_START_SEED = 0;
+const uint64_t GLOBAL_SEEDS_TO_CHECK = (1ULL << 48) - GLOBAL_START_SEED;
+const int GLOBAL_NUMBER_OF_WORKERS = 4;
 
-typedef struct {
-	int x, z;
-} Pos;
+const char *FILEPATH = NULL;
+const bool TIME_PROGRAM = false;
+
+uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
+int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+extern void outputValues(const uint64_t *seeds, const void *otherValues, const size_t count);
 
 uint64_t farthestDist = 0;
 // 138728061      (3890, -2996) = 24108116 (4910.001629)
-// pthread_mutex_t mutex;
 
-void *checkSeed(void *dat) {
+void *checkSeed(void *workerIndex) {
 	uint64_t rng;
-	for (uint64_t count = *(uint8_t *)dat; count < SEEDS_TO_CHECK; count += NUMBER_OF_THREADS) {
-		uint64_t seed = START_SEED + count;
+	for (uint64_t count = *(int *)workerIndex; count < localSeedsToCheck; count += localNumberOfWorkers) {
+		uint64_t seed = localStartSeed + count;
 		// setSeed(&rng, seed);
 		rng = seed;
 		Pos currentPos = {0, 0};
@@ -33,26 +34,15 @@ void *checkSeed(void *dat) {
 			// if (bestPossiblePos.x * bestPossiblePos.x + bestPossiblePos.z * bestPossiblePos.z < farthestDist) goto skipSeed;
 		}
 		uint64_t currentDist = currentPos.x * currentPos.x + currentPos.z * currentPos.z;
-		// pthread_mutex_lock(&mutex);
-		if (currentDist < farthestDist) {
-			// pthread_mutex_unlock(&mutex);
-			continue;
-		}
+		if (currentDist < farthestDist) continue;
 		char *bestDemarker = "\t";
 		if (farthestDist < currentDist) {
 			farthestDist = currentDist;
 			bestDemarker = "*";
 		}
-		// pthread_mutex_unlock(&mutex);
+		// TODO: Port to outputValues
 		printf("%s%" PRIu64 "\t(%d, %d) = %" PRIu64 " (%f)\n", bestDemarker, seed, currentPos.x, currentPos.z, currentDist, sqrt(currentDist));
 		// skipSeed: continue;
 	}
 	return NULL;
-}
-
-int main() {
-	pthread_t threads[NUMBER_OF_THREADS];
-	for (uint8_t i = 0; i < NUMBER_OF_THREADS; ++i) pthread_create(&threads[i], NULL, checkSeed, &i);
-	for (uint8_t i = 0; i < NUMBER_OF_THREADS; ++i) pthread_join(threads[i], NULL);
-	return 0;
 }

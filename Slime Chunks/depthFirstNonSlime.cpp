@@ -1,20 +1,21 @@
 #include "cubiomes/finders.h"
-#include <cinttypes>
-#include <cstdio>
-#include <pthread.h>
 #include <unordered_set>
 #include <utility>
 
-const uint64_t START_SEED = 0;
-const uint64_t SEEDS_TO_CHECK = 1ULL << 48;
-const uint8_t NUMBER_OF_THREADS = 4;
+const uint64_t GLOBAL_START_SEED = 0;
+const uint64_t GLOBAL_SEEDS_TO_CHECK = 1ULL << 48;
+const int GLOBAL_NUMBER_OF_WORKERS = 4;
+const Pos COORDINATE_TO_CHECK = {0, 0};
+const int INITIAL_BEST_COUNT = 2;
 const int MAX_EMPTY_AREA = 10;
+const bool TIME_PROGRAM = false;
 
-int bestCount;
 
-typedef struct {
-    uint8_t index;
-} ThreadData;
+uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
+int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+extern void outputValues(const uint64_t *seeds, const void *otherValues, const size_t count);
+
+int bestCount = INITIAL_BEST_COUNT;
 
 struct pair_hash {
     std::size_t operator()(std::pair<int, int> const &v) const {
@@ -22,6 +23,8 @@ struct pair_hash {
         return (v.second << 16) ^ v.first;
     }
 };
+
+void initGlobals() {}
 
 int testForSlimeAt(uint64_t seed, int chunkX, int chunkZ, std::unordered_set<std::pair<int, int>, pair_hash> *set, int depth) {
     if (depth > MAX_EMPTY_AREA + 1) return -100;
@@ -35,29 +38,16 @@ int testForSlimeAt(uint64_t seed, int chunkX, int chunkZ, std::unordered_set<std
     return count;
 }
 
-void *checkSeed(void *dat) {
-    ThreadData *data = (ThreadData *)dat;
+void *checkSeed(void *workerIndex) {
     std::unordered_set<std::pair<int, int>, pair_hash> checkedChunks;
-    for (uint64_t count = data->index; count < SEEDS_TO_CHECK; count += NUMBER_OF_THREADS) {
-        uint64_t seed = START_SEED + count;
+    for (uint64_t count = *(int *)workerIndex; count < localSeedsToCheck; count += localNumberOfWorkers) {
+        uint64_t seed = localStartSeed + count;
         checkedChunks.clear();
-        int currentCount = testForSlimeAt(seed, 0, 0, &checkedChunks, 0);
+        int currentCount = testForSlimeAt(seed, COORDINATE_TO_CHECK.x, COORDINATE_TO_CHECK.z, &checkedChunks, 0);
         if (currentCount >= bestCount) {
-            printf("%" PRIu64 "\t%d\n", seed, currentCount);
+            outputValues(&seed, &currentCount, 1);
             if (currentCount > bestCount) bestCount = currentCount;
         }
     }
     return NULL;
-}
-
-int main() {
-    pthread_t threads[NUMBER_OF_THREADS];
-    ThreadData data[NUMBER_OF_THREADS];
-    bestCount = 2;
-    for (uint8_t i = 0; i < NUMBER_OF_THREADS; ++i) {
-        data[i].index = i;
-        pthread_create(&threads[i], NULL, checkSeed, &data[i]);
-    }
-    for (uint8_t i = 0; i < NUMBER_OF_THREADS; ++i) pthread_join(threads[i], NULL);
-    return 0;
 }

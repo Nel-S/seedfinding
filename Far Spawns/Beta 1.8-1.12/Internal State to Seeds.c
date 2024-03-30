@@ -1,13 +1,18 @@
 #include "cubiomes/finders.h"
 #include <math.h>
-#include <pthread.h>
-#include <stdio.h>
+#include <stdbool.h>
 
 const uint64_t BASE_STATES[] = {1459339358529, 5159848224617, 90311412211, 8062451346052};
-const uint8_t NUMBER_OF_THREADS = 4;
-const _Bool LARGE_BIOMES_FLAG = 0;
+const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const int SECOND_CHANCES = 0;
 const int MC_VERSION = MC_1_8;
+const char *FILEPATH = NULL;
+const bool LARGE_BIOMES_FLAG = false;
+const bool TIME_PROGRAM = false;
+
+
+int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+extern void outputValues(const uint64_t *seeds, const void *otherValues, const size_t count);
 
 const uint64_t g_spawn_biomes_17 = (1ULL << forest) | (1ULL << plains) | (1ULL << taiga) | (1ULL << taiga_hills) | (1ULL << wooded_hills) | (1ULL << jungle) |(1ULL << jungle_hills);
 const uint64_t g_spawn_biomes_1 = (1ULL << forest) | (1ULL << swamp) | (1ULL << taiga);
@@ -15,16 +20,13 @@ const uint64_t g_spawn_biomes_1 = (1ULL << forest) | (1ULL << swamp) | (1ULL << 
 uint64_t farthestDist = 0;
 // const uint64_t farthestDist = 14776985;
 
-typedef struct {
-	uint8_t index;
-} ThreadData;
-
 // Steps the given java.util.Random internal state backwards once.
 static inline void stepBackState(uint64_t *state) {
 	*state = (*state * 246154705703781 + 107048004364969) & 0xffffffffffff;
 }
 
-_Bool mapApproxHeight2(const Generator *g, const SurfaceNoise *sn, int x, int z) {
+// From Cubiomes
+bool mapApproxHeight2(const Generator *g, const SurfaceNoise *sn, int x, int z) {
     const float biome_kernel[25] = { // with 10 / (sqrt(i**2 + j**2) + 0.2)
         3.302044127, 4.104975761, 4.545454545, 4.104975761, 3.302044127,
         4.104975761, 6.194967155, 8.333333333, 6.194967155, 4.104975761,
@@ -93,7 +95,7 @@ _Bool mapApproxHeight2(const Generator *g, const SurfaceNoise *sn, int x, int z)
     return 8 * (vmin / (double)(vmin - vmax) + ymin) >= grass;
 }
 
-void *checkSeed(void *dat) {
+void *checkSeed(void *workerIndex) {
 	Generator g;
 	// setupGenerator(&g, MC_1_12, LARGE_BIOMES_FLAG);
 	setupGenerator(&g, MC_VERSION, LARGE_BIOMES_FLAG);
@@ -102,7 +104,7 @@ void *checkSeed(void *dat) {
 
 	int ids[91007]; // Size returned by getMinCacheSize(&g, 4, 129, 1, 129);
 	// Chooses a base state to test.
-	for (size_t j = ((ThreadData *)dat)->index; j < sizeof(BASE_STATES)/sizeof(*BASE_STATES); j += NUMBER_OF_THREADS) {
+	for (size_t j = *(int *)workerIndex; j < sizeof(BASE_STATES)/sizeof(*BASE_STATES); j += localNumberOfWorkers) {
 		uint64_t initialState = BASE_STATES[j];
 		// This tracks how many state advancements there should be between the XORed worldseed and the chosen base state.
 		// It can range from 0 (if only one biome point is valid) to 16647 (most possible state advancements in nextInt(2) nextInt(3) ... nextInt(16641)).
@@ -128,7 +130,7 @@ void *checkSeed(void *dat) {
 					if (!id_matches(ids[i], MC_VERSION <= MC_1_0 ? g_spawn_biomes_1 : g_spawn_biomes_17, 0)) continue;
 					if (found) {
 						// Manually test if nextInt(&rng, found + 1) == 0
-						_Bool nextIntIsZero = 0;
+						bool nextIntIsZero = false;
 						if (!(found & (found + 1))) {
 							++currentNumberOfAdvancements;
 							nextIntIsZero = !((int64_t)((found + 1) * (uint64_t)next(&rng, 31)) >> 31);
@@ -182,8 +184,8 @@ void *checkSeed(void *dat) {
 				}
 				if (currentBestDist < farthestDist) goto nextTopSeed;
 
-				// printf("%" PRId64 "\t(%d, \t%" PRIu64 ")\n", seed, bestChance, currentBestDist);
-				printf("%" PRId64 "\t(%d, \t%f)\n", seed, bestChance, sqrt(currentBestDist));
+				// printf("%" PRId64 "\t(%d, \t%f)\n", seed, bestChance, sqrt(currentBestDist));
+				outputValues(&seed, &currentBestDist, 1);
 				if (currentBestDist > farthestDist) farthestDist = currentBestDist;
 				nextTopSeed: continue;
 			}
@@ -191,15 +193,4 @@ void *checkSeed(void *dat) {
 		}
 	}
 	return NULL;
-}
-
-int main() {
-	pthread_t threads[NUMBER_OF_THREADS];
-	ThreadData data[NUMBER_OF_THREADS];
-	for (uint8_t i = 0; i < NUMBER_OF_THREADS; ++i) {
-		data[i].index = i;
-		pthread_create(&threads[i], NULL, checkSeed, &data[i]);
-	}
-	for (uint8_t i = 0; i < NUMBER_OF_THREADS; ++i) pthread_join(threads[i], NULL);
-	return 0;
 }
