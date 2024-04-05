@@ -38,7 +38,7 @@ bool U_getFitnessBounded(const Pos *coord, const double *temperature, const doub
 }
 
 double U_sampleAndGetFitness(const Pos *coord, PerlinNoise *oct) {
-	double fitness;
+	double fitness = -INFINITY;
 	U_sampleAndGetFitnessBounded(coord, oct, NULL, &fitness);
 	return fitness;
 }
@@ -138,12 +138,13 @@ bool U_firstStageSpawnBounded(PerlinNoise *oct, const double fitnessLowerBound, 
 		if (!U_sampleAndGetFitnessBounded(&pos, oct, &bestFitness, &fitness)) continue;
 		if (chosenCoordIndex) *chosenCoordIndex = i;
 		if (*chosenFitness) *chosenFitness = fitness;
+		bestFitness = fitness;
 		if (bestFitness < fitnessLowerBound) return false;
 	}
 	return true;
 }
 
-bool U_secondStageSpawnBounded(PerlinNoise *oct, const int firstStageChosenCoordIndex, const double firstStageChosenFitness, const double fitnessLowerBound, int *chosenCoordIndex, double *chosenFitness) {
+bool U_secondStageSpawnBounded(PerlinNoise *oct, const int firstStageChosenCoordIndex, const double fitnessLowerBound, int *chosenCoordIndex, double *chosenFitness) {
 	double bestFitness = INFINITY;
 	// TODO: Continue as soon as an individual samplePerlin pushes fitness over fitness?
 	for (size_t i = 0; i < sizeof(U_SPAWN_SECOND_STAGE_VALS[firstStageChosenCoordIndex])/sizeof(*U_SPAWN_SECOND_STAGE_VALS[firstStageChosenCoordIndex]); ++i) {
@@ -153,6 +154,7 @@ bool U_secondStageSpawnBounded(PerlinNoise *oct, const int firstStageChosenCoord
 		if (!U_sampleAndGetFitnessBounded(&pos, oct, &bestFitness, &fitness)) continue;
 		if (chosenCoordIndex) *chosenCoordIndex = i;
 		if (*chosenFitness) *chosenFitness = fitness;
+		bestFitness = fitness;
 		if (bestFitness < fitnessLowerBound) return false;
 	}
 	return true;
@@ -161,13 +163,14 @@ bool U_secondStageSpawnBounded(PerlinNoise *oct, const int firstStageChosenCoord
 bool U_firstStageSpawnBounded_noTable(PerlinNoise *oct, const double fitnessLowerBound, Pos *chosenCoord, double *chosenFitness) {
 	double fitness, bestFitness = INFINITY;
 	for (double rad = 0.; rad <= 2048.; rad += 512.) {
-		for (double ang = 0.; ang <= U_TWO_PI; ang += rad ? 32./rad : INFINITY) {
+		for (double ang = 0.; ang <= U_TWO_PI; ang += rad ? 512./rad : INFINITY) {
 			Pos pos = {sin(ang) * rad, cos(ang) * rad};
 			if (!U_sampleAndGetFitnessBounded(&pos, oct, &bestFitness, &fitness)) continue;
 			if (chosenCoord) {
 				chosenCoord->x = pos.x;
 				chosenCoord->z = pos.z;
 			}
+			bestFitness = fitness;
 			if (*chosenFitness) *chosenFitness = fitness;
 			if (bestFitness < fitnessLowerBound) return false;
 		}
@@ -185,6 +188,7 @@ bool U_secondStageSpawnBounded_noTable(PerlinNoise *oct, const Pos *firstStageCh
 				chosenCoord->x = pos.x;
 				chosenCoord->z = pos.z;
 			}
+			bestFitness = fitness;
 			if (*chosenFitness) *chosenFitness = fitness;
 			if (bestFitness < fitnessLowerBound) return false;
 		}
