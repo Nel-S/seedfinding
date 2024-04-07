@@ -60,7 +60,7 @@ bool U_firstStageSpawnBounded_noTable(PerlinNoise *oct, const double fitnessLowe
 
 // Emulates the second stage of the spawn algorithm, aborting early (and returning false) if the current chosen point's fitness ever drops below `fitnessLowerBound`.
 // Otherwise returns true and stores the chosen coordinate index fitness value in `*fitness`.
-bool U_secondStageSpawnBounded(PerlinNoise *oct, const int firstStageChosenCoordIndex, const double fitnessLowerBound, int *chosenCoordIndex, double *chosenFitness);
+bool U_secondStageSpawnBounded(PerlinNoise *oct, const int firstStageChosenCoordIndex, const double firstStageChosenFitness, const double fitnessLowerBound, int *chosenCoordIndex, double *chosenFitness);
 
 // `U_secondStageSpawnBounded()`, but derives the coordinates manually instead of using a lookup table. For environments with limited memory.
 bool U_secondStageSpawnBounded_noTable(PerlinNoise *oct, const Pos *firstStageChosenCoord, const double firstStageChosenFitness, const double fitnessLowerBound, Pos *chosenCoord, double *chosenFitness);

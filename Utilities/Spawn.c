@@ -1,4 +1,3 @@
-
 #include "Spawn.h"
 
 // The maximum fitness that each climate by itself can equate to.
@@ -144,8 +143,8 @@ bool U_firstStageSpawnBounded(PerlinNoise *oct, const double fitnessLowerBound, 
 	return true;
 }
 
-bool U_secondStageSpawnBounded(PerlinNoise *oct, const int firstStageChosenCoordIndex, const double fitnessLowerBound, int *chosenCoordIndex, double *chosenFitness) {
-	double bestFitness = INFINITY;
+bool U_secondStageSpawnBounded(PerlinNoise *oct, const int firstStageChosenCoordIndex, const double firstStageChosenFitness, const double fitnessLowerBound, int *chosenCoordIndex, double *chosenFitness) {
+	double bestFitness = firstStageChosenFitness;
 	// TODO: Continue as soon as an individual samplePerlin pushes fitness over fitness?
 	for (size_t i = 0; i < sizeof(U_SPAWN_SECOND_STAGE_VALS[firstStageChosenCoordIndex])/sizeof(*U_SPAWN_SECOND_STAGE_VALS[firstStageChosenCoordIndex]); ++i) {
 		double fitness = U_SPAWN_SECOND_STAGE_VALS[firstStageChosenCoordIndex][i][U_spawn_table_fitness];
