@@ -1,37 +1,70 @@
 Hello. My handle is NelS; thank you for your interest in these works.
 
 
-## Definitions
-In this document, "the works" include, but are not limited to,
-- writeups I may or have written, or explanatory messages I may or have sent;
-- novel code I may or have created;
-- spreadsheets I may or have composed;
-- videos I may or have published;
-- other novel expressions originating from myself; or 
-- similar expressions originating from a contributor, narrowly construed to solely the contributions they have provided to my works.
-It does not include third-party libraries such as Cubiomes; elements originating from other parties such as (but again not limited to) Mojang A.B. or Microsoft Corporation; or contributors' works that are unrelated to my works. Any or all of those may have their own terms, which will be distinct from my own.
 
-Similarly, "the results of the works" or "the results" are any ultimate outcomes or facts derived from the works I or any contributors have engaged in. Examples of these include, but are not limited to, discovered seeds and/or coordinates, discovered noise amplitudes, or similar unequivocal facts. Unless explicitly stated otherwise, these are distinct from the works, but also more limited in scope than them.
+SCOPE
+-----
+In all cases, this license only pertains to my contributions, and to the contributions any contributors have directly and voluntarily provided to my works, narrowly construed. It does not apply to
+- external libraries, even if directly linked, such as Cubiomes;
+- contributors' personal repositories or similar content not directly and voluntarily provided to my works; or
+- elements originating from unrelated or foreign parties such as (but again not limited to) Mojang A.B. or Microsoft Corporation. (It is also worth mentioning that those are indeed foreign parties; my works are not official Minecraft products and are not endorsed by Microsoft or any other organization.)
+Any or all of these may have their own terms, which will be separate from my own.
 
 
-## Usage Terms
-If you would like to use, copy, reference, distribute for free, or build or expand upon the works or the results of the works in a non-commercial manner, you have permission to do so as long as you
-1. credit the person(s) who provided the contribution(s) in question in a clear, non-deceptive, and publicly-viewable manner;
-2. provide a direct, unaffiliated, non-paywalled, and publicly accessible link(s) to the work(s) involved; and
-3. do not engage in any pretense, either implicit or explicit, that you made any discoveries you actually did not; that you provided any contributions you actually did not; that you engaged in any partnerships or collaborations you actually did not; and so on. Be honest.
-
-If you would instead like to
-- directly sell the works or results (defined as if someone must, is unduly pressured to, or is deceived into paying money for them in their unaltered or trivially-altered state); or
-- republish the works (not necessarily the results since those are just facts) without making any changes or making solely trivial changes (defined as if a reasonable consumer of your derivative would have no or almost no reason to view the original work; this includes react channels);
-you do not have permission to do so.
-
-If you would instead like to use the works or the results in a commercial context without directly selling them (such as featuring them in a monetized video), or generally engage in a behavior not listed elsehwere on this document, contact us in a way that all contributors relevant to the requested works can view and participate in the conversation, so we/they can work out any details.
+If there is ever confusion over whether something falls under this license, it is best to reach out to whoever the original creator of the content was and ask them.
 
 
-## (Lack of) Warranty and Liability
+
+USAGE TERMS
+-----------
+This license will focus on two distinct forms of content: the ultimate results of my or any contributors' efforts, and the work used to obtain such results.
+
+
+"The results" are the ultimate facts attained from work I or any contributors have engaged in, such as (but not limited to)
+ - discovered seeds and/or coordinates;
+ - the Continentalness bounds necessary to obtain a spawnpoint 1700 blocks from the origin; or
+ - the knowledge that excluding structure collisions, a Java 1.18+ spawn fully inside a desert temple is impossible.
+Such facts are by nature independent of any one person: 3624905120954988039 in Java 1.19.3, for example, has a mansion/village/ruined portal collision, and that fact would be true regardless of if I had been the one to find it or not. Based on this, since they're not determined or dependent on me or any contributors, the usage terms for such facts are very permissive:
+ - YOU MAY use, copy, reference, distribute (not including directly selling--see below), or build or expand upon such results, in either a commmercial or a non-commercial manner. If doing this, you must
+    1. credit the person(s) who provided the contribution(s) in question in a clear, non-deceptive, and publicly-viewable manner;
+    2. provide a direct, unaffiliated, non-paywalled, and publicly accessible link(s) to the work(s) involved; and
+    3. not engage in any pretense, either implicit or explicit, that you made any discoveries you actually did not; that you provided any contributions you actually did not; that you engaged in any partnerships or collaborations you actually did not; and so on. Be honest.
+ - YOU MAY NOT sell such results, defined as if someone must, is unduly pressured to, or is deceived into paying money for the results in their unaltered or trivially-altered state. (Simply featuring them alongside other paid content is allowed if the results themselves are freely accessible.)
+
+
+"The works" are instead the means that were used to obtain such results. These will by definition depend on a particular person(s): examples include (but are not limited to)
+ - the exact words or figures used in writeups or explanatory messages I or a contributor have written;
+ - novel code I or a contributor have created;
+ - spreadsheets I or a contributor have composed;
+ - videos I or a contributor have published; or
+ - other expressions inherently based on myself or a contributor, and that fall under the scope of this license (see SCOPE above).
+Since such works are inherently determined and dependent on me or any contributors, and thus are fundamentally "our own work", the usage terms for these are less permissive.
+- YOU MAY use, copy, reference, or build or expand upon such results in an exclusively non-commercial manner. If doing this, you must
+    1. credit the person(s) who provided the contribution(s) in question in a clear, non-deceptive, and publicly-viewable manner;
+    2. provide a direct, unaffiliated, non-paywalled, and publicly accessible link(s) to the work(s) involved; and
+    3. not engage in any pretense, either implicit or explicit, that you made any discoveries you actually did not; that you provided any contributions you actually did not; that you engaged in any partnerships or collaborations you actually did not; and so on. Be honest.
+ - YOU MAY NOT use the works in a commercial context without obtaining explicit written permission from ALL person(s) who provided the relevant contribution(s) in question, subject to whatever (if any) terms said person(s) require or agree upon. Permission is not required from person(s) who are deceased, or person(s) who are truly unable to be contacted after at minimum five honest and non-trivial efforts to contact them, spaced over a period of at minimum three months. (Someone responding and saying "no" does not count as them being unable to be contacted.)
+ - YOU MAY NOT distribute or republish the works without making any changes or solely trivial changes to them, even non-commercially. "Without any/solely-trivial changes" is defined as if a reasonable consumer of your derivative would have effectively no real reason to view the original work. (This explicitly includes react channels and similar formats.) In such cases, simply linking the relevant works (again directly and publicly-accessibly, without paywalls or affiliation links or the like) and letting one's audience view the works for themselves is a better alternative.
+
+
+If you would like to involve the works or their results in a manner not listed elsehwere on this document, reach out to the creator(s) of the relevant contribution(s) to ask them about it.
+
+
+
+(LACK OF) WARRANTY AND LIABILITY
+--------------------------------
 In all cases, to the extent permitted by United States law, I waive responsibility and shall not be held liable for any claims, damages, false or misinformed beliefs, uses or abuses of the works or results, or other consequences of any kind relating to the works or results. These works are provided "as is" with no warranty of any kind whatsoever.
+
 
 I also do not claim or imply in any way whatsoever these works or results are official Minecraft products; I do not claim that Microsoft or any other organization has endorsed these works or results; and I do not claim that these results are correct or accurate (though I personally have done my best to be thorough).
 
 
+If any international laws or laws of the United States conflict with this license, those laws shall take precedence. (Please also let me know in such cases so I can amend this license.)
+
+
 I reserve the right to modify this license as needed.
+
+
+
+
+COPYRIGHT 2024, Nel-S.
