@@ -1,3 +1,4 @@
+#include "common.h"
 #include "cubiomes/finders.h"
 #include <unordered_set>
 #include <utility>
@@ -13,7 +14,6 @@ const bool TIME_PROGRAM = false;
 
 uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
 int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
-extern void outputValues(const uint64_t *seeds, const void *otherValues, const size_t count);
 
 int bestCount = INITIAL_BEST_COUNT;
 
@@ -38,16 +38,16 @@ int testForSlimeAt(uint64_t seed, int chunkX, int chunkZ, std::unordered_set<std
     return count;
 }
 
-void *checkSeed(void *workerIndex) {
+void *runWorker(void *workerIndex) {
     std::unordered_set<std::pair<int, int>, pair_hash> checkedChunks;
-    for (uint64_t count = *(int *)workerIndex; count < localSeedsToCheck; count += localNumberOfWorkers) {
-        uint64_t seed = localStartSeed + count;
+    uint64_t seed;
+    if (!getNextSeed(workerIndex, &seed)) return NULL; 
+    do {
         checkedChunks.clear();
         int currentCount = testForSlimeAt(seed, COORDINATE_TO_CHECK.x, COORDINATE_TO_CHECK.z, &checkedChunks, 0);
-        if (currentCount >= bestCount) {
-            outputValues(&seed, &currentCount, 1);
-            if (currentCount > bestCount) bestCount = currentCount;
-        }
-    }
+        if (currentCount < bestCount) continue;
+        outputValue("%" PRId64 "\t%d\n", seed, currentCount);
+        if (currentCount > bestCount) bestCount = currentCount;
+    } while (getNextSeed(NULL, &seed));
     return NULL;
 }

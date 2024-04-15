@@ -1,7 +1,14 @@
-#include <inttypes.h>
-#include <stdio.h>
+#include "common.h"
 
-_Bool testForSlime(uint64_t seed, int chunkX, int chunkZ) {
+const int GLOBAL_NUMBER_OF_WORKERS = 4;
+const bool TIME_PROGRAM = false;
+const char *INPUT_FILEPATH = NULL;
+const char *OUTPUT_FILEPATH = NULL;
+
+localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+
+
+bool testForSlime(uint64_t seed, int chunkX, int chunkZ) {
     uint64_t rng = ((seed + (int)(chunkX * (5947611 + chunkX * 4987142) + chunkZ * 389711) + (int)(chunkZ * chunkZ) * 4392871ULL) ^ 25303508018) & 0xffffffffffff;
     rng = (rng * 25214903917 + 11) & 0xffffffffffff;
     if ((rng >> 17) & 0x7fffffff >= 2147483640) rng = (rng * 25214903917 + 11) & 0xffffffffffff;
@@ -19,8 +26,4 @@ uint64_t reverseSlime() {
             uint64_t xoredState = fullState ^ 25303508018;
         }
     }
-}
-
-int main() {
-    return 0;
 }

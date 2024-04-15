@@ -1,24 +1,26 @@
+#include "common.h"
 #include "cubiomes/finders.h"
 #include <math.h>
-#include <stdbool.h>
 
 const uint64_t BASE_STATES[] = {1459339358529, 5159848224617, 90311412211, 8062451346052};
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const int SECOND_CHANCES = 0;
 const int MC_VERSION = MC_1_8;
-const char *FILEPATH = NULL;
+const char *INPUT_FILEPATH  = NULL;
+const char *OUTPUT_FILEPATH = NULL;
 const bool LARGE_BIOMES_FLAG = false;
 const bool TIME_PROGRAM = false;
 
-
 int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
-extern void outputValues(const uint64_t *seeds, const void *otherValues, const size_t count);
+
 
 const uint64_t g_spawn_biomes_17 = (1ULL << forest) | (1ULL << plains) | (1ULL << taiga) | (1ULL << taiga_hills) | (1ULL << wooded_hills) | (1ULL << jungle) |(1ULL << jungle_hills);
-const uint64_t g_spawn_biomes_1 = (1ULL << forest) | (1ULL << swamp) | (1ULL << taiga);
+const uint64_t g_spawn_biomes_1  = (1ULL << forest) | (1ULL << swamp) | (1ULL << taiga);
 
 uint64_t farthestDist = 0;
 // const uint64_t farthestDist = 14776985;
+
+void initGlobals() {}
 
 // Steps the given java.util.Random internal state backwards once.
 static inline void stepBackState(uint64_t *state) {
@@ -95,7 +97,7 @@ bool mapApproxHeight2(const Generator *g, const SurfaceNoise *sn, int x, int z) 
     return 8 * (vmin / (double)(vmin - vmax) + ymin) >= grass;
 }
 
-void *checkSeed(void *workerIndex) {
+void *runWorker(void *workerIndex) {
 	Generator g;
 	// setupGenerator(&g, MC_1_12, LARGE_BIOMES_FLAG);
 	setupGenerator(&g, MC_VERSION, LARGE_BIOMES_FLAG);
@@ -104,8 +106,10 @@ void *checkSeed(void *workerIndex) {
 
 	int ids[91007]; // Size returned by getMinCacheSize(&g, 4, 129, 1, 129);
 	// Chooses a base state to test.
-	for (size_t j = *(int *)workerIndex; j < sizeof(BASE_STATES)/sizeof(*BASE_STATES); j += localNumberOfWorkers) {
-		uint64_t initialState = BASE_STATES[j];
+	uint64_t origInitialState;
+	if (!getNextSeed(workerIndex, &origInitialState)) return NULL;
+	do {
+		uint64_t initialState = origInitialState;
 		// This tracks how many state advancements there should be between the XORed worldseed and the chosen base state.
 		// It can range from 0 (if only one biome point is valid) to 16647 (most possible state advancements in nextInt(2) nextInt(3) ... nextInt(16641)).
 		for (int desiredNumberOfAdvancements = 0; desiredNumberOfAdvancements <= 16647; ++desiredNumberOfAdvancements) {
@@ -149,7 +153,7 @@ void *checkSeed(void *workerIndex) {
 					out.z = -256 + 4*(i/129);
 					++found;
 				}
-				if (rng != BASE_STATES[j]) goto nextTopSeed;
+				if (rng != origInitialState) goto nextTopSeed;
 				// printf("(%" PRIu64 ")\n", seed);
 				if (!found) out.x = out.z = 8;
 
@@ -184,13 +188,12 @@ void *checkSeed(void *workerIndex) {
 				}
 				if (currentBestDist < farthestDist) goto nextTopSeed;
 
-				// printf("%" PRId64 "\t(%d, \t%f)\n", seed, bestChance, sqrt(currentBestDist));
-				outputValues(&seed, &currentBestDist, 1);
+				outputValue("%" PRId64 "\t%d\t%f\n", seed, bestChance, sqrt(currentBestDist));
 				if (currentBestDist > farthestDist) farthestDist = currentBestDist;
 				nextTopSeed: continue;
 			}
 			stepBackState(&initialState);
 		}
-	}
+	} while (getNextSeed(NULL, &origInitialState));
 	return NULL;
 }

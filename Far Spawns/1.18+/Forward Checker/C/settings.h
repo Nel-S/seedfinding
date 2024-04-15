@@ -1,11 +1,11 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
 
-#include <inttypes.h>
-#include <stdbool.h>
+#include "common.h"
+#include "Utilities/Spawn.h"
 
 // The seed to start from.
-const uint64_t GLOBAL_START_SEED = 3366025373172;
+const uint64_t GLOBAL_START_SEED = 3426926457792;
 // const uint64_t GLOBAL_START_SEED = 159316728991;
 // The number of seeds to iterate over.
 // (Note to self: redoing 2481627134962 up to 2612082682250 might be needed worst-case scenario, but I seriously doubt any candidates were missed)
@@ -14,7 +14,8 @@ const uint64_t GLOBAL_SEEDS_TO_CHECK = -1;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 
 // The filepath to print results to. If NULL, defaults to stdout.
-const char *FILEPATH = NULL;
+const char *INPUT_FILEPATH  = NULL;
+const char *OUTPUT_FILEPATH = NULL;
 
 /* Setting this to false will have the program search for spawns within a particular "ring", given the spawn algorithm initially
 	  checks five spaced-out "rings" of points to determine what approximate distance range the spawn will be from the origin.
@@ -35,6 +36,8 @@ const double MIN_AXIAL_DISTANCE = 1728 - 88;
 // const double MIN_AXIAL_DISTANCE = 2363 - 88;
 
 const double MOST_POSITIVE_CONT = -0.0;
+
+const int CLIMATE_PERCENTILE = FIFTIETH_PERCENTILE;
 #else
 /* Set to the minimum spawn ring one wishes to search for. (All rings farther than the desired one will also be returned.)
 	Ring 1: Spawns [   0, sqrt(1261186) ~ 1123.0] blocks from the origin

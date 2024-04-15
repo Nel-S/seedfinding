@@ -9,7 +9,7 @@ typedef struct {
 	double first, second;
 } Pair;
 
-void* shgo(void* func, Pair *bounds, size_t boundsCount, void **args, void **constraints, int n, int iters, uint8_t sampling_method) {
+void* shgo(void* func, Pair *bounds, size_t boundsCount, void **args, void **constraints, int n, int iters, int sampling_method) {
 	if (sampling_method >= NUM_SAMPLING_METHODS) {
 		fprintf(stderr, "shgo: Invalid sampling_method \"%" PRIu8 "\".\n", sampling_method);
 		exit(1);

@@ -3,11 +3,9 @@
 
 // Imports settings
 #include "settings.h"
-#include "Utilities/Spawn.h"
 
 uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
 int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
-extern void outputValues(const uint64_t *seeds, const void *otherValues, size_t count);
 
 /* Index at which each ring begins. Given the U_SPAWN_FIRST_STAGE_VALS[] coordinates are sorted by ascending distance, this is also the index of the smallest distance in each ring, while this minus one
    is the index of the largest distance in the previous ring.*/

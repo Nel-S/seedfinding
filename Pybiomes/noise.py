@@ -5,13 +5,14 @@ class SimplexNoise:
     # TODO: Find range
     """Gradient noise developed by Ken Perlin. Returns values in the range +-...."""
     d: list[int]
-    amplitude: float
+    # amplitude: float
     lacunarity: float
-    def __init__(self, amplitude: float, lacunarity: float, *, prng: Random | Xoroshiro | None = None) -> None:
+    # def __init__(self, amplitude: float, lacunarity: float, *, prng: Random | Xoroshiro | None = None) -> None:
+    def __init__(self, lacunarity: float, *, prng: Random | Xoroshiro | None = None) -> None:
         """Initializes the Simplex Noise generator, and optionally seeds it if `prng` is not None."""
-        self.amplitude = amplitude
+        # self.amplitude = amplitude
         self.lacunarity = lacunarity
-        if prng: self.seed(prng)
+        if prng is not None: self.seed(prng)
 
     def seed(self, prng: Random | Xoroshiro) -> None:
         """Seeds the Simplex Noise generator without disturbing all other initialized constants."""
@@ -23,12 +24,15 @@ class SimplexNoise:
             self.d[i] = self.d[j]
             self.d[j] = temp
     
-    def __grad(self, index: int, x: float, y: float, z: float = 0, d: float = 0.5):
-        con = d - x*x - y*y - z*z
-        return 0. if con <= 0 else con*con*con*con*indexedLerp(index, x, y, z)
+    def _getGradient(self, index: int, position: Position, d: float = 0.5):
+        """Calculates a gradient at a 3D position using an indexed linear interpolation."""
+        con = d - position.x*position.x - position.y*position.y - position.z*position.z
+        return 0. if con <= 0 else con*con*con*con*indexedLerp(index, position.x, position.y, position.z)
 
-    def sample(self, x: float, y: float) -> float:
-        """Samples the Simplex Noise generator."""
+    def sample(self, position: Position) -> float:
+        """Samples the Simplex Noise generator at a 2D position."""
+        # TODO: Clean up y-z mismatch
+        x, y = position.x, position.z
         UNSKEW = (3 - sqrt(3))/6
         # hf = (x + y)*(sqrt(3) - 1)/2
         # hx = int((x + hf)//1)
@@ -41,8 +45,9 @@ class SimplexNoise:
         offx = x > y
         offy = not offx
 
-        # return 70*(self.__grad(self.d[(self.d[hy & EIGHT_BITS] + hx) & EIGHT_BITS] % 12, x, y) + self.__grad(self.d[(self.d[(hy + offy) & EIGHT_BITS] + hx + offx) & EIGHT_BITS] % 12, x - offx + UNSKEW, y - offy + UNSKEW) + self.__grad(self.d[(self.d[(hy + 1) & EIGHT_BITS] + hx + 1) & EIGHT_BITS] % 12, x - 1 + 2*UNSKEW, y - 1 + 2*UNSKEW))
-        return 70*(self.__grad(self.d[(self.d[hy & EIGHT_BITS] + hx) & EIGHT_BITS] % 12, x, y) + self.__grad(self.d[(self.d[(hy + offy) & EIGHT_BITS] + hx + offx) & EIGHT_BITS] % 12, x - offx + UNSKEW, y - offy + UNSKEW) + self.__grad(self.d[(self.d[(hy + 1) & EIGHT_BITS] + hx + 1) & EIGHT_BITS] % 12, x - 1/sqrt(3), y - 1/sqrt(3)))
+        # Oddly, the indexed lerp in _getGradient treats z as though it were the y-coordinate. I haven't the slightest idea why.
+        # return 70*(self._getGradient(self.d[(self.d[hy & EIGHT_BITS] + hx) & EIGHT_BITS] % 12, Position(x, y=y)) + self._getGradient(self.d[(self.d[(hy + offy) & EIGHT_BITS] + hx + offx) & EIGHT_BITS] % 12, Position(x - offx + UNSKEW, y=y - offy + UNSKEW)) + self._getGradient(self.d[(self.d[(hy + 1) & EIGHT_BITS] + hx + 1) & EIGHT_BITS] % 12, Position(x - 1 + 2*UNSKEW, y=y - 1 + 2*UNSKEW)))
+        return 70*(self._getGradient(self.d[(self.d[hy & EIGHT_BITS] + hx) & EIGHT_BITS] % 12, Position(x, y=y)) + self._getGradient(self.d[(self.d[(hy + offy) & EIGHT_BITS] + hx + offx) & EIGHT_BITS] % 12, Position(x - offx + UNSKEW, y=y - offy + UNSKEW)) + self._getGradient(self.d[(self.d[(hy + 1) & EIGHT_BITS] + hx + 1) & EIGHT_BITS] % 12, Position(x - 1/sqrt(3), y=y - 1/sqrt(3))))
 
 
 class PerlinNoise:
@@ -61,7 +66,7 @@ class PerlinNoise:
         If the generator is seeded, the intended version is Java Beta 1.8+, and multiple samples with y=0 will be done, `precomputeY` can precompute y-related values to make sampling slightly faster."""
         self.amplitude = amplitude
         self.lacunarity = lacunarity
-        if prng: self.seed(prng, precomputeY=precomputeY)
+        if prng is not None: self.seed(prng, precomputeY=precomputeY)
 
 
     def seed(self, prng: Random | Xoroshiro, *, precomputeY: bool = True) -> None:
@@ -85,12 +90,11 @@ class PerlinNoise:
             self.yLerpWeightAt0 = self.yFractionalPartAt0*self.yFractionalPartAt0*self.yFractionalPartAt0*(self.yFractionalPartAt0*(self.yFractionalPartAt0*6 - 15) + 10)
     
 
-    def sample(self, x: float, y: float, z: float, *, yAmplitude: float = 0, yMinimum: float = 0) -> float:
+    def sample(self, position: Position, *, yAmplitude: float = 0, yMinimum: float = 0) -> float:
         # TODO: Figure out role of yAmplitude and yMinimum
-        """Samples the Perlin Noise generator in Beta 1.8 or later versions.
+        """Samples the Perlin Noise generator at a 3D position in Beta 1.8+.
         If `yAmplitude` is nonzero, the fractional part of y will be clamped during the sampling."""
-        x += self.a
-        z += self.c
+        x, y, z = position.x + self.a, position.y, position.z + self.c
         xIntegerPart, zIntegerPart = int(x//1) & EIGHT_BITS, int(z//1) & EIGHT_BITS
         xFractionalPart, zFractionalPart = x % 1, z % 1
 
@@ -126,11 +130,10 @@ class PerlinNoise:
             zFractionalPart*zFractionalPart*zFractionalPart*(zFractionalPart*(zFractionalPart*6 - 15) + 10)
         )
 
-    def sample_Beta_1_7_Terrain(self, x: float, z: float, yLacAmp: float) -> tuple[float, float]:
-        """Samples the Perlin Noise generator for Beta 1.7 terrain.
+    def sample_Beta_1_7_Terrain(self, position: Position, yLacAmp: float) -> tuple[float, float]:
+        """Samples the Perlin Noise generator at a 2D position for Beta 1.7 terrain.
         The output will be a tuple of exactly two samples."""
-        x += self.a
-        z += self.c
+        x, z = position.x + self.a, position.z + self.c
         xIntegerPart, zIntegerPart = int(x//1) & EIGHT_BITS, int(z//1) & EIGHT_BITS
         xFractionalPart, zFractionalPart = x % 1, z % 1
         xLerpWeight = xFractionalPart*xFractionalPart*xFractionalPart*(xFractionalPart*(xFractionalPart*6 - 15) + 10)
@@ -171,15 +174,18 @@ class PerlinNoise:
 
 # TODO: Untested
 class PerlinNoiseOctave:
+    """An octave containing multiple Perlin Noise generators."""
     octaves: tuple[PerlinNoise, ...] = tuple()
     initializedOctaves: int
 
     @multimethod
     def __init__(self, length: int, firstOctave: int = 0, octavesToInitialize: int | None = None, *, initialAmplitude: float | None = None, amplitudeFactor: float = 2, initialLacunarity: float | None = None, lacunarityFactor: float = 0.5, prng: Random | None = None, beta: bool = False) -> None:
-        """Initializes the Perlin Noise octave for Java 1.17-, and optionally seeds it if `prng` is not None."""
+        """Initializes the Perlin Noise octave for Java 1.17-, and optionally seeds it if `prng` is not None.
+        Fewer than the total number of octaves can be initialized if `octavesToInitialize` is specified.
+        Set `beta` to true if the emulated version is Beta 1.8-."""
         lastOctave = firstOctave + length - 1
-        if not initialAmplitude: initialAmplitude = 1/((1 << length) - 1)
-        if not initialLacunarity: initialLacunarity = 2.0**lastOctave
+        if initialAmplitude is None: initialAmplitude = 1/((1 << length) - 1)
+        if initialLacunarity is None: initialLacunarity = 2.0**lastOctave
         self.initializedOctaves = 0
         for _ in range(length):
             if octavesToInitialize and self.initializedOctaves >= octavesToInitialize: break
@@ -188,11 +194,12 @@ class PerlinNoiseOctave:
             initialLacunarity *= lacunarityFactor
             self.initializedOctaves += 1
         
-        if prng: self.seed(prng, firstOctave, beta=beta)
+        if prng is not None: self.seed(prng, firstOctave, beta=beta)
 
     @multimethod
     def __init__(self, amplitudes: tuple[float, ...], firstOctave: int, octavesToInitialize: int | None = None, *, prng: Xoroshiro | None = None) -> None:
-        """Initializes the Perlin Noise octave for Java 1.18+, and optionally seeds it if `prng` is not None."""
+        """Initializes the Perlin Noise octave for Java 1.18+, and optionally seeds it if `prng` is not None.
+        Fewer than the total number of octaves can be initialized if `octavesToInitialize` is specified."""
         initialAmplitude = (1 << (len(amplitudes) - 1))/((1 << len(amplitudes)) - 1)
         initialLacunarity = 2.0**firstOctave
         self.initializedOctaves = 0
@@ -204,19 +211,20 @@ class PerlinNoiseOctave:
             initialLacunarity /= 2
             self.initializedOctaves += 1
         
-        if prng: self.seed(prng, firstOctave, amplitudes)
+        if prng is not None: self.seed(prng, firstOctave, amplitudes)
 
     @multimethod
-    def seed(self, prng: Random, minOctave: int, *, beta: bool = False) -> None:
-        """Seeds the Simplex Noise generator using java.util.Random without disturbing all other initialized constants."""
+    def seed(self, prng: Random, firstOctave: int, *, beta: bool = False) -> None:
+        """Seeds the Perlin Noise octave using java.util.Random without disturbing all other initialized constants.
+        Set `beta` to true if the emulated version is Beta 1.8-."""
         if not beta:
-            end = minOctave + self.initializedOctaves - 1
+            end = firstOctave + self.initializedOctaves - 1
             if end: prng.skipN(-262*end)
         for i in range(self.initializedOctaves): self.octaves[i].seed(prng)
     
     @multimethod
-    def seed(self, prng: Xoroshiro, amplitudes: tuple[float, ...], minOctave: int) -> None:
-        """Seeds the Simplex Noise generator using xoroshiro128++ without disturbing all other initialized constants."""
+    def seed(self, prng: Xoroshiro, amplitudes: tuple[float, ...], firstOctave: int) -> None:
+        """Seeds the Perlin Noise octave using xoroshiro128++ without disturbing all other initialized constants."""
         MD5_OCTAVE_N = (
             (0xb198de63a8012672, 0x7b84cad43ef7b5a8), # md5 "octave_-12"
             (0x0fd787bfbc403ec3, 0x74a4a31ca21b48b8), # md5 "octave_-11"
@@ -235,37 +243,66 @@ class PerlinNoiseOctave:
         xlo = prng.nextLong()
         xhi = prng.nextLong()
         for i in range(self.initializedOctaves):
-            if amplitudes[i]: self.octaves[i].seed(Xoroshiro(xlo ^ MD5_OCTAVE_N[12 + minOctave + i][0], xhi ^ MD5_OCTAVE_N[12 + minOctave + i][1]))
+            if amplitudes[i]: self.octaves[i].seed(Xoroshiro(xlo ^ MD5_OCTAVE_N[12 + firstOctave + i][0], xhi ^ MD5_OCTAVE_N[12 + firstOctave + i][1]))
 
-    def sample(self, x: float, y: float, z: float, yAmplitude: float = 0, yMinimum: float = 0, *, ignoreY: bool = False) -> float:
-        return sum(octave.amplitude*octave.sample(x*octave.lacunarity, -octave.b if ignoreY else y*octave.lacunarity, z*octave.lacunarity, yAmplitude=yAmplitude*octave.lacunarity, yMinimum=yMinimum*octave.lacunarity) for octave in self.octaves[:self.initializedOctaves])
+    def sample(self, position: Position, yAmplitude: float = 0, yMinimum: float = 0, *, ignoreY: bool = False) -> float:
+        """Samples the Perlin Noise octave at a 3D position, nullifying the contribution of the `y` value if `ignoreY` is true.
+        If `yAmplitude` is nonzero, the fractional part of y will be clamped during the sampling."""
+        return sum(octave.amplitude*octave.sample(Position(position.x*octave.lacunarity, position.z*octave.lacunarity, y=-octave.b if ignoreY else position.y*octave.lacunarity), yAmplitude=yAmplitude*octave.lacunarity, yMinimum=yMinimum*octave.lacunarity) for octave in self.octaves[:self.initializedOctaves])
     
-    def sample_Beta_1_7_Biomes(self, x: float, z: float) -> float:
+    def sample_Beta_1_7_Biomes(self, position: Position) -> float:
+        """Samples the Perlin Noise octave at a 2D position for Beta 1.7 biomes."""
         # return sum(octave.amplitude*octave.sample(x*octave.lacunarity + octave.a, z*octave.lacunarity + octave.b) for octave in self.octaves[:self.initializedOctaves])
-        sample = 0
+        sample = 0.
         for octave in self.octaves[:self.initializedOctaves]:
-            sn = SimplexNoise(octave.amplitude, octave.lacunarity)
+            # sn = SimplexNoise(octave.amplitude, octave.lacunarity)
+            sn = SimplexNoise(octave.lacunarity)
             sn.d = octave.d
-            sample += sn.sample(x*octave.lacunarity + octave.a, z*octave.lacunarity + octave.b)
+            sample += sn.sample(Position(position.x*octave.lacunarity + octave.a, position.z*octave.lacunarity + octave.b))
         return sample
 
-    def sample_Beta_1_7_Terrain(self, x: float, z: float, minimumLacunarity: float = 0, *, yLacunarityFlag: bool) -> tuple[float, float]:
+    def sample_Beta_1_7_Terrain(self, position: Position, minimumLacunarity: float = 0, *, yLacunarityFlag: bool) -> tuple[float, float]:
+        """Samples the Perlin Noise octave at a 2D position for Beta 1.7 terrain.
+        The output will be a tuple of exactly two samples."""
         samples = (0., 0.)
         for octave in self.octaves[:self.initializedOctaves]:
             if minimumLacunarity and octave.lacunarity > minimumLacunarity: continue
-            newSample = octave.sample_Beta_1_7_Terrain(x*octave.lacunarity, z*octave.lacunarity, 1 - yLacunarityFlag/2)
+            newSample = octave.sample_Beta_1_7_Terrain(Position(position.x*octave.lacunarity, position.z*octave.lacunarity), 1 - yLacunarityFlag/2)
             samples = (samples[0] + newSample[0], samples[1] + newSample[1])
             # samples: tuple[float, float] = tuple(s + n for s, n in zip(samples, newSample)) #type: ignore
         return samples
 
 
-# TODO: Unfinished
 class Climate:
+    """A climate composed of two Perlin Noise octaves."""
     octaveA: PerlinNoiseOctave
     octaveB: PerlinNoiseOctave
     amplitude: float
+    def __init__(self, amplitudes: int | tuple[float, ...], firstOctave: int, octavesToInitialize: int | None = None, *, prng: Random | Xoroshiro | None = None) -> None:
+        """Initializes the climate, and optionally seeds it if `prng` is not None.
+        If a length (a single integer) is provided for `amplitudes`, the climate will be treated as 1.17-; otherwise if a tuple of amplitudes is provided, the climate will be treated as 1.18+.
+        Fewer than the total number of octaves can be initialized if `octavesToInitialize` is specified."""
+        if octavesToInitialize: # None and 0 have the same behavior, so no need for "is not None"
+            AOctavesToInitialize = (octavesToInitialize + 1) >> 1
+            BOctavesToInitialize = octavesToInitialize - AOctavesToInitialize
+        self.octaveA.__init__(amplitudes, firstOctave, AOctavesToInitialize if octavesToInitialize else None, prng=prng)
+        self.octaveB.__init__(amplitudes, firstOctave, BOctavesToInitialize if octavesToInitialize else None, prng=prng)
+        if isinstance(amplitudes, tuple): amplitudes = max(i for i in range(len(amplitudes)) if amplitudes[i]) - min(i for i in range(len(amplitudes)) if amplitudes[i]) + 1
+        self.amplitude = 5/3 * amplitudes/(amplitudes + 1)
+
     @multimethod
-    def __init__(self, length: int, firstOctave: int, *, prng: Random | None = None) -> None:
-        self.octaveA.__init__(length, firstOctave, prng=prng)
-        self.octaveB.__init__(length, firstOctave, prng=prng)
-        self.amplitude = 5/3 * length/(length + 1)
+    def seed(self, prng: Random, firstOctave: int, *, beta: bool = False) -> None:
+        """Seeds the climate using java.util.Random without disturbing all other initialized constants.
+        Set `beta` to true if the emulated version is Beta 1.8-."""
+        self.octaveA.seed(prng, firstOctave, beta=beta)
+        self.octaveB.seed(prng, firstOctave, beta=beta)
+    
+    @multimethod
+    def seed(self, prng: Xoroshiro, amplitudes: tuple[float, ...], firstOctave: int) -> None:
+        """Seeds the climate using xoroshiro128++ without disturbing all other initialized constants."""
+        self.octaveA.seed(prng, amplitudes, firstOctave)
+        self.octaveB.seed(prng, amplitudes, firstOctave)
+
+    def sample(self, position: Position) -> float:
+        """Samples the Perlin Noise octave at a 3D position."""
+        return self.amplitude*(self.octaveA.sample(position) + self.octaveB.sample(Position(position.x*337/331, position.z*337/331, y=position.y*337/331)))

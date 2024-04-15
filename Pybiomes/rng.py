@@ -26,7 +26,7 @@ def toUnsigned(n: int, *, width: int = 64) -> int:
     return n & ((1 << width) - 1)
 
 def rotl(n: int, bits: int, *, width: int = 64) -> int:
-    """Returns the unsigned left circular rotation of `n`, as a `width`-bit integer, by `bits` bits.
+    """Returns the unsigned left [circular rotation](https://en.wikipedia.org/wiki/Circular_shift) of `n`, as a `width`-bit integer, by `bits` bits.
     A right circular rotation can be done by calling this with a negative value for `bits` instead.
     `width` must be positive."""
     window = (1 << width) - 1
@@ -70,10 +70,11 @@ def rotl(n: int, bits: int, *, width: int = 64) -> int:
 
 
 def floordiv(a: int, b: int) -> int:
+    """Returns the integer result of `floor(a/b)`."""
     return a//b
 
 def lerp(lowerBound: float, upperBound: float, weight: float, *, clamp: bool = True) -> float:
-    """Returns the result of a round of linear interpolation.
+    """Returns the result of one round of [linear interpolation](https://en.wikipedia.org/wiki/Linear_interpolation).
     If `weight` is in the range [0,1], or if `clamp` is true, the returned value will be in the range [`lowerBound`, `upperBound`]."""
     if clamp:
         if weight <= 0: return lowerBound
@@ -124,27 +125,66 @@ def modularInverse(x: int, modulo: int, *, width=64) -> int:
     return toUnsigned(b, width=width)
 
 
+class Position:
+    """A three-dimensional position in space. Unlike `Coordinate`, these values can be decimals.
+    `y` defaults to 0 unless explicitly specified.
+    All functions in this library using this will explicitly specify in their description if all three dimensions will be used, or if the object will be taken as a 2D point (meaning y will be ignored)."""
+    x: int | float
+    y: int | float
+    z: int | float
+    def __init__(self, x: int | float = 0, z: int | float = 0, *, y: int | float = 0) -> None:
+        self.x = x
+        self.y = y
+        self.z = z
+
+class Coordinate:
+    """A two-dimensional or three-dimensional coordinate. Unlike `Position`, these values must be integers.
+    `y` defaults to 0 unless explicitly specified.
+    All functions in this library using this will explicitly specify in their description if all three dimensions will be used, or if the object will be taken as a 2D point (meaning y will be ignored)."""
+    x: int
+    y: int
+    z: int
+    def __init__(self, x: int = 0, z: int = 0, *, y: int = 0) -> None:
+        self.x = x
+        self.y = y
+        self.z = z
+
+class Range(Coordinate):
+    """A three-dimensional range of coordinates.
+    (x, y, z) is the lower-Northwest corner of the region, and the region extends to (x + length - 1, y + height - 1, z + width - 1).
+    `y` and `height` default to 0 unless explicitly specified.
+    All functions in this library using this will explicitly specify in their description if all three dimensions will be used, or if the object will be taken as a 2D area (meaning y and height will be ignored)."""
+    length: int
+    width: int
+    height: int
+    def __init__(self, x: int = 0, z: int = 0, length: int = 0, width: int = 0, *, y: int = 0, height: int = 0) -> None:
+        super().__init__(x, z, y=y)
+        self.length = length
+        self.width = width
+        self.height = height
+
+
 class Random:
-    """Implementation of `java.util.Random` (which uses a linear congruential generator with a 2^48 state space). This is most commonly used for pre-Java 1.18 mechanics, such as potential structure positions and a world's End."""
-    seed: int
+    """Implementation of [java.util.Random](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html) (which uses a [linear congruential generator](https://en.wikipedia.org/wiki/Linear_congruential_generator) with a 2^48 state space). This is most commonly used for pre-Java 1.18 mechanics, potential structure positions, and a world's Nether and End."""
+    state: int
     def __init__(self, seed: int, *, asState: bool = False) -> None:
         """Creates and initializes an LCG with the seed `seed`.
         If `asState` is True, the LCG will instead set `seed` directly as the internal state without first converting it."""
-        self.seed = (seed ^ (0 if asState else 0x5deece66d)) & FORTY_EIGHT_BITS
+        self.state = (seed ^ (0x5deece66d*(1 - asState))) & FORTY_EIGHT_BITS
 
-    def __next(self, bits: int) -> int:
+    def _next(self, bits: int) -> int:
         # TODO: Finish description
         """Advances the LCG's internal state once, returning a signed pseudorandom min(`bits`, 32)-bit integer in the process."""
         bits &= THIRTY_TWO_BITS
-        self.seed = (self.seed * 0x5deece66d + 0xb) & FORTY_EIGHT_BITS
-        return toSigned(self.seed >> (48 - bits), width=32)
+        self.state = (self.state * 0x5deece66d + 0xb) & FORTY_EIGHT_BITS
+        return toSigned(self.state >> (48 - bits), width=32)
 
     def nextInt(self, n: int) -> int:
-        """Returns a pseudorandom integer in the range [0, min(`n`, 2^32)-1]. The LCG's internal state will be advanced almost always once, but rarely multiple times if `n` is not a power of two."""
+        """Returns a pseudorandom integer in the range [0, min(`n`, 2^32)-1]. The LCG's internal state will be advanced almost always once, but rarely multiple times (with probability (2^32 mod `n`)/2^32)."""
         n &= THIRTY_TWO_BITS
-        if not n & n - 1: return ((n * self.__next(31)) >> 31) & THIRTY_TWO_BITS
+        if not n & n - 1: return ((n * self._next(31)) >> 31) & THIRTY_TWO_BITS
         while True:
-            bits = self.__next(31)
+            bits = self._next(31)
             val = (bits & THIRTY_TWO_BITS) % n
             if toSigned(bits - val + n, width=32) < 1: break
         return val
@@ -152,15 +192,15 @@ class Random:
     def nextLong(self) -> int:
         """Returns a pseudorandom integer in the range [-2^63, 2^63 - 1], advancing the LCG's internal state twice in the process.
         Since the LCG uses a 48-bit state, only 2^48 integers within the aforementioned range are actually reachable."""
-        return ((self.__next(32) << 32) + self.__next(32)) & SIXTY_FOUR_BITS
+        return ((self._next(32) << 32) + self._next(32)) & SIXTY_FOUR_BITS
 
     def nextFloat(self) -> float:
         """Returns a pseudorandom single-precision float in the range [0, 1), advancing the LCG's internal state once in the process."""
-        return self.__next(24) / FLOAT_LENGTH
+        return self._next(24) / FLOAT_LENGTH
     
     def nextDouble(self) -> float:
         """Returns a pseudorandom double-precision float in the range [0, 1), advancing the LCG's internal state twice in the process."""
-        return ((self.__next(26) << 27) + self.__next(27)) / DOUBLE_LENGTH
+        return ((self._next(26) << 27) + self._next(27)) / DOUBLE_LENGTH
     
     def skipN(self, n: int) -> None:
         """Advances the LCG's internal state `n` times if `n` is non-negative, or steps it back `n` times if `n` is negative."""
@@ -178,11 +218,11 @@ class Random:
             ia *= im + 1
             im *= im
             n >>= 1
-        self.seed = (self.seed * m + a) & FORTY_EIGHT_BITS
+        self.state = (self.state * m + a) & FORTY_EIGHT_BITS
 
 
 class Xoroshiro:
-    """Implementation of `xoroshiro128++` (developed by [TODO: NAME]) which has a 2^128 state space. Most commonly used for Overworld mechanics introduced in or after 1.18."""
+    """Implementation of [xoroshiro128++](https://prng.di.unimi.it/xoroshiro128plusplus.c) (developed by David Blackman and Sebastiano Vigna) which has a 2^128 state space. Most commonly used for Overworld mechanics introduced in or after Java/Bedrock 1.18."""
     lo: int
     hi: int
     @multimethod
@@ -213,13 +253,13 @@ class Xoroshiro:
         self.hi = hi & SIXTY_FOUR_BITS
 
     
-    def __prev(self) -> None:
+    def _prev(self) -> None:
         """Steps the generator's internal state backwards once."""
         loXorHi = rotl(self.hi, 36)
         self.lo = rotl(self.lo ^ loXorHi ^ (loXorHi << 21), 15)
         self.hi = loXorHi ^ self.lo
 
-    def __next(self) -> None:
+    def _next(self) -> None:
         """Advances the generator's internal state once."""
         loXorHi = self.lo ^ self.hi
         self.lo = (rotl(self.lo, 49) ^ loXorHi ^ (loXorHi << 21)) & SIXTY_FOUR_BITS
@@ -228,7 +268,7 @@ class Xoroshiro:
     def nextLong(self) -> int:
         """Returns a pseudorandom integer in the range [-2^63, 2^63 - 1], advancing the generator's internal state once in the process."""
         n = toSigned(rotl(self.lo + self.hi, 17) + self.lo)
-        self.__next()
+        self._next()
         return n
     
     def nextInt(self, n: int) -> int:
@@ -236,9 +276,8 @@ class Xoroshiro:
         n &= THIRTY_TWO_BITS
         r = ((self.nextLong() & THIRTY_TWO_BITS) * n) & SIXTY_FOUR_BITS
         # I don't believe that code will ever run, but keeping just in case.
-        if ((r & THIRTY_TWO_BITS) < n):
-            while ((r & THIRTY_TWO_BITS) < (~n + 1) % n):
-                r = ((self.nextLong() & THIRTY_TWO_BITS) * n) & SIXTY_FOUR_BITS
+        if (r & THIRTY_TWO_BITS) < n:
+            while (r & THIRTY_TWO_BITS) < (~n + 1) % n: r = ((self.nextLong() & THIRTY_TWO_BITS) * n) & SIXTY_FOUR_BITS
         return r >> 32
 
     def nextFloat(self) -> float:
@@ -252,13 +291,12 @@ class Xoroshiro:
     def skipN(self, n: int) -> None:
         """Advances the generator's internal state `n` times if `n` is non-negative, or steps it back `n` times if `n` is negative."""
         if n >= 0:
-            for _ in range(n & ONE_HUNDRED_TWENTY_EIGHT_BITS): self.__next()
+            for _ in range(n & ONE_HUNDRED_TWENTY_EIGHT_BITS): self._next()
         else:
-            for _ in range(n & ONE_HUNDRED_TWENTY_EIGHT_BITS): self.__prev()
+            for _ in range(n & ONE_HUNDRED_TWENTY_EIGHT_BITS): self._prev()
 
     def nextLongJava(self) -> int:
-        """Returns a pseudorandom integer in the range [-2^63, 2^63 - 1], advancing the generator's internal state twice in the process.
-        Since the LCG uses a 48-bit state, only 2^48 integers within the aforementioned range are actually reachable."""
+        """Returns a pseudorandom integer in the range [-2^63, 2^63 - 1], advancing the generator's internal state twice in the process."""
         return toSigned(((self.nextLong() & THIRTY_TWO_BITS) << 32) + (self.nextLong() & THIRTY_TWO_BITS))
     
     def nextIntJava(self, n: int) -> int:
@@ -269,41 +307,47 @@ class Xoroshiro:
         while True:
             bits = (self.nextLong() >> 33) & THIRTY_TWO_BITS
             val = bits % n
-            if toSigned(bits - val + n, width=32) < 1: break
+            if toSigned(bits - val + n, width=32) >= 0: break
         return val
 
 
 class SeedHelper:
     """A 64-bit PRNG used in Java 1.17- chunk generation."""
-    def getLayerSalt(self, salt: int) -> int:
+    @classmethod
+    def getLayerSalt(cls, salt: int) -> int:
         """Returns a layer's salt given its initial `salt`.
         This output is then fed to `getStartSalt()` and `getStartSeed()`."""
-        return self.__getStartSalt(salt, salt)
+        return cls.getStartSalt(salt, salt)
     
-    def __getStartSalt(self, worldseed: int, layerSalt: int) -> int:
+    @classmethod
+    def getStartSalt(cls, worldseed: int, layerSalt: int) -> int:
         """Returns a starting salt given a worldseed and a layer salt (see `getLayerSalt()`).
         Not to be confused with `getStartSeed()`."""
-        return self.stepSeed(self.stepSeed(self.stepSeed(worldseed, layerSalt), layerSalt), layerSalt)
+        return cls.stepSeed(cls.stepSeed(cls.stepSeed(worldseed, layerSalt), layerSalt), layerSalt)
     
-    def getStartSeed(self, worldseed: int, layerSalt: int) -> int:
+    @classmethod
+    def getStartSeed(cls, worldseed: int, layerSalt: int) -> int:
         """Returns a starting seed given a worldseed and a layer salt (see `getLayerSalt()`).
         This output is then fed to `getChunkSeed()`."""
-        return self.stepSeed(self.__getStartSalt(worldseed, layerSalt), 0)
+        return cls.stepSeed(cls.getStartSalt(worldseed, layerSalt), 0)
 
+    @classmethod
     @multimethod
-    def getChunkSeed(self, startSeed: int, x: int, z: int) -> int:
-        """Returns a chunk seed given coordinates and a starting seed (see `getStartSeed()`).
+    def getChunkSeed(cls, startSeed: int, coordinate: Coordinate) -> int:
+        """Returns a chunk seed given a 2D coordinate and a starting seed (see `getStartSeed()`).
         This output is then fed to `firstInt()`."""
-        return self.stepSeed(self.stepSeed(self.stepSeed(startSeed + x, z), x), z)
+        return cls.stepSeed(cls.stepSeed(cls.stepSeed(startSeed + coordinate.x, coordinate.z), coordinate.x), coordinate.z)
 
+    @classmethod
     @multimethod
-    def getChunkSeed(self, worldseed: int, x: int, z: int, salt: int) -> int:
-        """Returns a chunk seed given a worldseed, coordinates, and an initial `salt`.
+    def getChunkSeed(cls, worldseed: int, coordinate: Coordinate, salt: int) -> int:
+        """Returns a chunk seed given a worldseed, a 2D coordinate, and an initial `salt`.
         This output is then fed to `firstInt()`."""
-        return self.stepSeed(self.stepSeed(self.stepSeed(self.getStartSeed(worldseed, self.getLayerSalt(salt)) + x, z), x), z)
+        return cls.stepSeed(cls.stepSeed(cls.stepSeed(cls.getStartSeed(worldseed, cls.getLayerSalt(salt)) + coordinate.x, coordinate.z), coordinate.x), coordinate.z)
 
+    @staticmethod
     @multimethod
-    def firstInt(self, chunkSeed: int, mod: int) -> int:
+    def firstInt(chunkSeed: int, mod: int) -> int:
         """Returns the first pseudorandom integer returned by the PRNG in the range [0, min(`mod`, 2^32)], given a chunk seed (see `getChunkSeed()`).
         The PRNG can then be advanced by calling `stepSeed()`."""
         # TODO: Double check bound in description
@@ -313,28 +357,35 @@ class SeedHelper:
         if (ret < 0): ret += mod
         return ret
 
+    @classmethod
     @multimethod
-    def firstInt(self, worldseed: int, x: int, z: int, salt: int, mod: int) -> int:
-        """Returns the first pseudorandom integer returned by the PRNG in the range [0, min(`mod`, 2^32)], given a worldseed, coordinates, and an initial salt.
+    def firstInt(cls, worldseed: int, coordinate: Coordinate, salt: int, mod: int) -> int:
+        """Returns the first pseudorandom integer returned by the PRNG in the range [0, min(`mod`, 2^32)], given a worldseed, a 2D coordinate, and an initial salt.
         The PRNG can then be advanced by calling `stepSeed()`."""
         # TODO: Double check bound in description
         mod &= THIRTY_TWO_BITS
         # TODO: Compare Python signed % to C signed %
-        ret = toSigned((self.getChunkSeed(worldseed, x, z, salt) >> 24) % mod, width=32)
+        ret = toSigned((cls.getChunkSeed(worldseed, coordinate, salt) >> 24) % mod, width=32)
         if (ret < 0): ret += mod
         return ret
     
+    @staticmethod
     @multimethod
-    def firstIntIsZero(self, chunkSeed: int, mod: int) -> bool:
+    def firstIntIsZero(chunkSeed: int, mod: int) -> bool:
         """Returns whether the first pseudorandom integer returned by the PRNG initialized by a chunk seed (see `getChunkSeed()`) is zero."""
         return not (((chunkSeed >> 24) % (mod & THIRTY_TWO_BITS)) & THIRTY_TWO_BITS)
     
+    @classmethod
     @multimethod
-    def firstIntIsZero(self, worldseed: int, x: int, z: int, salt: int, mod: int) -> bool:
-        """Returns whether the first pseudorandom integer returned by the PRNG initialized by a worldseed, coordinates, and initial salt is zero."""
-        return not (((self.getChunkSeed(worldseed, x, z, salt) >> 24) % (mod & THIRTY_TWO_BITS)) & THIRTY_TWO_BITS)
+    def firstIntIsZero(cls, worldseed: int, coordinate: Coordinate, salt: int, mod: int) -> bool:
+        """Returns whether the first pseudorandom integer returned by the PRNG initialized by a worldseed, a 2D coordinate, and an initial salt is zero."""
+        return not (((cls.getChunkSeed(worldseed, coordinate, salt) >> 24) % (mod & THIRTY_TWO_BITS)) & THIRTY_TWO_BITS)
     
-    def stepSeed(self, chunkSeed: int, startSalt: int) -> int:
+    @staticmethod
+    def stepSeed(chunkSeed: int, startSalt: int, *, width: int = 64) -> int:
         """Advances the PRNG once.
         To initialize the PRNG first, see `firstInt()`."""
-        return (chunkSeed * (chunkSeed * 6364136223846793005 + 1442695040888963407) + startSalt) & SIXTY_FOUR_BITS
+        return toUnsigned(chunkSeed * (chunkSeed * 6364136223846793005 + 1442695040888963407) + startSalt, width=width)
+    
+    # @classmethod
+    # def selectOneOfFour(cls, a: int, b: int, c: int, d: int, *, chunkSeed: int, startSalt: int) -> int:

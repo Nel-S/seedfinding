@@ -5,4 +5,4 @@ This is an unfinished, limited port of some of [Cubiomes](https://www.github.com
 2. for use by seedfinders who are interested in the field but who aren't familiar with any other programming languages.
 
 This program requires installing the [multimethod module](https://pypi.org/project/multimethod/) to function.<br>
-Note that there are multiple syntactical and semantical differences between this library and the original Cubiomes library, and one should not expect this library to necessary be updated whenever Cubiomes is.
+Note that there are multiple syntactical and semantical differences between this library and the original Cubiomes library, and one should not expect this library to necessarily be updated whenever Cubiomes is.

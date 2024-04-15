@@ -1,8 +1,10 @@
 #include "Climates.h"
 #include <math.h>
 
-// pi/2pi.
+// Mathematical constants.
 const double U_PI     = 3.1415926535897932384626433;
+const double U_SQRT_2 = 1.4142135623730950488016887;
+const double U_SQRT_3 = 1.7320508075688772935274463;
 const double U_TWO_PI = 6.2831853071795864769252866;
 
 /*
@@ -14,6 +16,9 @@ const double U_TWO_PI = 6.2831853071795864769252866;
 const double U_MAX_PERLIN_VALUE = 1.0363538112118025;
 // The minimum value that a Perlin sample can return.
 const double U_MIN_PERLIN_VALUE = -U_MAX_PERLIN_VALUE;
+// The values that, alongside their negative inverses, encompass the middle N% likelihood of an average Perlin sample.
+const double U_PERLIN_BENCHMARKS[PERCENTILES] = {0.0295, 0.0612, 0.0948, 0.130, 0.1683, 0.2101, 0.2572, 0.3182, 0.4040, U_MAX_PERLIN_VALUE};
+
 // The maximum value each climate sample can return. 
 const double U_MAX_CLIMATE_AMPLITUDES[NP_MAX] = {20./9  * U_MAX_PERLIN_VALUE, 320./189 * U_MAX_PERLIN_VALUE, 267./73 * U_MAX_PERLIN_VALUE,
 										   75./31 * U_MAX_PERLIN_VALUE,  28./3   * U_MAX_PERLIN_VALUE,  20./7  * U_MAX_PERLIN_VALUE};
@@ -77,17 +82,17 @@ const double U_MIN_WEIRD_OCTAVE_AMPLITUDE_SUMS[6] = {20./9  * U_MIN_PERLIN_VALUE
 
 
 
-int U_initClimateBoundsArray(const int climate, const double desiredClimateSample, double *array, const size_t arraySize) {
+int U_initClimateBoundsArray(const int climate, const double desiredClimateSample, const int percentile, double *array, const size_t arraySize) {
 	static const double *CLIMATE_ARRAYS[] = {U_MAX_TEMP_OCTAVE_AMPLITUDE_SUMS,  U_MIN_TEMP_OCTAVE_AMPLITUDE_SUMS,
 											 U_MAX_HUMID_OCTAVE_AMPLITUDE_SUMS, U_MIN_HUMID_OCTAVE_AMPLITUDE_SUMS,
 											 U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS,  U_MIN_CONT_OCTAVE_AMPLITUDE_SUMS,
 											 U_MAX_EROS_OCTAVE_AMPLITUDE_SUMS,  U_MIN_EROS_OCTAVE_AMPLITUDE_SUMS,
 											 U_MAX_SHIFT_OCTAVE_AMPLITUDE_SUMS, U_MIN_SHIFT_OCTAVE_AMPLITUDE_SUMS,
 											 U_MAX_WEIRD_OCTAVE_AMPLITUDE_SUMS, U_MIN_WEIRD_OCTAVE_AMPLITUDE_SUMS};
-	const double *octaveRangesArray = CLIMATE_ARRAYS[2*climate + (desiredClimateSample < 0)];
+	const double *OCTAVE_RANGES_ARRAY = CLIMATE_ARRAYS[2*climate + (desiredClimateSample < 0)];
 	int count = 0;
 	for (size_t i = 0; i < min(arraySize, (size_t)U_CLIMATE_NUMBER_OF_OCTAVES[climate]); ++i, ++count) {
-		array[i] = desiredClimateSample - octaveRangesArray[i];
+		array[i] = desiredClimateSample - OCTAVE_RANGES_ARRAY[i]*U_PERLIN_BENCHMARKS[percentile]/U_MAX_PERLIN_VALUE;
 		if (climate == NP_SHIFT && U_CLIMATE_NUMBER_OF_OCTAVES[NP_SHIFT] + i < arraySize) {
 			array[U_CLIMATE_NUMBER_OF_OCTAVES[NP_SHIFT] + i] = array[i];
 			++count;

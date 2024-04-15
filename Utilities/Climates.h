@@ -4,9 +4,11 @@
 #include "cubiomes/finders.h"
 #include <stdbool.h>
 
+enum {TENTH_PERCENTILE, TWENTIETH_PERCENTILE, THIRTIETH_PERCENTILE, FOURTIETH_PERCENTILE, FIFTIETH_PERCENTILE, SIXTIETH_PERCENTILE, SEVENTIETH_PERCENTILE, EIGHTIETH_PERCENTILE, NINETIETH_PERCENTILE, ONE_HUNDREDTH_PERCENTILE, PERCENTILES};
 extern const bool LARGE_BIOMES_FLAG;
-extern const double U_PI, U_TWO_PI,
-    U_MAX_PERLIN_VALUE, U_MIN_PERLIN_VALUE, U_MAX_CLIMATE_AMPLITUDES[NP_MAX], U_MIN_CLIMATE_AMPLITUDES[NP_MAX], U_SET_CLIMATE_AMPLITUDES[NP_MAX],
+extern const double U_PI, U_SQRT_2, U_SQRT_3, U_TWO_PI,
+    U_MAX_PERLIN_VALUE, U_MIN_PERLIN_VALUE, U_PERLIN_BENCHMARKS[PERCENTILES],
+    U_MAX_CLIMATE_AMPLITUDES[NP_MAX], U_MIN_CLIMATE_AMPLITUDES[NP_MAX], U_SET_CLIMATE_AMPLITUDES[NP_MAX],
     U_MAX_TEMP_OCTAVE_AMPLITUDE_SUMS[4],  U_MIN_TEMP_OCTAVE_AMPLITUDE_SUMS[4],  U_MAX_HUMID_OCTAVE_AMPLITUDE_SUMS[4], U_MIN_HUMID_OCTAVE_AMPLITUDE_SUMS[4],
     U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS[18], U_MIN_CONT_OCTAVE_AMPLITUDE_SUMS[18], U_MAX_EROS_OCTAVE_AMPLITUDE_SUMS[8],  U_MIN_EROS_OCTAVE_AMPLITUDE_SUMS[8], 
     U_MAX_SHIFT_OCTAVE_AMPLITUDE_SUMS[6], U_MIN_SHIFT_OCTAVE_AMPLITUDE_SUMS[6], U_MAX_WEIRD_OCTAVE_AMPLITUDE_SUMS[6], U_MIN_WEIRD_OCTAVE_AMPLITUDE_SUMS[6];
@@ -19,7 +21,7 @@ extern const int U_NUMBER_OF_OCTAVES, U_CLIMATE_NUMBER_OF_OCTAVES[NP_MAX];
 // Fills an array with the bounds necessary for a particular climate sample to occur. Note that the sign of `desiredClimateSample` is also taken into account.
 // Returns the number of array elements set.
 // If `climate == NP_SHIFT` and space is available in the array, the bounds will be filled twice over--the first set for px, the second set for pz--for usage in e.g. `U_sampleClimateBounded()` later on.
-int U_initClimateBoundsArray(const int climate, const double desiredClimateSample, double *array, const size_t arraySize);
+int U_initClimateBoundsArray(const int climate, const double desiredClimateSample, const int percentile, double *array, const size_t arraySize);
 
 // Initializes several 1.18+ BiomeNoise constants that Cubiomes chooses to regenerate each time instead of hardcoding (https://github.com/Cubitect/cubiomes/issues/82).
 // Note that Cubiomes' `xPerlinInit()` will reset the octave amplitudes and lacunarities initialized by this; use `U_initPerlin()` instead.

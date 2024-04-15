@@ -4,6 +4,9 @@
 #include "settings.h"
 #include "Utilities/Spawn.h"
 
+uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
+int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+
 const double CONT_FITNESS_SQRT = MOST_POSITIVE_CONT < -0.11 ? 10000*(MOST_POSITIVE_CONT + 0.11) : 0;
 const double FITNESS = CONT_FITNESS_SQRT * CONT_FITNESS_SQRT;
 

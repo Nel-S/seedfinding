@@ -1,6 +1,13 @@
 Hello. My handle is NelS; thank you for your interest in these works.
 
 
+THE FOUR-MINUTE (noncomprehensive) SUMMARY
+------------------------------------------
+- If something was not created by me and wasn't voluntarily contributed to my works by someone else, this license probably doesn't apply to it.
+- You're free to use/reference/etc., in almost any context, unequivocal facts determined by me/a contributor that don't necessarily rely on any one person (such-and-such a seed has a spawn 1700 blocks from the origin, such-and-such is the smallest possible distance between two mansions, etc.). If you do, you must credit all relevant persons who found it, provide a direct unaffiliated link to all relevant works, and not act like you discovered/participated in/etc. anything you actually didn't. The one exception is selling those facts where one must pay money to learn them (or is unduly pressured/tricked into doing so), which is outright forbidden.
+- You're free to *noncomercially* use/reference/etc. the works that were used to find/share/etc. such unequivocal facts (examples of such works include code, verbatim statements, videos I make, etc.). You must still credit the relevant persons, provide a direct link, and not lie to anyone; in addition, if publishing these works, you need to nontrivially modify it so people still have some vague reason to see the original (instead of you stealing someone else's hard work and publishing it verbatim). If you instead want to use/reference/etc. the works commercially, you must obtain written permission from all relevant contributors who aren't dead/impossible to reach first.
+- I and all contributors are not responsible for the accuracy of any works/results (though I've tried, at least), nor are we responsible for anything anyone uses them for.
+
 
 SCOPE
 -----
@@ -10,15 +17,12 @@ In all cases, this license only pertains to my contributions, and to the contrib
 - elements originating from unrelated or foreign parties such as (but again not limited to) Mojang A.B. or Microsoft Corporation. (It is also worth mentioning that those are indeed foreign parties; my works are not official Minecraft products and are not endorsed by Microsoft or any other organization.)
 Any or all of these may have their own terms, which will be separate from my own.
 
-
 If there is ever confusion over whether something falls under this license, it is best to reach out to whoever the original creator of the content was and ask them.
-
 
 
 USAGE TERMS
 -----------
 This license will focus on two distinct forms of content: the ultimate results of my or any contributors' efforts, and the work used to obtain such results.
-
 
 "The results" are the ultimate facts attained from work I or any contributors have engaged in, such as (but not limited to)
  - discovered seeds and/or coordinates;
@@ -30,7 +34,6 @@ Such facts are by nature independent of any one person: 3624905120954988039 in J
     2. provide a direct, unaffiliated, non-paywalled, and publicly accessible link(s) to the work(s) involved; and
     3. not engage in any pretense, either implicit or explicit, that you made any discoveries you actually did not; that you provided any contributions you actually did not; that you engaged in any partnerships or collaborations you actually did not; and so on. Be honest.
  - YOU MAY NOT sell such results, defined as if someone must, is unduly pressured to, or is deceived into paying money for the results in their unaltered or trivially-altered state. (Simply featuring them alongside other paid content is allowed if the results themselves are freely accessible.)
-
 
 "The works" are instead the means that were used to obtain such results. These will by definition depend on a particular person(s): examples include (but are not limited to)
  - the exact words or figures used in writeups or explanatory messages I or a contributor have written;
@@ -46,25 +49,18 @@ Since such works are inherently determined and dependent on me or any contributo
  - YOU MAY NOT use the works in a commercial context without obtaining explicit written permission from ALL person(s) who provided the relevant contribution(s) in question, subject to whatever (if any) terms said person(s) require or agree upon. Permission is not required from person(s) who are deceased, or person(s) who are truly unable to be contacted after at minimum five honest and non-trivial efforts to contact them, spaced over a period of at minimum three months. (Someone responding and saying "no" does not count as them being unable to be contacted.)
  - YOU MAY NOT distribute or republish the works without making any changes or solely trivial changes to them, even non-commercially. "Without any/solely-trivial changes" is defined as if a reasonable consumer of your derivative would have effectively no real reason to view the original work. (This explicitly includes react channels and similar formats.) In such cases, simply linking the relevant works (again directly and publicly-accessibly, without paywalls or affiliation links or the like) and letting one's audience view the works for themselves is a better alternative.
 
-
 If you would like to involve the works or their results in a manner not listed elsehwere on this document, reach out to the creator(s) of the relevant contribution(s) to ask them about it.
-
 
 
 (LACK OF) WARRANTY AND LIABILITY
 --------------------------------
 In all cases, to the extent permitted by United States law, I waive responsibility and shall not be held liable for any claims, damages, false or misinformed beliefs, uses or abuses of the works or results, or other consequences of any kind relating to the works or results. These works are provided "as is" with no warranty of any kind whatsoever.
 
-
 I also do not claim or imply in any way whatsoever these works or results are official Minecraft products; I do not claim that Microsoft or any other organization has endorsed these works or results; and I do not claim that these results are correct or accurate (though I personally have done my best to be thorough).
 
-
 If any international laws or laws of the United States conflict with this license, those laws shall take precedence. (Please also let me know in such cases so I can amend this license.)
-
 
 I reserve the right to modify this license as needed.
 
 
-
-
-COPYRIGHT 2024, Nel-S.
+COPYRIGHT 2024, Nel-S. Some rights reserved.

@@ -1,5 +1,5 @@
+#include "common.h"
 #include "Chunkbiomes/Bfinders.c"
-#include <stdio.h>
 #include <string.h>
 
 const int MAX_RADIUS = 3;
@@ -10,12 +10,17 @@ typedef struct {
     uint64_t count;
 } BoundingBox;
 
-int main() {
+void initGlobals() {}
+
+void *runWorker(void *workerIndex) {
     BoundingBox bb;
     // In 1.18+ chunks can generate at most one ravine
     StructureVariant *sv;
     uint64_t bestCount = 1, bestScore = UINT64_MAX;
-    for (uint64_t seed = 0; seed < (1ULL << 48); ++seed) {
+
+    uint64_t seed;
+    if (!getNextSeed(workerIndex, &seed)) return NULL;
+    do {
         uint64_t currentScore = UINT64_MAX;
         memset(&bb, 0, sizeof(bb));
         for (int chunkX = -MAX_RADIUS; chunkX <= MAX_RADIUS; ++chunkX) {
@@ -60,10 +65,9 @@ int main() {
             if (currentScore > bestScore) continue;
             bestScore = currentScore;
         }
-        printf("%" PRIu64 "\t%" PRIu64 "\t(%d, %d, %d) - (%d, %d, %d)\t%" PRIu64 "\n", seed, bb.count, bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z, currentScore);
+        outputValue("%" PRIu64 "\t%" PRIu64 "\t(%d, %d, %d) - (%d, %d, %d)\t%" PRIu64 "\n", seed, bb.count, bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z, currentScore);
         bestCount = bb.count;
         // nextSeed: continue;
-    }
-
-    return 0;
+    } while (getNextSeed(NULL, &seed));
+    return NULL;
 }

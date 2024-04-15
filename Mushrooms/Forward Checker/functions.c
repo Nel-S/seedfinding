@@ -3,46 +3,41 @@
 
 #include "globals.h"
 
-/*
-	Custom main() files MUST
-		- #include "functions.c";
-		- call initGlobals() before starting the search;
-		- create a struct "Data <name>" in each thread/process/etc. such that <name>.index = <index of the thread/process/etc.>;
-		- heave each thread/process/etc. call checkSeeds(&<name>) to start its search; and
-		- implement outputValues().
-	Anything else can be implemented to your liking. (Also, localStartSeed, localSeedsToCheck, and localNumberOfProcesses can be overridden if desired.)
-*/
-uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
-int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
-extern void outputValues(const uint64_t *seeds, const void *otherValues, size_t count);
-
-
 void initGlobals() {
 	for (ringStartingIndex = 0; ringStartingIndex < sizeof(U_SPAWN_FIRST_STAGE_VALS)/sizeof(*U_SPAWN_FIRST_STAGE_VALS) && U_SPAWN_FIRST_STAGE_VALS[ringStartingIndex][U_spawn_table_fitness] <= FITNESS; ++ringStartingIndex);
 
 	for (uint_fast8_t i = 0; i < ringStartingIndex; ++i) {
-		U_initClimateBoundsArray(NP_CONTINENTALNESS, U_getEffectiveContinentalness(FITNESS - U_SPAWN_FIRST_STAGE_VALS[i][U_spawn_table_fitness]), Cdouble[i], sizeof(*Cdouble)/sizeof(**Cdouble));
+		U_initClimateBoundsArray(NP_CONTINENTALNESS, U_getEffectiveContinentalness(FITNESS - U_SPAWN_FIRST_STAGE_VALS[i][U_spawn_table_fitness]), FIFTIETH_PERCENTILE, Cdouble[i], sizeof(*Cdouble)/sizeof(**Cdouble));
 	}
 }
 
-void *checkSeeds(void *workerIndex) {
+void *runWorker(void *workerIndex) {
 	BiomeNoise bn;
 	initBiomeNoise(&bn, MC_NEWEST);
 	U_manualBNinit(&bn);
 
 	int ids[BIOME_CACHE_SIZE];
 	PerlinNoise *oct = bn.oct;
-	// Iterates over N seeds, beginning at the one originally specified by the user
-	for (uint64_t count = *(int *)workerIndex; count < localSeedsToCheck; count += localNumberOfWorkers) {
-		uint64_t seed = count + localStartSeed;
-		double px = 0, pz = 0, npC;
-		if (!DELAY_SHIFT) U_initAndSampleClimateBounded(NP_SHIFT, oct, &px, &pz, NULL, NULL, &seed, NULL);
+	double pxs[ringStartingIndex], pzs[ringStartingIndex];
+	for (uint_fast8_t i = 0; i < ringStartingIndex; ++i) {
+		pxs[i] = U_SPAWN_FIRST_STAGE_VALS[i][U_spawn_table_x], pzs[i] = U_SPAWN_FIRST_STAGE_VALS[i][U_spawn_table_z];
+		if (DELAY_SHIFT) {
+			pxs[i] = floor(pxs[i]/4);
+			pzs[i] = floor(pzs[i]/4);
+		}
+	}
 
+	// Iterates over N seeds, beginning at the one originally specified by the user
+	uint64_t seed;
+	if (!getNextSeed(workerIndex, &seed)) return NULL;
+	do {
+		double px = pxs[0], pz = pzs[0], npC;
+		if (!DELAY_SHIFT) U_initAndSampleClimateBounded(NP_SHIFT, oct, &px, &pz, NULL, NULL, &seed, NULL);
 		if (U_initAndSampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble[0], &seed, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
 
 		// If a 1st-ring spawn is all that is needed, we can stop here; otherwise, we repeat the process again for each position in each ring below the desired one.
 		for (uint_fast8_t i = 1; i < ringStartingIndex; ++i) {
-			px = U_SPAWN_FIRST_STAGE_VALS[i][U_spawn_table_x] >> 2, pz = U_SPAWN_FIRST_STAGE_VALS[i][U_spawn_table_z] >> 2;
+			px = pxs[i], pz = pzs[i];
 			if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz);
 			if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble[i], &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) goto skip;
 		}
@@ -132,9 +127,9 @@ void *checkSeeds(void *workerIndex) {
 
 		if (!mushroomExists) continue;
 
-		outputValues(&seed, &mushroomDist, 1);
+		outputValue("%" PRId64 "\t%d\n", seed, mushroomDist);
 		skip: continue;
-	}
+	} while (getNextSeed(NULL, &seed));
 	return NULL;
 }
 

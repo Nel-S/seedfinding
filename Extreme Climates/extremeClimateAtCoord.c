@@ -1,10 +1,11 @@
+#include "common.h"
 #include "Utilities/Climates.h"
-#include <stdbool.h>
 
 const uint64_t GLOBAL_START_SEED = 110546880051;
 const uint64_t GLOBAL_SEEDS_TO_CHECK = -1;
 const int      GLOBAL_NUMBER_OF_WORKERS = 4;
-const char    *FILEPATH = NULL;
+const char    *INPUT_FILEPATH  = NULL;
+const char    *OUTPUT_FILEPATH = NULL;
 
 const int CLIMATE = NP_TEMPERATURE;
 const Pos COORD = {0, 0};
@@ -21,34 +22,35 @@ const bool TIME_PROGRAM      = false;
 
 
 
-uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
-int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
-extern void outputValues(const uint64_t *seeds, const void *otherValues, const size_t count);
+localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK, localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
 
 double Cdouble[sizeof(U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS)/sizeof(*U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS)];
 
 void initGlobals() {
-	U_initClimateBoundsArray(CLIMATE, AS_PERCENT ? U_MAX_CLIMATE_AMPLITUDES[CLIMATE] * THRESHOLD : (THRESHOLD >= 0 ? min(THRESHOLD, U_MAX_CLIMATE_AMPLITUDES[CLIMATE]) : max(THRESHOLD, U_MIN_CLIMATE_AMPLITUDES[CLIMATE])), Cdouble, U_CLIMATE_NUMBER_OF_OCTAVES[CLIMATE]);
+	U_initClimateBoundsArray(CLIMATE, AS_PERCENT ? U_MAX_CLIMATE_AMPLITUDES[CLIMATE] * THRESHOLD : (THRESHOLD >= 0 ? min(THRESHOLD, U_MAX_CLIMATE_AMPLITUDES[CLIMATE]) : max(THRESHOLD, U_MIN_CLIMATE_AMPLITUDES[CLIMATE])), ONE_HUNDREDTH_PERCENTILE, Cdouble, U_CLIMATE_NUMBER_OF_OCTAVES[CLIMATE]);
 }
 
-void *checkSeeds(void *workerIndex) {
+void *runWorker(void *workerIndex) {
 	PerlinNoise oct[U_NUMBER_OF_OCTAVES];
-	for (uint64_t count = *(int *)workerIndex; count < localSeedsToCheck; count += localNumberOfWorkers) {
-		uint64_t seed = localStartSeed + count;
 
-		double px = COORD.x, pz = COORD.z, npC;
+	double origPx = COORD.x, origPz = COORD.z;
+	if (!CHECK_PX_FLAG) {
+		origPx = floor(origPx/4);
+		origPz = floor(origPz/4);
+	}
+
+	uint64_t seed;
+	if (!getNextSeed(workerIndex, &seed)) return NULL;
+	do {
+		double px = origPx, pz = origPz, npC;
 		if (CHECK_PX_FLAG) {
 			U_initClimate(NP_SHIFT, oct, seed);
 			U_sampleClimate(NP_SHIFT, oct, &px, &pz);
-		} else {
-			px = floor(px/4);
-			pz = floor(pz/4);
 		}
 
 		if (U_initAndSampleClimateBounded(CLIMATE, oct, &px, &pz, THRESHOLD >= 0 ? Cdouble : NULL, THRESHOLD >= 0 ? NULL : Cdouble, &seed, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[CLIMATE]) continue;
 		/*Prints the seed.*/
-		int out = 10000 * npC;
-		outputValues(&seed, &out, 1);
-	}
+		outputValue("%" PRId64 "\t%f\n", seed, npC);
+	} while (getNextSeed(NULL, &seed));
 	return NULL;
 }

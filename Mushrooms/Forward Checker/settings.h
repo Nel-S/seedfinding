@@ -1,7 +1,6 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
-#include <inttypes.h>
-#include <stdbool.h>
+#include "common.h"
 
 // Sets the seed to start at and the number of seeds to iterate over.
 const uint64_t GLOBAL_START_SEED = 154778801832;
@@ -17,7 +16,8 @@ const double MOST_POSITIVE_CONT = -0.4;
 const int RADIUS = 400;
 
 // (If one's main() file prints to a file) The filepath to print results to.
-const char *FILEPATH = "mushroomSeeds.txt";
+const char *INPUT_FILEPATH  = NULL;
+const char *OUTPUT_FILEPATH = "mushroomSeeds.txt";
 
 // Set to false for normal generation, or true for Large Biomes generation.
 const bool LARGE_BIOMES_FLAG = false;
