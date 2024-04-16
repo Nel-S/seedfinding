@@ -242,7 +242,7 @@ int U_initAndSampleClimateBounded(const int climate, PerlinNoise *oct, double *p
             U_initPerlin(&oct[0], &pxr2);
 		}
 		*climateSample = 20./21 * samplePerlin(&oct[0], *px/(1024*LB_MULT), 0, *pz/(1024*LB_MULT), 0, 0);
-		if ((lowerBounds && *climateSample < lowerBounds[0]) || (upperBounds && *climateSample < lowerBounds[0])) return 0;
+		if ((lowerBounds && *climateSample < lowerBounds[0]) || (upperBounds && *climateSample > upperBounds[0])) return 0;
 
 		if (seedIfInitializingClimate) {
 			xlo2 = xNextLong(&pxr);
