@@ -1,5 +1,5 @@
 from math import trunc
-from multimethod import multimethod
+from typing import Literal, overload, Sequence
 
 # Bitlengths
 FOUR_BITS                     = 0xf
@@ -33,45 +33,6 @@ def rotl(n: int, bits: int, *, width: int = 64) -> int:
     n &= window
     bits %= width
     return ((n << bits) | (n >> (width - bits))) & window
-
-# Copies for the fixed widths of 32 and 64 bits, to maybe speed those up?
-
-# def toSigned32(n: int) -> int:
-#     """Returns the signed 32-bit integer equivalent of `n`."""
-#     n &= THIRTY_TWO_BITS
-#     return (n ^ 0x80000000) - 0x80000000
-
-# def toUnsigned32(n: int) -> int:
-#     """Returns the unsigned 32-bit integer equivalent of `n`."""
-#     return n & THIRTY_TWO_BITS
-
-# def toSigned64(n: int) -> int:
-#     """Returns the signed 64-bit integer equivalent of `n`."""
-#     n &= SIXTY_FOUR_BITS
-#     return (n ^ 0x8000000000000000) - 0x8000000000000000
-
-# def toUnsigned64(n: int) -> int:
-#     """Returns the unsigned 64-bit integer equivalent of `n`."""
-#     return n & THIRTY_TWO_BITS
-
-# def rotl32(n: int, bits: int) -> int:
-#     """Returns the unsigned left circular rotation of `n`, as a 32-bit integer, by `bits` bits.
-#     A right circular rotation can be done by calling this with a negative value for `bits` instead."""
-#     n &= THIRTY_TWO_BITS
-#     bits &= 31
-#     return ((n << bits) | (n >> (32 - bits))) & THIRTY_TWO_BITS
-
-# def rotl64(n: int, bits: int) -> int:
-#     """Returns the unsigned left circular rotation of `n`, as a 64-bit integer, by `b` bits.
-#     A right circular rotation can be done by calling this with a negative value for `bits` instead."""
-#     n &= SIXTY_FOUR_BITS
-#     bits &= 63
-#     return ((n << bits) | (n >> (64 - bits))) & SIXTY_FOUR_BITS
-
-
-def floordiv(a: int, b: int) -> int:
-    """Returns the integer result of `floor(a/b)`."""
-    return a//b
 
 def lerp(lowerBound: float, upperBound: float, weight: float, *, clamp: bool = True) -> float:
     """Returns the result of one round of [linear interpolation](https://en.wikipedia.org/wiki/Linear_interpolation).
@@ -126,28 +87,36 @@ def modularInverse(x: int, modulo: int, *, width=64) -> int:
 
 
 class Position:
-    """A three-dimensional position in space. Unlike `Coordinate`, these values can be decimals.
+    """A two-dimensional or three-dimensional position in space. Unlike `Coordinate`, its values can be decimals.
     `y` defaults to 0 unless explicitly specified.
     All functions in this library using this will explicitly specify in their description if all three dimensions will be used, or if the object will be taken as a 2D point (meaning y will be ignored)."""
     x: int | float
     y: int | float
     z: int | float
-    def __init__(self, x: int | float = 0, z: int | float = 0, *, y: int | float = 0) -> None:
-        self.x = x
-        self.y = y
-        self.z = z
+    @overload
+    def __init__(self, x: int | float = 0, z: int | float = 0, *, y: int | float = 0) -> None: ...
+
+    @overload
+    def __init__(self, x: Sequence[int | float]) -> None: ...
+
+    def __init__(self, x: int | float | Sequence[int | float] = 0, z: int | float = 0, *, y: int | float = 0) -> None:
+        self.x, self.y, self.z = ((x[0], 0, x[1]) if len(x) < 3 else (x[0], x[1], x[2])) if isinstance(x, Sequence) else (x, y, z)
 
 class Coordinate:
-    """A two-dimensional or three-dimensional coordinate. Unlike `Position`, these values must be integers.
+    """A two-dimensional or three-dimensional coordinate. Unlike `Position`, its values must be integers.
     `y` defaults to 0 unless explicitly specified.
     All functions in this library using this will explicitly specify in their description if all three dimensions will be used, or if the object will be taken as a 2D point (meaning y will be ignored)."""
     x: int
     y: int
     z: int
-    def __init__(self, x: int = 0, z: int = 0, *, y: int = 0) -> None:
-        self.x = x
-        self.y = y
-        self.z = z
+    @overload
+    def __init__(self, x: int = 0, z: int = 0, *, y: int = 0) -> None: ...
+
+    @overload
+    def __init__(self, x: Sequence[int]) -> None: ...
+
+    def __init__(self, x: int | Sequence[int] = 0, z: int = 0, *, y: int = 0) -> None:
+        self.x, self.y, self.z = ((x[0], 0, x[1]) if len(x) < 3 else (x[0], x[1], x[2])) if isinstance(x, Sequence) else (x, y, z)
 
 class Range(Coordinate):
     """A three-dimensional range of coordinates.
@@ -157,11 +126,19 @@ class Range(Coordinate):
     length: int
     width: int
     height: int
-    def __init__(self, x: int = 0, z: int = 0, length: int = 0, width: int = 0, *, y: int = 0, height: int = 0) -> None:
-        super().__init__(x, z, y=y)
-        self.length = length
-        self.width = width
-        self.height = height
+    @overload
+    def __init__(self, x: int = 0, z: int = 0, length: int = 0, width: int = 0, *, y: int = 0, height: int = 0) -> None: ...
+
+    @overload
+    def __init__(self, x: Sequence[int]) -> None: ...
+
+    def __init__(self, x: int | Sequence[int] = 0, z: int = 0, length: int = 0, width: int = 0, *, y: int = 0, height: int = 0) -> None:
+        if isinstance(x, Sequence):
+            super().__init__(x[0], x[1], y=0 if len(x) < 5 else x[4])
+            self.length, self.width, self.height = x[2], x[3], 0 if len(x) < 6 else x[5]
+        else:
+            super().__init__(x, z, y=y)
+            self.length, self.width, self.height = length, width, height
 
 
 class Random:
@@ -225,32 +202,35 @@ class Xoroshiro:
     """Implementation of [xoroshiro128++](https://prng.di.unimi.it/xoroshiro128plusplus.c) (developed by David Blackman and Sebastiano Vigna) which has a 2^128 state space. Most commonly used for Overworld mechanics introduced in or after Java/Bedrock 1.18."""
     lo: int
     hi: int
-    @multimethod
-    def __init__(self, seed: int) -> None:
-        """Creates and initializes a xoroshiro128++ generator with the seed `seed`.
-        Since `seed` is treated as if a 64-bit integer, only 2^64 initial states for xoroshiro128++ are possible, despite its 2^128 overall state space."""
-        # l = (seed ^ 0x6a09e667f3bcc909) & SIXTY_FOUR_BITS
-        # h = (l + 0x9e3779b97f4a7c15) & SIXTY_FOUR_BITS
-        # l = ((l ^ (l >> 30)) * 0xbf58476d1ce4e5b9) & SIXTY_FOUR_BITS
-        # l = ((l ^ (l >> 30)) * 0x94d049bb133111eb) & SIXTY_FOUR_BITS
-        # self.lo = l ^ (l >> 31)
-        # h = ((h ^ (h >> 30)) * 0xbf58476d1ce4e5b9) & SIXTY_FOUR_BITS
-        # h = ((h ^ (h >> 30)) * 0x94d049bb133111eb) & SIXTY_FOUR_BITS
-        # self.hi = h ^ (h >> 31)
-        l = (seed ^ 0x6a09e667f3bcc909)
-        h = (l + 0x9e3779b97f4a7c15)
-        l = ((l ^ (l >> 30)) * 0xbf58476d1ce4e5b9)
-        l = ((l ^ (l >> 30)) * 0x94d049bb133111eb)
-        self.lo = (l ^ (l >> 31)) & SIXTY_FOUR_BITS
-        h = ((h ^ (h >> 30)) * 0xbf58476d1ce4e5b9)
-        h = ((h ^ (h >> 30)) * 0x94d049bb133111eb)
-        self.hi = (h ^ (h >> 31)) & SIXTY_FOUR_BITS
-    
-    @multimethod
-    def __init__(self, lo: int, hi: int) -> None:
-        """Creates and initializes a xoroshiro128++ generator with internal 64-bit lower bits `lo` and higher bits `hi`."""
-        self.lo = lo & SIXTY_FOUR_BITS
-        self.hi = hi & SIXTY_FOUR_BITS
+    @overload
+    def __init__(self, seedOrLo: int) -> None: ...
+
+    @overload
+    def __init__(self, seedOrLo: int, hi: int) -> None: ...
+
+    @overload
+    def __init__(self, seedOrLo: Sequence[int]) -> None: ...
+
+    def __init__(self, seedOrLo: int | Sequence[int], hi: int | None = None) -> None:
+        """Creates and initializes a xoroshiro128++ generator.
+        - If one integer is provided, it is interpreted as a PRNG seed. (It will also be interpreted as a 64-bit integer, meaning only 2^64 initial states for xoroshiro128++ are possible despite its 2^128 overall state space.)
+        - Otherwise if two integers or a tuple are provided, they are interpreted as an internal state to be directly set."""
+        if isinstance(seedOrLo, int):
+            if hi is None:
+                l = (seedOrLo ^ 0x6a09e667f3bcc909)
+                h = (l + 0x9e3779b97f4a7c15)
+                l = ((l ^ (l >> 30)) * 0xbf58476d1ce4e5b9)
+                l = ((l ^ (l >> 30)) * 0x94d049bb133111eb)
+                self.lo = (l ^ (l >> 31)) & SIXTY_FOUR_BITS
+                h = ((h ^ (h >> 30)) * 0xbf58476d1ce4e5b9)
+                h = ((h ^ (h >> 30)) * 0x94d049bb133111eb)
+                self.hi = (h ^ (h >> 31)) & SIXTY_FOUR_BITS
+            else:
+                self.lo = seedOrLo & SIXTY_FOUR_BITS
+                self.hi = hi & SIXTY_FOUR_BITS
+        else:
+            self.lo = seedOrLo[0] & SIXTY_FOUR_BITS
+            self.hi = seedOrLo[1] & SIXTY_FOUR_BITS
 
     
     def _prev(self) -> None:
@@ -331,55 +311,56 @@ class SeedHelper:
         This output is then fed to `getChunkSeed()`."""
         return cls.stepSeed(cls.getStartSalt(worldseed, layerSalt), 0)
 
+    @overload
     @classmethod
-    @multimethod
-    def getChunkSeed(cls, startSeed: int, coordinate: Coordinate) -> int:
-        """Returns a chunk seed given a 2D coordinate and a starting seed (see `getStartSeed()`).
-        This output is then fed to `firstInt()`."""
-        return cls.stepSeed(cls.stepSeed(cls.stepSeed(startSeed + coordinate.x, coordinate.z), coordinate.x), coordinate.z)
+    def getChunkSeed(cls, seed: int, coordinate: Coordinate) -> int: ...
+
+    @overload
+    @classmethod
+    def getChunkSeed(cls, seed: int, coordinate: Coordinate, salt: int) -> int: ...
 
     @classmethod
-    @multimethod
-    def getChunkSeed(cls, worldseed: int, coordinate: Coordinate, salt: int) -> int:
-        """Returns a chunk seed given a worldseed, a 2D coordinate, and an initial `salt`.
-        This output is then fed to `firstInt()`."""
-        return cls.stepSeed(cls.stepSeed(cls.stepSeed(cls.getStartSeed(worldseed, cls.getLayerSalt(salt)) + coordinate.x, coordinate.z), coordinate.x), coordinate.z)
+    def getChunkSeed(cls, seed: int, coordinate: Coordinate, salt: int | None = None) -> int:
+        """Returns a chunk seed.
+        - If solely `seed` and a 2D `coordinate` are provided, `seed` will be interpreted as a starting seed (see `getStartSeed()`).
+        - Otherwise if a salt is provided, `seed` will be interpreted as a worldseed.
+        In either case, this output is then usually fed to `firstInt()`."""
+        return cls.stepSeed(cls.stepSeed(cls.stepSeed((seed if salt is None else cls.getStartSeed(seed, cls.getLayerSalt(salt))) + coordinate.x, coordinate.z), coordinate.x), coordinate.z)
 
-    @staticmethod
-    @multimethod
-    def firstInt(chunkSeed: int, mod: int) -> int:
-        """Returns the first pseudorandom integer returned by the PRNG in the range [0, min(`mod`, 2^32)], given a chunk seed (see `getChunkSeed()`).
-        The PRNG can then be advanced by calling `stepSeed()`."""
+    @overload
+    @classmethod
+    def firstInt(cls, seed: int, mod: int) -> int: ...
+
+    @overload
+    @classmethod
+    def firstInt(cls, seed: int, mod: int, coordinate: Coordinate, salt: int) -> int: ...
+
+    @classmethod
+    def firstInt(cls, seed: int, mod: int, coordinate: Coordinate | None = None, salt: int | None = None) -> int:
+        """Returns the first pseudorandom integer returned by the PRNG in the range [0, min(`mod`, 2^32)].
+        - If solely `seed` and `mod` are provided, `seed` will be interpreted as a chunk seed (see `getChunkSeed()`).
+        - Otherwise if a `coordinate` and `salt` are provided, `seed` will be interpreted as a worldseed.
+        In either case, the PRNG can then be advanced by calling `stepSeed()`."""
         # TODO: Double check bound in description
         mod &= THIRTY_TWO_BITS
-        # TODO: Compare Python signed % to C signed %
-        ret = toSigned((chunkSeed >> 24) % mod, width=32)
-        if (ret < 0): ret += mod
-        return ret
-
-    @classmethod
-    @multimethod
-    def firstInt(cls, worldseed: int, coordinate: Coordinate, salt: int, mod: int) -> int:
-        """Returns the first pseudorandom integer returned by the PRNG in the range [0, min(`mod`, 2^32)], given a worldseed, a 2D coordinate, and an initial salt.
-        The PRNG can then be advanced by calling `stepSeed()`."""
-        # TODO: Double check bound in description
-        mod &= THIRTY_TWO_BITS
-        # TODO: Compare Python signed % to C signed %
-        ret = toSigned((cls.getChunkSeed(worldseed, coordinate, salt) >> 24) % mod, width=32)
+        ret = toSigned(((seed if coordinate is None or salt is None else cls.getChunkSeed(seed, coordinate, salt)) >> 24) % mod, width=32)
         if (ret < 0): ret += mod
         return ret
     
-    @staticmethod
-    @multimethod
-    def firstIntIsZero(chunkSeed: int, mod: int) -> bool:
-        """Returns whether the first pseudorandom integer returned by the PRNG initialized by a chunk seed (see `getChunkSeed()`) is zero."""
-        return not (((chunkSeed >> 24) % (mod & THIRTY_TWO_BITS)) & THIRTY_TWO_BITS)
-    
+    @overload
     @classmethod
-    @multimethod
-    def firstIntIsZero(cls, worldseed: int, coordinate: Coordinate, salt: int, mod: int) -> bool:
-        """Returns whether the first pseudorandom integer returned by the PRNG initialized by a worldseed, a 2D coordinate, and an initial salt is zero."""
-        return not (((cls.getChunkSeed(worldseed, coordinate, salt) >> 24) % (mod & THIRTY_TWO_BITS)) & THIRTY_TWO_BITS)
+    def firstIntIsZero(cls, seed: int, mod: int) -> bool: ...
+
+    @overload
+    @classmethod
+    def firstIntIsZero(cls, seed: int, mod: int, coordinate: Coordinate, salt: int) -> bool: ...
+
+    @classmethod
+    def firstIntIsZero(cls, seed: int, mod: int, coordinate: Coordinate | None = None, salt: int | None = None) -> bool:
+        """Returns whether the first pseudorandom integer returned by the PRNG is zero.
+        - If solely `seed` and `mod` are provided, `seed` will be interpreted as a chunk seed (see `getChunkSeed()`).
+        - Otherwise if a `coordinate` and `salt` are provided, `seed` will be interpreted as a worldseed."""
+        return not ((((seed if coordinate is None or salt is None else cls.getChunkSeed(seed, coordinate, salt)) >> 24) % (mod & THIRTY_TWO_BITS)) & THIRTY_TWO_BITS)
     
     @staticmethod
     def stepSeed(chunkSeed: int, startSalt: int, *, width: int = 64) -> int:

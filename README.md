@@ -10,9 +10,9 @@ Furthermore, most of the C programs will need to link the [Cubiomes](https://git
 
 All #include paths in this repository are also standardized in relation to the parent directory `seedfinding/`: as such, when compiling the C programs one needs to specify that directory should be examined as well via `-I"<path to seedfinding/>"`.
 
-As an example, compiling [`Extreme Climates/extremeClimateAtCoord.c`](./Extreme%20Climates/extremeClimateAtCoord.c) with pthreads would be done with
+As an example, compiling [`Extreme Climates/Extreme Climate At Coordinate.c`](./Extreme%20Climates/Extreme%20Climate%20At%20Coordinate.c) with pthreads would be done with
 ```bash
-gcc "Extreme Climates/extremeClimateAtCoord.c" "Templates/Example main (pthreads).c" "Utilities/Climates.c" "Utilities/Spawn.c" "libcubiomes.a" -I"<path to seedfinding/>" -o <executable name>
+gcc "Extreme Climates/Extreme Climate At Coordinate.c" "Templates/Example main (pthreads).c" "Utilities/Math.c" "Utilities/Climates.c" "Utilities/Spawn.c" "libcubiomes.a" -I"<path to seedfinding/>" -o "<executable name>"
 ```
 with optional compilation flags (`-O3`, `-fwrapv`, `-Wall`, etc.) listed afterwards.
 

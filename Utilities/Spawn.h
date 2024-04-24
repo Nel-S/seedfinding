@@ -1,6 +1,7 @@
 #ifndef _SPAWN_H
 #define _SPAWN_H
 
+#include "Math.h"
 #include "Climates.h"
 
 enum {U_spawn_table_x, U_spawn_table_z, U_spawn_table_fitness, U_spawn_table_entrySize};

@@ -19,7 +19,7 @@ extern uint64_t localStartSeed, localSeedsToCheck;
 extern int localNumberOfWorkers;
 
 // This is defined in the filtering program.
-// It must initialize all global variables prior to any workers having been created.
+// It must initialize all global variables prior to any workers being created.
 void initGlobals();
 // This is defined in the filtering program.
 // It must initialize a worker; it is also recommended it
@@ -29,13 +29,13 @@ void initGlobals();
 // though custom implementations are still allowed if one wishes.
 void *runWorker(void *workerIndex);
 
-// This is defined in the main function.
+// This is defined in the main template.
 // If workerIndex is not NULL, it returns the first seed for the specified worker.
 // Otherwise if workerIndex is NULL, it returns the next seed in the sequence.
 // Returns false when the end of the sequence is reached. 
 bool getNextSeed(const void* workerIndex, uint64_t *seed);
-// This is defined in the main function.
-// It prints the information for a single result given a setup equivalent to `printf()`.
+// This is defined in the main template.
+// It prints the information for a single result given a setup identical to `printf()`.
 void outputValue(const char *format, ...);
 
 #endif

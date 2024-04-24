@@ -1,7 +1,6 @@
 from enum import IntEnum
 
 class Version(IntEnum):
-	UNDEFINED = -1
 	V_B1_7 = V_BETA_1_7 = 0
 	V_B1_8 = V_BETA_1_8 = 1
 	V1_0  = V1_0_0  = 2
@@ -33,10 +32,8 @@ class Dimension(IntEnum):
 	NETHER    = -1
 	OVERWORLD =  0
 	END       =  1
-	UNDEFINED =  1000
 
 class Biome(IntEnum):
-	UNDEFINED = -1
 	OCEAN = 0
 	PLAINS = 1
 	DESERT = 2
@@ -188,29 +185,29 @@ class Biome(IntEnum):
 		return True
 
 	@classmethod
-	def getDimension(cls, biome: "Biome") -> Dimension:
+	def getDimension(cls, biome: "Biome") -> Dimension | None:
 		"""Returns the dimension a specified `biome` exists within."""
 		# match biome:
 		# 	# TODO: Create pull request for Cubiomes for UNDEFINED case
-		# 	case cls.UNDEFINED: return Dimension.UNDEFINED
+		# 	case None: return None
 		# 	case cls.BASALT_DELTAS | cls.CRIMSON_FOREST | cls.NETHER_WASTES | cls.SOUL_SAND_VALLEY | cls.WARPED_FOREST: return Dimension.NETHER
 		# 	case cls.END_BARRENS | cls.END_HIGHLANDS | cls.END_MIDLANDS | cls.SMALL_END_ISLANDS | cls.THE_END: return Dimension.END
 		# 	case _: return Dimension.OVERWORLD
 		match cls.getCategory(biome):
-			case cls.UNDEFINED: return Dimension.UNDEFINED
+			case None: return None
 			case cls.NETHER_WASTES: return Dimension.NETHER
 			case cls.THE_END: return Dimension.END
 		return Dimension.OVERWORLD
 
 	@classmethod
-	def getMutatedBiome(cls, biome: "Biome", version: Version = Version.UNDEFINED) -> "Biome":
+	def getMutatedBiome(cls, biome: "Biome", version: Version | None = None) -> "Biome | None":
 		"""Returns a `biome`'s corresponding mutation. Note that this feature only existed between versions 1.7-1.17 (inclusive)."""
 		match biome:
 			case cls.BADLANDS: return cls.ERODED_BADLANDS
 			case cls.BADLANDS_PLATEAU: return cls.MODIFIED_BADLANDS_PLATEAU
 			# Emulation of [MC-98995](https://bugs.mojang.com/browse/MC-98995)
-			case cls.BIRCH_FOREST: return cls.TALL_BIRCH_HILLS if Version.V1_9 <= version <= Version.V1_10 else cls.TALL_BIRCH_FOREST
-			case cls.BIRCH_FOREST_HILLS: return cls.UNDEFINED if Version.V1_9 <= version <= Version.V1_10 else cls.TALL_BIRCH_HILLS
+			case cls.BIRCH_FOREST: return cls.TALL_BIRCH_HILLS if version is not None and Version.V1_9 <= version <= Version.V1_10 else cls.TALL_BIRCH_FOREST
+			case cls.BIRCH_FOREST_HILLS: return None if version is not None and Version.V1_9 <= version <= Version.V1_10 else cls.TALL_BIRCH_HILLS
 			case cls.DARK_FOREST: return cls.DARK_FOREST_HILLS
 			case cls.DESERT: return cls.DESERT_LAKES
 			case cls.FOREST: return cls.FLOWER_FOREST
@@ -228,15 +225,15 @@ class Biome(IntEnum):
 			case cls.TAIGA: return cls.TAIGA_MOUNTAINS
 			case cls.WOODED_BADLANDS: return cls.MODIFIED_WOODED_BADLANDS_PLATEAU
 			case cls.WOODED_MOUNTAINS: return cls.MODIFIED_GRAVELLY_MOUNTAINS
-		return cls.UNDEFINED
+		return None
 
 	# TODO: Unfinished
 	@classmethod
-	def getCategory(cls, biome: "Biome", version: Version = Version.UNDEFINED) -> "Biome":
+	def getCategory(cls, biome: "Biome", version: Version | None = None) -> "Biome | None":
 		"""Returns a `biome`'s general biome category."""
 		match biome:
 			case cls.BADLANDS | cls.ERODED_BADLANDS | cls.MODIFIED_BADLANDS_PLATEAU | cls.MODIFIED_WOODED_BADLANDS_PLATEAU: return cls.MESA
-			case cls.BADLANDS_PLATEAU | cls.WOODED_BADLANDS: return cls.MESA if version <= Version.V1_15 else cls.BADLANDS_PLATEAU
+			case cls.BADLANDS_PLATEAU | cls.WOODED_BADLANDS: return cls.MESA if version is not None and version <= Version.V1_15 else cls.BADLANDS_PLATEAU
 			case cls.BAMBOO_JUNGLE | cls.BAMBOO_JUNGLE_HILLS | cls.JUNGLE | cls.JUNGLE_EDGE | cls.JUNGLE_HILLS | cls.MODIFIED_JUNGLE | cls.MODIFIED_JUNGLE_EDGE: return cls.JUNGLE
 			case cls.BEACH | cls.SNOWY_BEACH: return cls.BEACH
 			case cls.BASALT_DELTAS | cls.CRIMSON_FOREST | cls.NETHER_WASTES | cls.SOUL_SAND_VALLEY | cls.WARPED_FOREST: return cls.NETHER_WASTES
@@ -254,7 +251,7 @@ class Biome(IntEnum):
 			case cls.SNOWY_TUNDRA | cls.SNOWY_MOUNTAINS | cls.ICE_SPIKES: return cls.SNOWY_TUNDRA
 			case cls.SWAMP | cls.SWAMP_HILLS: return cls.SWAMP
 			case cls.STONE_SHORE: return cls.STONE_SHORE
-		return cls.UNDEFINED
+		return None
 
 	@classmethod
 	def areSimilar(cls, biome1: "Biome", biome2: "Biome") -> bool:

@@ -5,9 +5,7 @@ class SimplexNoise:
     # TODO: Find range
     """Gradient noise developed by Ken Perlin. Returns values in the range +-...."""
     d: list[int]
-    # amplitude: float
     lacunarity: float
-    # def __init__(self, amplitude: float, lacunarity: float, *, prng: Random | Xoroshiro | None = None) -> None:
     def __init__(self, lacunarity: float, *, prng: Random | Xoroshiro | None = None) -> None:
         """Initializes the Simplex Noise generator, and optionally seeds it if `prng` is not None."""
         # self.amplitude = amplitude
@@ -24,8 +22,8 @@ class SimplexNoise:
             self.d[i] = self.d[j]
             self.d[j] = temp
     
-    def _getGradient(self, index: int, position: Position, d: float = 0.5):
-        """Calculates a gradient at a 3D position using an indexed linear interpolation."""
+    def _getGradient(self, index: int, position: Position, d: float = 0.5) -> float:
+        """Calculates a gradient at a 3D position using indexed linear interpolation."""
         con = d - position.x*position.x - position.y*position.y - position.z*position.z
         return 0. if con <= 0 else con*con*con*con*indexedLerp(index, position.x, position.y, position.z)
 
@@ -176,74 +174,114 @@ class PerlinNoise:
 class PerlinNoiseOctave:
     """An octave containing multiple Perlin Noise generators."""
     octaves: tuple[PerlinNoise, ...] = tuple()
-    initializedOctaves: int
+    initializedOctaves: int = 0
+    @overload
+    def __init__(self, lengths: int, firstOctave: int, octavesToInitialize: int | None = None, *, prng: Random | None = None, beta: Literal[False] = False) -> None: ...
 
-    @multimethod
-    def __init__(self, length: int, firstOctave: int = 0, octavesToInitialize: int | None = None, *, initialAmplitude: float | None = None, amplitudeFactor: float = 2, initialLacunarity: float | None = None, lacunarityFactor: float = 0.5, prng: Random | None = None, beta: bool = False) -> None:
-        """Initializes the Perlin Noise octave for Java 1.17-, and optionally seeds it if `prng` is not None.
+    @overload
+    def __init__(self, lengths: int, firstOctave: int, octavesToInitialize: int | None = None, *, prng: Random | None = None, beta: Literal[True] = True) -> None: ...
+
+    @overload
+    def __init__(self, lengths: int, firstOctave: Literal[0] = 0, octavesToInitialize: int | None = None, *, initialAmplitude: float, amplitudeFactor: float, initialLacunarity: float, lacunarityFactor: float, prng: Random | None = None, beta: Literal[True] = True) -> None: ...
+
+    @overload
+    def __init__(self, lengths: tuple[float, ...], firstOctave: int, octavesToInitialize: int | None = None, *, prng: Xoroshiro | None = None) -> None: ...
+
+    def __init__(self, lengths: int | tuple[float, ...], firstOctave: int = 0, octavesToInitialize: int | None = None, *, initialAmplitude: float | None = None, amplitudeFactor: float = 2, initialLacunarity: float | None = None, lacunarityFactor: float = 0.5, prng: Random | Xoroshiro | None = None, beta: bool = False) -> None:
+        """Initializes the Perlin Noise octave, and optionally seeds it if `prng` is not None.
         Fewer than the total number of octaves can be initialized if `octavesToInitialize` is specified.
         Set `beta` to true if the emulated version is Beta 1.8-."""
-        lastOctave = firstOctave + length - 1
-        if initialAmplitude is None: initialAmplitude = 1/((1 << length) - 1)
-        if initialLacunarity is None: initialLacunarity = 2.0**lastOctave
-        self.initializedOctaves = 0
-        for _ in range(length):
+        if isinstance(lengths, int):
+            if initialAmplitude is None: initialAmplitude = 1/((1 << lengths) - 1)
+            if initialLacunarity is None: initialLacunarity = 2.0**(firstOctave + lengths - 1)
+        else:
+            if initialAmplitude is None: initialAmplitude = (1 << (len(lengths) - 1))/((1 << len(lengths)) - 1)
+            if initialLacunarity is None: initialLacunarity = 2.0**firstOctave
+
+        for amp in (range(lengths) if isinstance(lengths, int) else lengths):
             if octavesToInitialize and self.initializedOctaves >= octavesToInitialize: break
-            self.octaves += (PerlinNoise(initialAmplitude, initialLacunarity),)
+            if isinstance(lengths, tuple) and not amp: continue
+            self.octaves += (PerlinNoise((amp if isinstance(lengths, tuple) else 1) * initialAmplitude, initialLacunarity),)
             initialAmplitude *= amplitudeFactor
             initialLacunarity *= lacunarityFactor
             self.initializedOctaves += 1
-        
-        if prng is not None: self.seed(prng, firstOctave, beta=beta)
 
-    @multimethod
-    def __init__(self, amplitudes: tuple[float, ...], firstOctave: int, octavesToInitialize: int | None = None, *, prng: Xoroshiro | None = None) -> None:
-        """Initializes the Perlin Noise octave for Java 1.18+, and optionally seeds it if `prng` is not None.
-        Fewer than the total number of octaves can be initialized if `octavesToInitialize` is specified."""
-        initialAmplitude = (1 << (len(amplitudes) - 1))/((1 << len(amplitudes)) - 1)
-        initialLacunarity = 2.0**firstOctave
-        self.initializedOctaves = 0
-        for amp in amplitudes:
-            if octavesToInitialize and self.initializedOctaves >= octavesToInitialize: break
-            if not amp: continue
-            self.octaves += (PerlinNoise(amp * initialAmplitude, initialLacunarity),)
-            initialAmplitude *= 2
-            initialLacunarity /= 2
-            self.initializedOctaves += 1
-        
-        if prng is not None: self.seed(prng, firstOctave, amplitudes)
+        if prng is not None:
+            if isinstance(prng, Xoroshiro):
+                assert isinstance(lengths, tuple)
+                self.seed(prng, firstOctave, lengths)
+            elif not beta: self.seed(prng, firstOctave, beta=False)
+            else: self.seed(prng, beta=True)
 
-    @multimethod
-    def seed(self, prng: Random, firstOctave: int, *, beta: bool = False) -> None:
+
+    # @multimethod
+    # def seed(self, prng: Random, firstOctave: int, *, beta: bool = False) -> None:
+    #     """Seeds the Perlin Noise octave using java.util.Random without disturbing all other initialized constants.
+    #     Set `beta` to true if the emulated version is Beta 1.8-."""
+    #     if not beta:
+    #         end = firstOctave + self.initializedOctaves - 1
+    #         if end: prng.skipN(-262*end)
+    #     for i in range(self.initializedOctaves): self.octaves[i].seed(prng)
+    
+    # @multimethod
+    # def seed(self, prng: Xoroshiro, amplitudes: tuple[float, ...], firstOctave: int) -> None:
+    #     """Seeds the Perlin Noise octave using xoroshiro128++ without disturbing all other initialized constants."""
+    #     MD5_OCTAVE_N = (
+    #         (0xb198de63a8012672, 0x7b84cad43ef7b5a8), # md5 "octave_-12"
+    #         (0x0fd787bfbc403ec3, 0x74a4a31ca21b48b8), # md5 "octave_-11"
+    #         (0x36d326eed40efeb2, 0x5be9ce18223c636a), # md5 "octave_-10"
+    #         (0x082fe255f8be6631, 0x4e96119e22dedc81), # md5 "octave_-9"
+    #         (0x0ef68ec68504005e, 0x48b6bf93a2789640), # md5 "octave_-8"
+    #         (0xf11268128982754f, 0x257a1d670430b0aa), # md5 "octave_-7"
+    #         (0xe51c98ce7d1de664, 0x5f9478a733040c45), # md5 "octave_-6"
+    #         (0x6d7b49e7e429850a, 0x2e3063c622a24777), # md5 "octave_-5"
+    #         (0xbd90d5377ba1b762, 0xc07317d419a7548d), # md5 "octave_-4"
+    #         (0x53d39c6752dac858, 0xbcd1c5a80ab65b3e), # md5 "octave_-3"
+    #         (0xb4a24d7a84e7677b, 0x023ff9668e89b5c4), # md5 "octave_-2"
+    #         (0xdffa22b534c5f608, 0xb9b67517d3665ca9), # md5 "octave_-1"
+    #         (0xd50708086cef4d7c, 0x6e1651ecc7f43309), # md5 "octave_0"
+    #     )
+    #     xlo = prng.nextLong()
+    #     xhi = prng.nextLong()
+    #     for i in range(self.initializedOctaves):
+    #         if amplitudes[i]: self.octaves[i].seed(Xoroshiro(xlo ^ MD5_OCTAVE_N[12 + firstOctave + i][0], xhi ^ MD5_OCTAVE_N[12 + firstOctave + i][1]))
+    @overload
+    def seed(self, prng: Random, firstOctave: int, *, beta: Literal[False] = False) -> None: ...
+
+    @overload
+    def seed(self, prng: Random, *, beta: Literal[True] = True) -> None: ...
+
+    @overload
+    def seed(self, prng: Xoroshiro, firstOctave: int, amplitudes: tuple[float, ...]) -> None: ...
+
+    def seed(self, prng: Random | Xoroshiro, firstOctave: int = 0, amplitudes: tuple[float, ...] | None = None, *, beta: bool = False) -> None:
         """Seeds the Perlin Noise octave using java.util.Random without disturbing all other initialized constants.
         Set `beta` to true if the emulated version is Beta 1.8-."""
-        if not beta:
-            end = firstOctave + self.initializedOctaves - 1
-            if end: prng.skipN(-262*end)
-        for i in range(self.initializedOctaves): self.octaves[i].seed(prng)
-    
-    @multimethod
-    def seed(self, prng: Xoroshiro, amplitudes: tuple[float, ...], firstOctave: int) -> None:
-        """Seeds the Perlin Noise octave using xoroshiro128++ without disturbing all other initialized constants."""
-        MD5_OCTAVE_N = (
-            (0xb198de63a8012672, 0x7b84cad43ef7b5a8), # md5 "octave_-12"
-            (0x0fd787bfbc403ec3, 0x74a4a31ca21b48b8), # md5 "octave_-11"
-            (0x36d326eed40efeb2, 0x5be9ce18223c636a), # md5 "octave_-10"
-            (0x082fe255f8be6631, 0x4e96119e22dedc81), # md5 "octave_-9"
-            (0x0ef68ec68504005e, 0x48b6bf93a2789640), # md5 "octave_-8"
-            (0xf11268128982754f, 0x257a1d670430b0aa), # md5 "octave_-7"
-            (0xe51c98ce7d1de664, 0x5f9478a733040c45), # md5 "octave_-6"
-            (0x6d7b49e7e429850a, 0x2e3063c622a24777), # md5 "octave_-5"
-            (0xbd90d5377ba1b762, 0xc07317d419a7548d), # md5 "octave_-4"
-            (0x53d39c6752dac858, 0xbcd1c5a80ab65b3e), # md5 "octave_-3"
-            (0xb4a24d7a84e7677b, 0x023ff9668e89b5c4), # md5 "octave_-2"
-            (0xdffa22b534c5f608, 0xb9b67517d3665ca9), # md5 "octave_-1"
-            (0xd50708086cef4d7c, 0x6e1651ecc7f43309), # md5 "octave_0"
-        )
-        xlo = prng.nextLong()
-        xhi = prng.nextLong()
-        for i in range(self.initializedOctaves):
-            if amplitudes[i]: self.octaves[i].seed(Xoroshiro(xlo ^ MD5_OCTAVE_N[12 + firstOctave + i][0], xhi ^ MD5_OCTAVE_N[12 + firstOctave + i][1]))
+        if isinstance(prng, Random):
+            if not beta:
+                end = firstOctave + self.initializedOctaves - 1
+                if end: prng.skipN(-262*end)
+            for i in range(self.initializedOctaves): self.octaves[i].seed(prng)
+        else:
+            MD5_OCTAVE_N = (
+                (0xb198de63a8012672, 0x7b84cad43ef7b5a8), # md5 "octave_-12"
+                (0x0fd787bfbc403ec3, 0x74a4a31ca21b48b8), # md5 "octave_-11"
+                (0x36d326eed40efeb2, 0x5be9ce18223c636a), # md5 "octave_-10"
+                (0x082fe255f8be6631, 0x4e96119e22dedc81), # md5 "octave_-9"
+                (0x0ef68ec68504005e, 0x48b6bf93a2789640), # md5 "octave_-8"
+                (0xf11268128982754f, 0x257a1d670430b0aa), # md5 "octave_-7"
+                (0xe51c98ce7d1de664, 0x5f9478a733040c45), # md5 "octave_-6"
+                (0x6d7b49e7e429850a, 0x2e3063c622a24777), # md5 "octave_-5"
+                (0xbd90d5377ba1b762, 0xc07317d419a7548d), # md5 "octave_-4"
+                (0x53d39c6752dac858, 0xbcd1c5a80ab65b3e), # md5 "octave_-3"
+                (0xb4a24d7a84e7677b, 0x023ff9668e89b5c4), # md5 "octave_-2"
+                (0xdffa22b534c5f608, 0xb9b67517d3665ca9), # md5 "octave_-1"
+                (0xd50708086cef4d7c, 0x6e1651ecc7f43309), # md5 "octave_0"
+            )
+            xlo = prng.nextLong()
+            xhi = prng.nextLong()
+            for i in range(self.initializedOctaves):
+                if amplitudes is not None and amplitudes[i]: self.octaves[i].seed(Xoroshiro(xlo ^ MD5_OCTAVE_N[12 + firstOctave + i][0], xhi ^ MD5_OCTAVE_N[12 + firstOctave + i][1]))
 
     def sample(self, position: Position, yAmplitude: float = 0, yMinimum: float = 0, *, ignoreY: bool = False) -> float:
         """Samples the Perlin Noise octave at a 3D position, nullifying the contribution of the `y` value if `ignoreY` is true.
@@ -278,30 +316,66 @@ class Climate:
     octaveA: PerlinNoiseOctave
     octaveB: PerlinNoiseOctave
     amplitude: float
-    def __init__(self, amplitudes: int | tuple[float, ...], firstOctave: int, octavesToInitialize: int | None = None, *, prng: Random | Xoroshiro | None = None) -> None:
+    @overload
+    def __init__(self, firstOctave: int, amplitudes: int, octavesToInitialize: int | None = None, *, prng: Random | None = None) -> None: ...
+    
+    @overload
+    def __init__(self, firstOctave: int, amplitudes: tuple[float, ...], octavesToInitialize: int | None = None, *, prng: Xoroshiro | None = None) -> None: ...
+
+    def __init__(self, firstOctave: int, amplitudes: int | tuple[float, ...], octavesToInitialize: int | None = None, *, prng: Random | Xoroshiro | None = None) -> None:
         """Initializes the climate, and optionally seeds it if `prng` is not None.
         If a length (a single integer) is provided for `amplitudes`, the climate will be treated as 1.17-; otherwise if a tuple of amplitudes is provided, the climate will be treated as 1.18+.
         Fewer than the total number of octaves can be initialized if `octavesToInitialize` is specified."""
         if octavesToInitialize: # None and 0 have the same behavior, so no need for "is not None"
             AOctavesToInitialize = (octavesToInitialize + 1) >> 1
             BOctavesToInitialize = octavesToInitialize - AOctavesToInitialize
-        self.octaveA.__init__(amplitudes, firstOctave, AOctavesToInitialize if octavesToInitialize else None, prng=prng)
-        self.octaveB.__init__(amplitudes, firstOctave, BOctavesToInitialize if octavesToInitialize else None, prng=prng)
-        if isinstance(amplitudes, tuple): amplitudes = max(i for i in range(len(amplitudes)) if amplitudes[i]) - min(i for i in range(len(amplitudes)) if amplitudes[i]) + 1
+        if isinstance(amplitudes, tuple):
+            assert not isinstance(prng, Random)
+            self.octaveA.__init__(amplitudes, firstOctave, AOctavesToInitialize if octavesToInitialize else None, prng=prng)
+            self.octaveB.__init__(amplitudes, firstOctave, BOctavesToInitialize if octavesToInitialize else None, prng=prng)
+            amplitudes = max(i for i in range(len(amplitudes)) if amplitudes[i]) - min(i for i in range(len(amplitudes)) if amplitudes[i]) + 1
+        else: # isinstance(amplitudes, int)
+            assert not isinstance(prng, Xoroshiro)
+            self.octaveA.__init__(amplitudes, firstOctave, AOctavesToInitialize if octavesToInitialize else None, prng=prng)
+            self.octaveB.__init__(amplitudes, firstOctave, BOctavesToInitialize if octavesToInitialize else None, prng=prng)
         self.amplitude = 5/3 * amplitudes/(amplitudes + 1)
 
-    @multimethod
-    def seed(self, prng: Random, firstOctave: int, *, beta: bool = False) -> None:
-        """Seeds the climate using java.util.Random without disturbing all other initialized constants.
-        Set `beta` to true if the emulated version is Beta 1.8-."""
-        self.octaveA.seed(prng, firstOctave, beta=beta)
-        self.octaveB.seed(prng, firstOctave, beta=beta)
+    @overload
+    def seed(self, prng: Random, firstOctave: int, *, beta: bool = False) -> None: ...
+
+    @overload
+    def seed(self, prng: Xoroshiro, firstOctave: int, amplitudes: tuple[float, ...]) -> None: ...
+
+    # @multimethod
+    # def seed(self, prng: Random, firstOctave: int, *, beta: bool = False) -> None:
+    #     """Seeds the climate using java.util.Random without disturbing all other initialized constants.
+    #     Set `beta` to true if the emulated version is Beta 1.8-."""
+    #     self.octaveA.seed(prng, firstOctave, beta=beta)
+    #     self.octaveB.seed(prng, firstOctave, beta=beta)
     
-    @multimethod
-    def seed(self, prng: Xoroshiro, amplitudes: tuple[float, ...], firstOctave: int) -> None:
+    # @multimethod
+    # def seed(self, prng: Xoroshiro, amplitudes: tuple[float, ...], firstOctave: int) -> None:
+    #     """Seeds the climate using xoroshiro128++ without disturbing all other initialized constants."""
+    #     self.octaveA.seed(prng, amplitudes, firstOctave)
+    #     self.octaveB.seed(prng, amplitudes, firstOctave)
+    @overload
+    def seed(self, prng: Random, firstOctave: int, *, beta: bool = False) -> None: ...
+
+    @overload
+    def seed(self, prng: Xoroshiro, firstOctave: int, amplitudes: tuple[float, ...], *, beta: bool = False) -> None: ...
+
+    def seed(self, prng: Random | Xoroshiro, firstOctave: int, amplitudes: tuple[float, ...] | None = None, *, beta: bool = False) -> None:
         """Seeds the climate using xoroshiro128++ without disturbing all other initialized constants."""
-        self.octaveA.seed(prng, amplitudes, firstOctave)
-        self.octaveB.seed(prng, amplitudes, firstOctave)
+        if isinstance(prng, Xoroshiro):
+            assert isinstance(amplitudes, tuple)
+            self.octaveA.seed(prng, firstOctave, amplitudes)
+            self.octaveB.seed(prng, firstOctave, amplitudes)
+        elif not beta:
+            self.octaveA.seed(prng, firstOctave, beta=False)
+            self.octaveB.seed(prng, firstOctave, beta=False)
+        else:
+            self.octaveA.seed(prng, beta=True)
+            self.octaveB.seed(prng, beta=True)
 
     def sample(self, position: Position) -> float:
         """Samples the Perlin Noise octave at a 3D position."""
