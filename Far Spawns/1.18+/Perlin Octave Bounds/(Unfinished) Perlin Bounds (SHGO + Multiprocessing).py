@@ -37,6 +37,7 @@ HIGHER_PRECISION_EPSILON = 0
 from multiprocessing import Lock, Pool, Value
 from numpy import format_float_positional, ndarray
 from scipy.optimize import shgo
+from ....Pybiomes import lerp, indexedLerp
 
 # Standardizes MODE as lowercase
 MODE = MODE.lower()
@@ -44,32 +45,6 @@ threshold = Value('d', lock=True)
 filelock = Lock()
 file = open(FILEPATH, "w")
 threshold.value = INIT_THRESHOLD
-
-def lerp(weight: float, a: float, b: float) -> float:
-    """Copy of the linear interpolation function from Cubiomes. `weight` must be in the range [0.0,1.0)."""
-    # if weight < 0 or weight >= 1: raise ValueError("lerp: weight must be in the range [0,1).")
-    return a + weight * (b - a)
-
-def indexedLerp(index: int, a: float, b: float, c: float) -> float:
-    """Reduced copy of the indexed linear interpolation function from Cubiomes. `index` must be an integer in [0,12).
-    
-    The real function moduloes `index` by 16 and thus has cases for 12, 13, 14, and 15 as well,
-    but in reality those are duplicates of already-existing cases, and since we are hardcoding
-    which indices get sent to indexedLerp to begin with, those cases and the modulo have been removed."""
-    match index:
-        case 0: return a + b
-        case 1: return -a + b
-        case 2: return a - b
-        case 3: return -a - b
-        case 4: return a + c
-        case 5: return -a + c
-        case 6: return a - c
-        case 7: return -a - c
-        case 8: return b + c
-        case 9: return -b + c
-        case 10: return b - c
-        case 11: return -b - c
-        case _: raise ValueError("indexedLerp: index must be in the range [0,12).")
 
 def isBetter(old: float, new: float, epsilon: float = 0) -> bool:
     """Compares `old` and `new` based on `MODE` and returns whether `new` is "better" or not.
@@ -102,7 +77,7 @@ INDEXED_LERP_DUPLICATE_CASES: dict[int, list[int]] = {
     11: [11, 15]
 }
 
-def samplePerlin(x: ndarray | list[float, float, float], i1: int, i2: int, i3: int, i4: int, i5: int, i6: int, i7: int, i8: int) -> float:
+def samplePerlin(x: ndarray | list[float], i1: int, i2: int, i3: int, i4: int, i5: int, i6: int, i7: int, i8: int) -> float:
     """Modified copy of the samplePerlin function from Cubiomes.
     
     It accepts a list `x` of three floats in the range [0,1), and a tuple `Is` of eight integer indices in the range [0,12)
@@ -110,14 +85,14 @@ def samplePerlin(x: ndarray | list[float, float, float], i1: int, i2: int, i3: i
     and the Perlin octave's d-array, but this way we can model its behavior if a particular set of indices
     were to have been chosen by that."""
     t1 = x[0]**3 * (x[0] * (x[0] * 6 - 15) + 10)
-    l1 = lerp(t1, indexedLerp(i1, x[0], x[1], x[2]), indexedLerp(i2, x[0]-1, x[1], x[2]))
-    l3 = lerp(t1, indexedLerp(i3, x[0], x[1]-1, x[2]), indexedLerp(i4, x[0]-1, x[1]-1, x[2]))
-    l5 = lerp(t1, indexedLerp(i5, x[0], x[1], x[2]-1), indexedLerp(i6, x[0]-1, x[1], x[2]-1))
-    l7 = lerp(t1, indexedLerp(i7, x[0], x[1]-1, x[2]-1), indexedLerp(i8, x[0]-1, x[1]-1, x[2]-1))
+    l1 = lerp(indexedLerp(i1, x[0], x[1], x[2]), indexedLerp(i2, x[0]-1, x[1], x[2]), t1)
+    l3 = lerp(indexedLerp(i3, x[0], x[1]-1, x[2]), indexedLerp(i4, x[0]-1, x[1]-1, x[2]), t1)
+    l5 = lerp(indexedLerp(i5, x[0], x[1], x[2]-1), indexedLerp(i6, x[0]-1, x[1], x[2]-1), t1)
+    l7 = lerp(indexedLerp(i7, x[0], x[1]-1, x[2]-1), indexedLerp(i8, x[0]-1, x[1]-1, x[2]-1), t1)
     t2 = x[1]**3 * (x[1] * (x[1] * 6 - 15) + 10)
-    l1 = lerp(t2, l1, l3)
-    l5 = lerp(t2, l5, l7)
-    return lerp(x[2]**3 * (x[2] * (x[2] * 6 - 15) + 10), l1, l5)
+    l1 = lerp(l1, l3, t2)
+    l5 = lerp(l5, l7, t2)
+    return lerp(l1, l5, x[2]**3 * (x[2] * (x[2] * 6 - 15) + 10))
 
 def writePerlinMin(config: int) -> None:
     global file, filelock

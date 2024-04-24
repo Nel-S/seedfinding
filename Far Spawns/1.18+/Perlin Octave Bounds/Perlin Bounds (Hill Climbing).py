@@ -27,34 +27,10 @@ EPSILON = 0.00001
 
 # ---------------------------------------------------------------------------------
 from itertools import product
+from ....Pybiomes import lerp, indexedLerp
 
 # Standardizes MODE as lowercase
 MODE = MODE.lower()
-
-def lerp(weight: float, a: float, b: float) -> float:
-    """Copy of the linear interpolation function from Cubiomes. `weight` must be in the range [0.0,1.0)."""
-    return a + weight * (b - a)
-
-def indexedLerp(index: int, a: float, b: float, c: float) -> float:
-    """Reduced copy of the indexed linear interpolation function from Cubiomes. `index` must be an integer in [0,12).
-    
-    The real function moduloes `index` by 16 and thus has cases for 12, 13, 14, and 15 as well,
-    but in reality those are duplicates of already-existing cases, and since we are hardcoding
-    which indices get sent to indexedLerp to begin with we don't need to worry about those cases or the modulo."""
-    match index:
-        case 0: return a + b
-        case 1: return -a + b
-        case 2: return a - b
-        case 3: return -a - b
-        case 4: return a + c
-        case 5: return -a + c
-        case 6: return a - c
-        case 7: return -a - c
-        case 8: return b + c
-        case 9: return -b + c
-        case 10: return b - c
-        case 11: return -b - c
-        case _: raise ValueError("index must be in the range [0,12).")
 
 def isBetter(old: float, new: float, epsilon: float = 0) -> bool:
     """Compares `old` and `new` values based on `MODE` and returns if `new` is "better" or not.
@@ -96,14 +72,14 @@ def samplePerlin(a: float, b: float, c: float, i1: int, i2: int, i3: int, i4: in
     and the Perlin octave's d-array, but this way we can model its behavior if a particular set of indices
     were to be chosen by that."""
     t1 = a * a * a * (a * (a * 6 - 15) + 10)
-    l1 = lerp(t1, indexedLerp(i1, a, b, c), indexedLerp(i2, a-1, b, c))
-    l3 = lerp(t1, indexedLerp(i3, a, b-1, c), indexedLerp(i4, a-1, b-1, c))
-    l5 = lerp(t1, indexedLerp(i5, a, b, c-1), indexedLerp(i6, a-1, b, c-1))
-    l7 = lerp(t1, indexedLerp(i7, a, b-1, c-1), indexedLerp(i8, a-1, b-1, c-1))
+    l1 = lerp(indexedLerp(i1, a, b, c), indexedLerp(i2, a-1, b, c), t1)
+    l3 = lerp(indexedLerp(i3, a, b-1, c), indexedLerp(i4, a-1, b-1, c), t1)
+    l5 = lerp(indexedLerp(i5, a, b, c-1), indexedLerp(i6, a-1, b, c-1), t1)
+    l7 = lerp(indexedLerp(i7, a, b-1, c-1), indexedLerp(i8, a-1, b-1, c-1), t1)
     t2 = b * b * b * (b * (b * 6 - 15) + 10)
-    l1 = lerp(t2, l1, l3)
-    l5 = lerp(t2, l5, l7)
-    return lerp(c * c * c * (c * (c * 6 - 15) + 10), l1, l5)
+    l1 = lerp(l1, l3, t2)
+    l5 = lerp(l5, l7, t2)
+    return lerp(l1, l5, c * c * c * (c * (c * 6 - 15) + 10))
 
 # Iterates over all indices for the specified mode.
 #   (Syntax from https://stackoverflow.com/a/16384126 and https://stackoverflow.com/a/36908)
@@ -111,7 +87,7 @@ for i1, i2, i3, i4, i5, i6, i7, i8 in product(*IDEAL_INDICES[MODE]):
     # Begin with an initial state of (a, b, c) = (0.5, 0.5, 0.5) (the midpoint of all three ranges)
     state = [0.5]*3
     # Take the sample there to have a benchmark for the current combination
-    currentBestSample = samplePerlin(*state, i1, i2, i3, i4, i5, i6, i7, i8)
+    currentBestSample = samplePerlin(state[0], state[1], state[2], i1, i2, i3, i4, i5, i6, i7, i8)
     # This specifies how much displacement each value will undergo at a time on each iteration.
     #   It will be halved after every iteration, allowing us to gradually converge
     #   on the optimal a/b/c values.

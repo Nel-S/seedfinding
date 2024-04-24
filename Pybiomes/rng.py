@@ -1,162 +1,26 @@
-from math import trunc
-from typing import Literal, overload, Sequence
-
-# Bitlengths
-FOUR_BITS                     = 0xf
-EIGHT_BITS                    = 0xff
-SIXTEEN_BITS                  = 0xffff
-THIRTY_TWO_BITS               = 0xffffffff
-FORTY_EIGHT_BITS              = 0xffffffffffff
-SIXTY_FOUR_BITS               = 0xffffffffffffffff
-ONE_HUNDRED_TWENTY_EIGHT_BITS = 0xffffffffffffffffffffffffffffffff
-FLOAT_LENGTH                  = 0x1000000
-DOUBLE_LENGTH                 = 0x20000000000000
-
-# Might convert into classes for the different-width integers
-
-def toSigned(n: int, *, width: int = 64) -> int:
-    """Returns the signed `width`-bit integer equivalent of `n`. `width` must be positive.
-    Logic courtesy of https://graphics.stanford.edu/~seander/bithacks.html#VariableSignExtend."""
-    n &= (1 << width) - 1
-    minInt = 1 << (width - 1)
-    return (n ^ minInt) - minInt
-
-def toUnsigned(n: int, *, width: int = 64) -> int:
-    """Returns the unsigned `width`-bit integer equivalent of `n`. `width` must be positive."""
-    return n & ((1 << width) - 1)
-
-def rotl(n: int, bits: int, *, width: int = 64) -> int:
-    """Returns the unsigned left [circular rotation](https://en.wikipedia.org/wiki/Circular_shift) of `n`, as a `width`-bit integer, by `bits` bits.
-    A right circular rotation can be done by calling this with a negative value for `bits` instead.
-    `width` must be positive."""
-    window = (1 << width) - 1
-    n &= window
-    bits %= width
-    return ((n << bits) | (n >> (width - bits))) & window
-
-def lerp(lowerBound: float, upperBound: float, weight: float, *, clamp: bool = True) -> float:
-    """Returns the result of one round of [linear interpolation](https://en.wikipedia.org/wiki/Linear_interpolation).
-    If `weight` is in the range [0,1], or if `clamp` is true, the returned value will be in the range [`lowerBound`, `upperBound`]."""
-    if clamp:
-        if weight <= 0: return lowerBound
-        if weight >= 1: return upperBound
-    return lowerBound + weight*(upperBound - lowerBound)
-
-def doubleLerp(lowerBound1: float, upperBound1: float, lowerBound2: float, upperBound2: float, weight1: float, weight2: float, *, clamp: bool = True) -> float:
-    """Returns the result of two nested rounds of linear interpolation."""
-    # TODO: Figure out range
-    return lerp(lerp(lowerBound1, upperBound1, weight1, clamp=clamp), lerp(lowerBound2, upperBound2, weight1, clamp=clamp), weight2, clamp=clamp)
-
-def tripleLerp(lowerBound1: float, upperBound1: float, lowerBound2: float, upperBound2: float, lowerBound3: float, upperBound3: float, lowerBound4: float, upperBound4: float, weight1: float, weight2: float, weight3: float, *, clamp: bool = True) -> float:
-    """Returns the result of three nested rounds of linear interpolation."""
-    # TODO: Figure out range
-    return lerp(doubleLerp(lowerBound1, upperBound1, lowerBound2, upperBound2, weight1, weight2, clamp=clamp), doubleLerp(lowerBound3, upperBound3, lowerBound4, upperBound4, weight1, weight2, clamp=clamp), weight3, clamp=clamp)
-
-def indexedLerp(index: int, a: float, b: float, c: float) -> float:
-    """Returns two of the three values `a`, `b`, or `c` added to or subtracted from one another, depending on the value of `index`."""
-    match index & FOUR_BITS:
-        case 0 | 12 : return  a + b
-        case 1 | 14 : return -a + b
-        case 2      : return  a - b
-        case 3      : return -a - b
-        case 4      : return  a + c
-        case 5      : return -a + c
-        case 6      : return  a - c
-        case 7      : return -a - c
-        case 8      : return  b + c
-        case 9 | 13 : return -b + c
-        case 10     : return  b - c
-        case 11 | 15: return -b - c
-    return 0
-
-def modularInverse(x: int, modulo: int, *, width=64) -> int:
-    """Returns the modulo inverse `x`^-1 (mod `modulo`)--equivalently the value p such that `x`*p (mod `modulo`) = 1--or 0 if no such inverse exists."""
-    if toSigned(modulo, width=width) <= 1: return 0
-    originalModulo, a, b = modulo, 0, 1
-    x = toUnsigned(x, width=width)
-    while toSigned(x, width=width) > 1:
-        if not modulo: return 0
-        temp = a
-        a = b - a*trunc(x/modulo)
-        b = temp
-        temp = modulo
-        modulo = x % modulo
-        x = temp
-    if toSigned(b, width=width) < 0: b += originalModulo
-    return toUnsigned(b, width=width)
-
-
-class Position:
-    """A two-dimensional or three-dimensional position in space. Unlike `Coordinate`, its values can be decimals.
-    `y` defaults to 0 unless explicitly specified.
-    All functions in this library using this will explicitly specify in their description if all three dimensions will be used, or if the object will be taken as a 2D point (meaning y will be ignored)."""
-    x: int | float
-    y: int | float
-    z: int | float
-    @overload
-    def __init__(self, x: int | float = 0, z: int | float = 0, *, y: int | float = 0) -> None: ...
-
-    @overload
-    def __init__(self, x: Sequence[int | float]) -> None: ...
-
-    def __init__(self, x: int | float | Sequence[int | float] = 0, z: int | float = 0, *, y: int | float = 0) -> None:
-        self.x, self.y, self.z = ((x[0], 0, x[1]) if len(x) < 3 else (x[0], x[1], x[2])) if isinstance(x, Sequence) else (x, y, z)
-
-class Coordinate:
-    """A two-dimensional or three-dimensional coordinate. Unlike `Position`, its values must be integers.
-    `y` defaults to 0 unless explicitly specified.
-    All functions in this library using this will explicitly specify in their description if all three dimensions will be used, or if the object will be taken as a 2D point (meaning y will be ignored)."""
-    x: int
-    y: int
-    z: int
-    @overload
-    def __init__(self, x: int = 0, z: int = 0, *, y: int = 0) -> None: ...
-
-    @overload
-    def __init__(self, x: Sequence[int]) -> None: ...
-
-    def __init__(self, x: int | Sequence[int] = 0, z: int = 0, *, y: int = 0) -> None:
-        self.x, self.y, self.z = ((x[0], 0, x[1]) if len(x) < 3 else (x[0], x[1], x[2])) if isinstance(x, Sequence) else (x, y, z)
-
-class Range(Coordinate):
-    """A three-dimensional range of coordinates.
-    (x, y, z) is the lower-Northwest corner of the region, and the region extends to (x + length - 1, y + height - 1, z + width - 1).
-    `y` and `height` default to 0 unless explicitly specified.
-    All functions in this library using this will explicitly specify in their description if all three dimensions will be used, or if the object will be taken as a 2D area (meaning y and height will be ignored)."""
-    length: int
-    width: int
-    height: int
-    @overload
-    def __init__(self, x: int = 0, z: int = 0, length: int = 0, width: int = 0, *, y: int = 0, height: int = 0) -> None: ...
-
-    @overload
-    def __init__(self, x: Sequence[int]) -> None: ...
-
-    def __init__(self, x: int | Sequence[int] = 0, z: int = 0, length: int = 0, width: int = 0, *, y: int = 0, height: int = 0) -> None:
-        if isinstance(x, Sequence):
-            super().__init__(x[0], x[1], y=0 if len(x) < 5 else x[4])
-            self.length, self.width, self.height = x[2], x[3], 0 if len(x) < 6 else x[5]
-        else:
-            super().__init__(x, z, y=y)
-            self.length, self.width, self.height = length, width, height
-
+from .base import (
+    overload, Sequence,
+    THIRTY_TWO_BITS, FORTY_EIGHT_BITS, SIXTY_FOUR_BITS, ONE_HUNDRED_TWENTY_EIGHT_BITS, FLOAT_LENGTH, DOUBLE_LENGTH,
+    toSigned, toUnsigned, rotateLeft,
+    Coordinate
+)
 
 class Random:
     """Implementation of [java.util.Random](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html) (which uses a [linear congruential generator](https://en.wikipedia.org/wiki/Linear_congruential_generator) with a 2^48 state space). This is most commonly used for pre-Java 1.18 mechanics, potential structure positions, and a world's Nether and End."""
     state: int
-    def __init__(self, seed: int, *, asState: bool = False) -> None:
+    def __init__(self, seed: int, *, asState: bool = False) -> None: # setSeed()
         """Creates and initializes an LCG with the seed `seed`.
         If `asState` is True, the LCG will instead set `seed` directly as the internal state without first converting it."""
         self.state = (seed ^ (0x5deece66d*(1 - asState))) & FORTY_EIGHT_BITS
 
-    def _next(self, bits: int) -> int:
+    def _next(self, bits: int) -> int: # next()
         # TODO: Finish description
         """Advances the LCG's internal state once, returning a signed pseudorandom min(`bits`, 32)-bit integer in the process."""
         bits &= THIRTY_TWO_BITS
         self.state = (self.state * 0x5deece66d + 0xb) & FORTY_EIGHT_BITS
         return toSigned(self.state >> (48 - bits), width=32)
 
-    def nextInt(self, n: int) -> int:
+    def nextInt(self, n: int) -> int: # nextInt()
         """Returns a pseudorandom integer in the range [0, min(`n`, 2^32)-1]. The LCG's internal state will be advanced almost always once, but rarely multiple times (with probability (2^32 mod `n`)/2^32)."""
         n &= THIRTY_TWO_BITS
         if not n & n - 1: return ((n * self._next(31)) >> 31) & THIRTY_TWO_BITS
@@ -166,20 +30,20 @@ class Random:
             if toSigned(bits - val + n, width=32) < 1: break
         return val
     
-    def nextLong(self) -> int:
+    def nextLong(self) -> int: # nextLong()
         """Returns a pseudorandom integer in the range [-2^63, 2^63 - 1], advancing the LCG's internal state twice in the process.
         Since the LCG uses a 48-bit state, only 2^48 integers within the aforementioned range are actually reachable."""
         return ((self._next(32) << 32) + self._next(32)) & SIXTY_FOUR_BITS
 
-    def nextFloat(self) -> float:
+    def nextFloat(self) -> float: # nextFloat()
         """Returns a pseudorandom single-precision float in the range [0, 1), advancing the LCG's internal state once in the process."""
         return self._next(24) / FLOAT_LENGTH
     
-    def nextDouble(self) -> float:
+    def nextDouble(self) -> float: # nextDouble()
         """Returns a pseudorandom double-precision float in the range [0, 1), advancing the LCG's internal state twice in the process."""
         return ((self._next(26) << 27) + self._next(27)) / DOUBLE_LENGTH
     
-    def skipN(self, n: int) -> None:
+    def skipN(self, n: int) -> None: # skipNextN()
         """Advances the LCG's internal state `n` times if `n` is non-negative, or steps it back `n` times if `n` is negative."""
         m, a = 1, 0
         im, ia = (0x5deece66d, 0xb) if n >= 0 else (0xdfe05bcb1365, 0x615c0e462aa9)
@@ -203,7 +67,7 @@ class Xoroshiro:
     lo: int
     hi: int
     @overload
-    def __init__(self, seedOrLo: int) -> None: ...
+    def __init__(self, seedOrLo: int) -> None: ... # xSetSeed()
 
     @overload
     def __init__(self, seedOrLo: int, hi: int) -> None: ...
@@ -235,24 +99,25 @@ class Xoroshiro:
     
     def _prev(self) -> None:
         """Steps the generator's internal state backwards once."""
-        loXorHi = rotl(self.hi, 36)
-        self.lo = rotl(self.lo ^ loXorHi ^ (loXorHi << 21), 15)
+        loXorHi = rotateLeft(self.hi, 36)
+        self.lo = rotateLeft(self.lo ^ loXorHi ^ (loXorHi << 21), 15)
         self.hi = loXorHi ^ self.lo
 
     def _next(self) -> None:
         """Advances the generator's internal state once."""
         loXorHi = self.lo ^ self.hi
-        self.lo = (rotl(self.lo, 49) ^ loXorHi ^ (loXorHi << 21)) & SIXTY_FOUR_BITS
-        self.hi = rotl(loXorHi, 28)
+        self.lo = (rotateLeft(self.lo, 49) ^ loXorHi ^ (loXorHi << 21)) & SIXTY_FOUR_BITS
+        self.hi = rotateLeft(loXorHi, 28)
 
-    def nextLong(self) -> int:
+    def nextLong(self) -> int: # xNextLong()
         """Returns a pseudorandom integer in the range [-2^63, 2^63 - 1], advancing the generator's internal state once in the process."""
-        n = toSigned(rotl(self.lo + self.hi, 17) + self.lo)
+        n = toSigned(rotateLeft(self.lo + self.hi, 17) + self.lo)
         self._next()
         return n
     
-    def nextInt(self, n: int) -> int:
+    def nextInt(self, n: int) -> int: # xNextInt()
         """Returns a pseudorandom integer in the range [0, min(`n`, 2^32)-1].The generator's internal state is almost always advanced once in the process, but rarely multiples times."""
+        # TODO: Check--2^32 or 2^31?
         n &= THIRTY_TWO_BITS
         r = ((self.nextLong() & THIRTY_TWO_BITS) * n) & SIXTY_FOUR_BITS
         # I don't believe that code will ever run, but keeping just in case.
@@ -264,18 +129,18 @@ class Xoroshiro:
         """Returns a pseudorandom single-precision float in the range [0,1), advancing the internal state once in the process."""
         return (self.nextLong() >> 40) / FLOAT_LENGTH
 
-    def nextDouble(self) -> float:
+    def nextDouble(self) -> float: # xNextDouble()
         """Returns a pseudorandom double-precision float in the range [0,1), advancing the internal state once in the process."""
         return (self.nextLong() >> 11) / DOUBLE_LENGTH
     
-    def skipN(self, n: int) -> None:
+    def skipN(self, n: int) -> None: # xSkipN()
         """Advances the generator's internal state `n` times if `n` is non-negative, or steps it back `n` times if `n` is negative."""
         if n >= 0:
             for _ in range(n & ONE_HUNDRED_TWENTY_EIGHT_BITS): self._next()
         else:
             for _ in range(n & ONE_HUNDRED_TWENTY_EIGHT_BITS): self._prev()
 
-    def nextLongJava(self) -> int:
+    def nextLongJava(self) -> int: # xNextLongJ()
         """Returns a pseudorandom integer in the range [-2^63, 2^63 - 1], advancing the generator's internal state twice in the process."""
         return toSigned(((self.nextLong() & THIRTY_TWO_BITS) << 32) + (self.nextLong() & THIRTY_TWO_BITS))
     
@@ -294,26 +159,26 @@ class Xoroshiro:
 class SeedHelper:
     """A 64-bit PRNG used in Java 1.17- chunk generation."""
     @classmethod
-    def getLayerSalt(cls, salt: int) -> int:
+    def getLayerSalt(cls, salt: int) -> int: # getLayerSalt()
         """Returns a layer's salt given its initial `salt`.
         This output is then fed to `getStartSalt()` and `getStartSeed()`."""
         return cls.getStartSalt(salt, salt)
     
     @classmethod
-    def getStartSalt(cls, worldseed: int, layerSalt: int) -> int:
+    def getStartSalt(cls, worldseed: int, layerSalt: int) -> int: # getStartSalt()
         """Returns a starting salt given a worldseed and a layer salt (see `getLayerSalt()`).
         Not to be confused with `getStartSeed()`."""
         return cls.stepSeed(cls.stepSeed(cls.stepSeed(worldseed, layerSalt), layerSalt), layerSalt)
     
     @classmethod
-    def getStartSeed(cls, worldseed: int, layerSalt: int) -> int:
+    def getStartSeed(cls, worldseed: int, layerSalt: int) -> int: # getStartSeed()
         """Returns a starting seed given a worldseed and a layer salt (see `getLayerSalt()`).
         This output is then fed to `getChunkSeed()`."""
         return cls.stepSeed(cls.getStartSalt(worldseed, layerSalt), 0)
 
     @overload
     @classmethod
-    def getChunkSeed(cls, seed: int, coordinate: Coordinate) -> int: ...
+    def getChunkSeed(cls, seed: int, coordinate: Coordinate) -> int: ... # getChunkSeed()
 
     @overload
     @classmethod
@@ -329,7 +194,7 @@ class SeedHelper:
 
     @overload
     @classmethod
-    def firstInt(cls, seed: int, mod: int) -> int: ...
+    def firstInt(cls, seed: int, mod: int) -> int: ... # mcFirstInt()
 
     @overload
     @classmethod
@@ -349,7 +214,7 @@ class SeedHelper:
     
     @overload
     @classmethod
-    def firstIntIsZero(cls, seed: int, mod: int) -> bool: ...
+    def firstIntIsZero(cls, seed: int, mod: int) -> bool: ... # mcFirstIntIsZero()
 
     @overload
     @classmethod
@@ -363,7 +228,7 @@ class SeedHelper:
         return not ((((seed if coordinate is None or salt is None else cls.getChunkSeed(seed, coordinate, salt)) >> 24) % (mod & THIRTY_TWO_BITS)) & THIRTY_TWO_BITS)
     
     @staticmethod
-    def stepSeed(chunkSeed: int, startSalt: int, *, width: int = 64) -> int:
+    def stepSeed(chunkSeed: int, startSalt: int, *, width: int = 64) -> int: # mcStepSeed()
         """Advances the PRNG once.
         To initialize the PRNG first, see `firstInt()`."""
         return toUnsigned(chunkSeed * (chunkSeed * 6364136223846793005 + 1442695040888963407) + startSalt, width=width)

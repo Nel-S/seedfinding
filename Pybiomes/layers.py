@@ -1,5 +1,7 @@
-from noise import *
-from biomes import *
+from .base import *
+from .rng import *
+from .noise import *
+from .biomes import *
 
 class BiomeTemperatureCategory(IntEnum):
     OCEANIC = 0

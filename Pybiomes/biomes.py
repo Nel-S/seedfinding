@@ -1,39 +1,6 @@
-from enum import IntEnum
+from .base import IntEnum, Dimension, Version
 
-class Version(IntEnum):
-	V_B1_7 = V_BETA_1_7 = 0
-	V_B1_8 = V_BETA_1_8 = 1
-	V1_0  = V1_0_0  = 2
-	V1_1  = V1_1_0  = 3
-	V1_2  = V1_2_5  = 4
-	V1_3  = V1_3_2  = 5
-	V1_4  = V1_4_7  = 6
-	V1_5  = V1_5_2  = 7
-	V1_6  = V1_6_4  = 8
-	V1_7  = V1_7_10 = 9
-	V1_8  = V1_8_9  = 10
-	V1_9  = V1_9_4  = 11
-	V1_10 = V1_10_2 = 12
-	V1_11 = V1_11_2 = 13
-	V1_12 = V1_12_2 = 14
-	V1_13 = V1_13_2 = 15
-	V1_14 = V1_14_4 = 16
-	V1_15 = V1_15_2 = 17
-	V1_16_1 = 18
-	V1_16 = V1_16_5 = 19
-	V1_17 = V1_17_1 = 20
-	V1_18 = V1_18_2 = 21
-	V1_19_2 = 22
-	V1_19 = V1_19_4 = 23
-	V1_20 = 24
-	NEWEST = V1_20
-
-class Dimension(IntEnum):
-	NETHER    = -1
-	OVERWORLD =  0
-	END       =  1
-
-class Biome(IntEnum):
+class Biome(IntEnum): # biomes.BiomeID
 	OCEAN = 0
 	PLAINS = 1
 	DESERT = 2
@@ -129,7 +96,7 @@ class Biome(IntEnum):
 	CHERRY_GROVE = 185
 	
 	@classmethod
-	def existsInVersion(cls, biome: "Biome", version: Version) -> bool:
+	def existsInVersion(cls, biome: "Biome", version: Version) -> bool: # layers.biomeExists()
 		"""Returns whether a specified `biome` existed in a specified `version`."""
 		match biome:
 			# Beta 1.7
@@ -172,7 +139,7 @@ class Biome(IntEnum):
 		return False
 
 	@classmethod
-	def isOverworld(cls, biome: "Biome", version: Version) -> bool:
+	def isOverworld(cls, biome: "Biome", version: Version) -> bool: # layers.isOverworld()
 		# TODO: Verify description
 		"""Returns whether a specified `version` classified a specified `biome` as existing in the Overworld. Note that this is from the viewpoint of processes such as version-specific stronghold and mineshaft generation, so this does not return the same results as `getDimension(biome)`."""
 		if not cls.existsInVersion(biome, version): return False
@@ -185,14 +152,9 @@ class Biome(IntEnum):
 		return True
 
 	@classmethod
-	def getDimension(cls, biome: "Biome") -> Dimension | None:
+	def getDimension(cls, biome: "Biome") -> Dimension | None: # layers.getDimension()
 		"""Returns the dimension a specified `biome` exists within."""
-		# match biome:
-		# 	# TODO: Create pull request for Cubiomes for UNDEFINED case
-		# 	case None: return None
-		# 	case cls.BASALT_DELTAS | cls.CRIMSON_FOREST | cls.NETHER_WASTES | cls.SOUL_SAND_VALLEY | cls.WARPED_FOREST: return Dimension.NETHER
-		# 	case cls.END_BARRENS | cls.END_HIGHLANDS | cls.END_MIDLANDS | cls.SMALL_END_ISLANDS | cls.THE_END: return Dimension.END
-		# 	case _: return Dimension.OVERWORLD
+		# TODO: Create pull request for Cubiomes for UNDEFINED case
 		match cls.getCategory(biome):
 			case None: return None
 			case cls.NETHER_WASTES: return Dimension.NETHER
@@ -200,7 +162,7 @@ class Biome(IntEnum):
 		return Dimension.OVERWORLD
 
 	@classmethod
-	def getMutatedBiome(cls, biome: "Biome", version: Version | None = None) -> "Biome | None":
+	def getMutatedBiome(cls, biome: "Biome", version: Version | None = None) -> "Biome | None": # layers.getMutated()
 		"""Returns a `biome`'s corresponding mutation. Note that this feature only existed between versions 1.7-1.17 (inclusive)."""
 		match biome:
 			case cls.BADLANDS: return cls.ERODED_BADLANDS
@@ -229,7 +191,7 @@ class Biome(IntEnum):
 
 	# TODO: Unfinished
 	@classmethod
-	def getCategory(cls, biome: "Biome", version: Version | None = None) -> "Biome | None":
+	def getCategory(cls, biome: "Biome", version: Version | None = None) -> "Biome | None": # layers.getCategory()
 		"""Returns a `biome`'s general biome category."""
 		match biome:
 			case cls.BADLANDS | cls.ERODED_BADLANDS | cls.MODIFIED_BADLANDS_PLATEAU | cls.MODIFIED_WOODED_BADLANDS_PLATEAU: return cls.MESA
@@ -254,33 +216,33 @@ class Biome(IntEnum):
 		return None
 
 	@classmethod
-	def areSimilar(cls, biome1: "Biome", biome2: "Biome") -> bool:
+	def areSimilar(cls, biome1: "Biome", biome2: "Biome") -> bool: # layers.areSimilar()
 		"""Returns whether `biome1` and `biome2` are considered similar in terms of their categories."""
 		# Badlands Plateau and Wooded Badlands are only similar to each other, which is the behavior exhibited by any 1.16+ version.
 		return cls.getCategory(biome1, Version.NEWEST) == cls.getCategory(biome2, Version.NEWEST)
 	
 	@classmethod
-	def isMesaBiome(cls, biome: "Biome") -> bool:
+	def isMesaBiome(cls, biome: "Biome") -> bool: # layers.isMesa()
 		"""Returns whether `biome` qualifies as a mesa biome."""
 		# Badlands Plateau and Wooded Badlands qualify, which is the behavior exhibited by any 1.15- or an unspecified version.
 		return cls.getCategory(biome) == cls.MESA
 	
 	@classmethod
-	def isShallowOceanBiome(cls, biome: "Biome") -> bool:
+	def isShallowOceanBiome(cls, biome: "Biome") -> bool: # layers.isShallowOcean()
 		"""Returns whether `biome` qualifies as a shallow ocean biome."""
 		return biome in {cls.COLD_OCEAN, cls.FROZEN_OCEAN, cls.LUKEWARM_OCEAN, cls.OCEAN, cls.WARM_OCEAN}
 	
 	@classmethod
-	def isDeepOceanBiome(cls, biome: "Biome") -> bool:
+	def isDeepOceanBiome(cls, biome: "Biome") -> bool: # layers.isDeepOcean()
 		"""Returns whether `biome` qualifies as a deep ocean biome."""
 		return biome in {cls.DEEP_COLD_OCEAN, cls.DEEP_FROZEN_OCEAN, cls.DEEP_LUKEWARM_OCEAN, cls.DEEP_OCEAN, cls.DEEP_WARM_OCEAN}
 	
 	@classmethod
-	def isOceanBiome(cls, biome: "Biome") -> bool:
+	def isOceanBiome(cls, biome: "Biome") -> bool: # layers.isOceanic()
 		"""Returns whether `biome` qualifies as an ocean biome."""
 		return cls.getCategory(biome) == cls.OCEAN
 	
 	@classmethod
-	def isSnowyBiome(cls, biome: "Biome") -> bool:
+	def isSnowyBiome(cls, biome: "Biome") -> bool: # layers.isSnowy()
 		"""Returns whether `biome` qualifies as a snowy biome."""
 		return biome in {cls.FROZEN_OCEAN, cls.FROZEN_RIVER, cls.ICE_SPIKES, cls.SNOWY_BEACH, cls.SNOWY_MOUNTAINS, cls.SNOWY_TAIGA, cls.SNOWY_TAIGA_HILLS, cls.SNOWY_TAIGA_MOUNTAINS, cls.SNOWY_TUNDRA}
