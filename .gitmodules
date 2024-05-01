@@ -1,0 +1,6 @@
+[submodule "pybiomes"]
+	path = pybiomes
+	url = https://github.com/Nel-S/pybiomes
+[submodule "utilities"]
+	path = utilities
+	url = https://github.com/Nel-S/utilities
