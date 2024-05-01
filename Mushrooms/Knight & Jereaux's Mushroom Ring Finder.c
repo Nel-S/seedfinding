@@ -1,7 +1,7 @@
 #include "common.h"
 #include "Utilities/Climates.h"
-// #include "cubiomes/finders.c"
-// #include "cubiomes/biomenoise.c"
+// #include "utilities/cubiomes/finders.c"
+// #include "utilities/cubiomes/biomenoise.c"
 
 // const uint64_t GLOBAL_START_SEED = -230734003789;
 const uint64_t GLOBAL_START_SEED = 0;

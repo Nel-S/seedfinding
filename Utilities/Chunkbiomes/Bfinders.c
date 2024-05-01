@@ -1,4 +1,5 @@
 #include "Bfinders.h"
+#include <stdbool.h>
 #include <string.h>
 
 int getBedrockStructureConfig(const int structureType, const int mc, StructureConfig *sconf) {
@@ -8,6 +9,7 @@ int getBedrockStructureConfig(const int structureType, const int mc, StructureCo
     s_jungle_pyramid  = { 14357617, 32, 24, Jungle_Pyramid,   0,0},
     s_mansion         = { 10387319, 80, 60, Mansion,         STRUCT_TRIANGULAR,0},
     s_monument        = { 10387313, 32, 27, Monument,        STRUCT_TRIANGULAR,0},
+    s_outpost         = {165745296, 80, 56, Outpost,         STRUCT_TRIANGULAR,0},
     s_ruined_portal   = { 40552231, 40, 25, Ruined_Portal,   0,0},
     s_shipwreck_117   = {165745295, 10,  5, Shipwreck,       STRUCT_TRIANGULAR,0},
     s_shipwreck       = {165745295, 24, 20, Shipwreck,       0,0},
@@ -19,8 +21,8 @@ int getBedrockStructureConfig(const int structureType, const int mc, StructureCo
     s_fortress        = { 30084232, 30, 26, Fortress,        STRUCT_NETHER,0},
     s_ruined_portal_n = { 40552231, 25, 15, Ruined_Portal_N, STRUCT_NETHER,0},
     // End structures
-    s_end_city        = { 10387313, 20,  9, End_City,        STRUCT_END|STRUCT_TRIANGULAR,0},
-    s_unknown         = { 16842397,  4,  2, Feature,         STRUCT_TRIANGULAR,0} // Not sure which structure/feature this corresponds to
+    s_end_city        = { 10387313, 20,  9, End_City,        STRUCT_END|STRUCT_TRIANGULAR,0}
+    // s_unknown         = { 16842397,  4,  2, Feature,         STRUCT_TRIANGULAR,0} // Not sure which structure/feature this corresponds to
     ;
 
     // Chunkbase only goes back to Bedrock 1.14
@@ -39,6 +41,9 @@ int getBedrockStructureConfig(const int structureType, const int mc, StructureCo
         return mc >= MC_1_14;
     case Monument: // -
         *sconf = s_monument;
+        return mc >= MC_1_14;
+    case Outpost:
+        *sconf = s_outpost;
         return mc >= MC_1_14;
     case Ruined_Portal: // -
         *sconf = s_ruined_portal;
@@ -186,3 +191,27 @@ int getBedrockRavinePos(uint64_t seed, int x, int z, StructureVariant *ravine) {
     }
     return 0;
 }
+
+// Unfinished
+// int getBedrockStronghold(uint64_t seed) {
+//     static const double PI = 3.1415926535897932384626433;
+//     MersenneTwister mt;
+//     mSetSeed(&mt, seed);
+//     double i = 2*PI*mNextFloat(&mt);
+//     int j = 40 + mNextInt(&mt, 16);
+//     Pos f[3];
+//     for (int k = 0; k < 3; ++k) {
+
+//         bool found = false;
+//         int l = floor(j*cos(i));
+//         int m = floor(j*sin(i));
+//         int o = l - 8, p = m - 8;
+//         if (found) {
+//             i += 3*PI/5;
+//             j += 8;
+//         } else {
+//             i += PI/4;
+//             j += 4;
+//         }
+//     }
+// }

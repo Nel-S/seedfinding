@@ -27,7 +27,8 @@ EPSILON = 0.00001
 
 # ---------------------------------------------------------------------------------
 from itertools import product
-from ....Pybiomes import lerp, indexedLerp
+from ....pybiomes.src import lerp, indexedLerp
+# from pybiomes import lerp, indexedLerp
 
 # Standardizes MODE as lowercase
 MODE = MODE.lower()

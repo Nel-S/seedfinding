@@ -1,5 +1,5 @@
 #include "common.h"
-#include "cubiomes/finders.h"
+#include "utilities/cubiomes/finders.h"
 #include <math.h>
 
 const uint64_t BASE_STATES[] = {1459339358529, 5159848224617, 90311412211, 8062451346052};

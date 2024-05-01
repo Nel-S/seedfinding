@@ -1,0 +1,30 @@
+[build-system]
+requires = [
+    "setuptools >= 61.0",
+    "enum",
+    "math",
+    "twine >= 1.11.0",
+    "typing",
+    "wheel >= 0.31.0"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pybiomes"
+version = "0.1a"
+authors = [
+    {name="Nel. S.", email="75831544+Nel-S@users.noreply.github.com"},
+]
+description = "A port of the Cubiomes seedfinding library, by Cubitect et. al., to Python."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha"
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://github.com/Nel-S/pybiomes"
+Issues = "https://github.com/Nel-S/pybiomes/issues"

@@ -1,4 +1,4 @@
-#include "cubiomes/noise.h"
+#include "utilities/cubiomes/noise.h"
 #include <stdio.h>
 
 typedef struct {

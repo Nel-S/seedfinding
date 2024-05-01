@@ -37,7 +37,8 @@ HIGHER_PRECISION_EPSILON = 0
 from multiprocessing import Lock, Pool, Value
 from numpy import format_float_positional, ndarray
 from scipy.optimize import shgo
-from ....Pybiomes import lerp, indexedLerp
+from ....pybiomes.src import lerp, indexedLerp
+# from pybiomes import lerp, indexedLerp
 
 # Standardizes MODE as lowercase
 MODE = MODE.lower()
