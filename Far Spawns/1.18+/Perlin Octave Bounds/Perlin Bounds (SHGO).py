@@ -1,3 +1,5 @@
+from typing import Literal
+
 # This program finds the maximum/minimum sample generatable by a Perlin octave with an arbitrary set of indexedLerp indices.
 # 
 # Each entry outputted by this program lists:
@@ -13,25 +15,36 @@
 # The mode to search with ("max" or "min", case insensitive).
 #   "max"/"min" with IDEAL_INDICES_ONLY = True finds the maximum/minimum Perlin samples for the index combinations most ideal for maximum/minimum samples.
 #   "max"/"min" with IDEAL_INDICES_ONLY = False finds the maximum/minimum Perlin samples for all index combinations.
-MODE = "min"
-IDEAL_INDICES_ONLY = False
+MODE: str | Literal["max", "min"] = "min"
+IDEAL_INDICES_ONLY: bool = False
 # The initial threshold to begin with. Samples less than this (if "max") or greater than this (if "min") will be ignored.
 # threshold = -0.537489692875767
-threshold = float('inf')
+threshold: float = float('inf')
 # 
-UPDATE_THRESHOLD = False
-# The maximum difference a local min/max sample can have from the threshold and still be printed,
-#   to account for potential floating-point errors.
-EPSILON = 0
-HIGHER_PRECISION = True
+UPDATE_THRESHOLD: bool = False
+# The maximum difference a local min/max sample can have from the threshold and still be printed, to account for potential floating-point errors.
+SHGO_EPSILON: float = 0.001
+FINAL_EPSILON: float = 0
+HIGHER_PRECISION: bool = False
+MAX_NUMBER_OF_RESULTS: int | None = 1000
+FILEPATH: str | None = "perlinMins.txt"
 
 # ---------------------------------------------------------------------------------
-from csv import writer
 from itertools import product
 from numpy import format_float_positional, ndarray
 from scipy.optimize import shgo
-from ....pybiomes.src import lerp, indexedLerp
 # from pybiomes import lerp, indexedLerp
+# Horrific hack until I upload pybiomes as a formal package
+from os import chdir, getcwd
+from os.path import basename, join
+_currentDir = getcwd()
+match basename(_currentDir):
+    case "seedfinding": pass
+    case "Perlin Octave Bounds": chdir(join("..", "..", ".."))
+    case _: raise FileNotFoundError
+from pybiomes.src import lerp, indexedLerp
+if basename(_currentDir) != "seedfinding": chdir(_currentDir)
+del basename, chdir, getcwd, join, _currentDir
 
 # Standardizes MODE as lowercase
 MODE = MODE.lower()
@@ -67,7 +80,7 @@ INDEXED_LERP_DUPLICATE_CASES: dict[int, list[int]] = {
     11: [11, 15]
 }
 
-def samplePerlin(x: ndarray | list[float], i1: int, i2: int, i3: int, i4: int, i5: int, i6: int, i7: int, i8: int) -> float:
+def samplePerlin(x: ndarray | list[float], i1: int, i2: int, i3: int, i4: int, i5: int, i6: int, i7: int, i8: int, invertResult: bool = False) -> float:
     """Modified copy of the samplePerlin function from Cubiomes.
     
     It accepts a list `x` of three floats in the range [0,1), and a tuple `Is` of eight integer indices in the range [0,12)
@@ -82,17 +95,15 @@ def samplePerlin(x: ndarray | list[float], i1: int, i2: int, i3: int, i4: int, i
     t2 = x[1]**3 * (x[1] * (x[1] * 6 - 15) + 10)
     l1 = lerp(l1, l3, t2)
     l5 = lerp(l5, l7, t2)
-    return lerp(l1, l5, x[2]**3 * (x[2] * (x[2] * 6 - 15) + 10))
+    return (-1 if invertResult else 1)*lerp(l1, l5, x[2]**3 * (x[2] * (x[2] * 6 - 15) + 10))
 
-count = -1
-with open("perlinMins.csv", "w", newline='') as f:
-    fwriter = writer(f)
+# if FILEPATH is not None: f = open(FILEPATH, "w")
+with open(FILEPATH, "w") as f:
     # Iterates over all indices for the specified mode.
     #   (Syntax from https://stackoverflow.com/a/16384126 and https://stackoverflow.com/a/36908)
-    for i1, i2, i3, i4, i5, i6, i7, i8 in product(*INDICES[MODE]):
-        count += 1
+    for count, (i1, i2, i3, i4, i5, i6, i7, i8) in enumerate(product(*INDICES[MODE])):
         # First uses a SciPy global optimaztion algorithm to quickly find the minimum of the function.
-        result = shgo(samplePerlin, BOUNDS, args=(i1, i2, i3, i4, i5, i6, i7, i8))
+        result = shgo(samplePerlin, BOUNDS, args=(i1, i2, i3, i4, i5, i6, i7, i8, MODE == "max"), options={"maxiter": 5})
         # result = basinhopping(samplePerlin, [0.5]*3, stepsize=0.5, minimizer_kwargs={'args': (i1, i2, i3, i4, i5, i6, i7, i8)})
         # If that failed, print error message and continue to next case
         # if not result['success']:
@@ -100,7 +111,7 @@ with open("perlinMins.csv", "w", newline='') as f:
         #     continue
         state = list(result['x'])
         currentBestSample = samplePerlin(state, i1, i2, i3, i4, i5, i6, i7, i8)
-        if not isBetter(threshold, currentBestSample, 0.001): continue
+        if not isBetter(threshold, currentBestSample, SHGO_EPSILON): continue
 
         # Otherwise then manually converges using the values in that local area to achieve better precision
         # BUG: Extremely slow with certain octave configurations
@@ -170,13 +181,12 @@ with open("perlinMins.csv", "w", newline='') as f:
                 displacement /= 2
 
         # If the current sample is better than the specified threshold:
-        if isBetter(threshold, currentBestSample, EPSILON):
-            # successCount += 1
+        if isBetter(threshold, currentBestSample, FINAL_EPSILON):
             # Print the values
             # print(f"{currentBestSample} via {state}\t{INDEXED_LERP_DUPLICATE_CASES[i1] if i1 in INDEXED_LERP_DUPLICATE_CASES else i1} {INDEXED_LERP_DUPLICATE_CASES[i2] if i2 in INDEXED_LERP_DUPLICATE_CASES else i2} {INDEXED_LERP_DUPLICATE_CASES[i3] if i3 in INDEXED_LERP_DUPLICATE_CASES else i3} {INDEXED_LERP_DUPLICATE_CASES[i4] if i4 in INDEXED_LERP_DUPLICATE_CASES else i4} {INDEXED_LERP_DUPLICATE_CASES[i5] if i5 in INDEXED_LERP_DUPLICATE_CASES else i5} {INDEXED_LERP_DUPLICATE_CASES[i6] if i6 in INDEXED_LERP_DUPLICATE_CASES else i6} {INDEXED_LERP_DUPLICATE_CASES[i7] if i7 in INDEXED_LERP_DUPLICATE_CASES else i7} {INDEXED_LERP_DUPLICATE_CASES[i8] if i8 in INDEXED_LERP_DUPLICATE_CASES else i8}", flush=True)
             # print(f"{currentBestSample}\t{state}\t{i1} {i2} {i3} {i4} {i5} {i6} {i7} {i8}", flush=True)
-            fwriter.writerow([count, format_float_positional(currentBestSample, trim='-'), format_float_positional(state[0], trim='-'), format_float_positional(state[1], trim='-'), format_float_positional(state[2], trim='-')])
+            f.write(f"{count}\t{format_float_positional(currentBestSample, trim='-')}\t{format_float_positional(state[0], trim='-')}\t{format_float_positional(state[1], trim='-')}\t{format_float_positional(state[2], trim='-')}")
             # Then if we're concerned with the global minimums/maximums, and the current best sample actually is better than
             #   the threshold, update the threshold.
             if UPDATE_THRESHOLD and isBetter(threshold, currentBestSample): threshold = currentBestSample
-        if count >= 10000: break
+        if MAX_NUMBER_OF_RESULTS is not None and count >= MAX_NUMBER_OF_RESULTS: break

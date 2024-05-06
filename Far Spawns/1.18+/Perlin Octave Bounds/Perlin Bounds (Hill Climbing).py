@@ -1,3 +1,5 @@
+from typing import Literal
+
 # This program was used to find the maximum/minimum possible Perlin samples in Minecraft Java/Bedrock 1.18+ (+-1.0363538112118025...),
 #   and the configurations capable of generating them.
 # This can also be used to list the maximum/minimum sample generatable by any arbitrary set of indexedLerp indices.
@@ -15,20 +17,31 @@
 # The mode to search with ("max" or "min", case insensitive).
 #   "max"/"min" with GLOBAL = True finds the maximum/minimum Perlin samples across all index combinations.
 #   "max"/"min" with GLOBAL = False finds the maximum/minimum Perlin samples for each individual index combination.
-MODE = "max"
-GLOBAL = True
+MODE: str | Literal["max", "min"] = "max"
+GLOBAL: bool = True
 
 """Only relevant if GLOBAL = True:"""
 # The initial threshold to begin with. Samples less than this (if "max") or greater than this (if "min") will be ignored.
-threshold = 0
+threshold: float = 0
 # The maximum difference a local min/max sample can have from the global min/max sample and still be printed,
 #   to account for potential floating-point errors.
-EPSILON = 0.00001
+EPSILON: float = 0.00001
+MAX_NUMBER_OF_RESULTS: int | None = 1000
 
 # ---------------------------------------------------------------------------------
 from itertools import product
-from ....pybiomes.src import lerp, indexedLerp
 # from pybiomes import lerp, indexedLerp
+# Horrific hack until I can upload pybiomes as a formal package
+from os import chdir, getcwd
+from os.path import basename, join
+_currentDir = getcwd()
+match basename(_currentDir):
+    case "seedfinding": pass
+    case "Perlin Octave Bounds": chdir(join("..", "..", ".."))
+    case _: raise FileNotFoundError
+from pybiomes.src import lerp, indexedLerp
+if basename(_currentDir) != "seedfinding": chdir(_currentDir)
+del basename, chdir, getcwd, join, _currentDir
 
 # Standardizes MODE as lowercase
 MODE = MODE.lower()
@@ -84,7 +97,7 @@ def samplePerlin(a: float, b: float, c: float, i1: int, i2: int, i3: int, i4: in
 
 # Iterates over all indices for the specified mode.
 #   (Syntax from https://stackoverflow.com/a/16384126 and https://stackoverflow.com/a/36908)
-for i1, i2, i3, i4, i5, i6, i7, i8 in product(*IDEAL_INDICES[MODE]):
+for count, (i1, i2, i3, i4, i5, i6, i7, i8) in enumerate(product(*IDEAL_INDICES[MODE])):
     # Begin with an initial state of (a, b, c) = (0.5, 0.5, 0.5) (the midpoint of all three ranges)
     state = [0.5]*3
     # Take the sample there to have a benchmark for the current combination
@@ -162,3 +175,4 @@ for i1, i2, i3, i4, i5, i6, i7, i8 in product(*IDEAL_INDICES[MODE]):
         # Then if we're concerned with the global minimums/maximums, and the current best sample actually is better than
         #   the threshold, update the threshold.
         if GLOBAL and isBetter(threshold, currentBestSample): threshold = currentBestSample
+    if MAX_NUMBER_OF_RESULTS is not None and count >= MAX_NUMBER_OF_RESULTS: break

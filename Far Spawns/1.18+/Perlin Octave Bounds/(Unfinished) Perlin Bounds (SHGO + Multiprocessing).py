@@ -11,41 +11,52 @@
 
 from os import sep
 from os.path import join
+from typing import Literal
 
 # The mode to search with ("max" or "min", case insensitive).
 #   "max"/"min" with IDEAL_INDICES_ONLY = True finds the maximum/minimum Perlin samples for the index combinations most ideal for maximum/minimum samples.
 #   "max"/"min" with IDEAL_INDICES_ONLY = False finds the maximum/minimum Perlin samples for all index combinations.
-MODE = "min"
-IDEAL_INDICES_ONLY = False
-NUMBER_OF_PROCESSES = 4
+MODE: str | Literal["max", "min"] = "min"
+IDEAL_INDICES_ONLY: bool = False
+NUMBER_OF_PROCESSES: int = 4
 
 # The initial threshold to begin with. Samples less than this (if "max") or greater than this (if "min") will be ignored.
 # threshold = -0.537489692875767
-INIT_THRESHOLD = float('inf')
+INITIAL_THRESHOLD: float = float('inf')
 # 
-UPDATE_THRESHOLD = False
+UPDATE_THRESHOLD: bool = False
 # The maximum difference a local min/max sample can have from the threshold and still be printed,
 #   to account for potential floating-point errors.
 
-FILEPATH = join("C:" + sep, "perlinMins.txt")
-SHGO_EPSILON = 0.001
-HIGHER_PRECISION_MAX_ITERATIONS = 10000
-HIGHER_PRECISION_EPSILON = 0
+FILEPATH: str = join("C:" + sep, "perlinMins.txt")
+SHGO_EPSILON: float = 0.001
+HIGHER_PRECISION_MAX_ITERATIONS: int = 0
+HIGHER_PRECISION_EPSILON: float = 0.
 
 # ---------------------------------------------------------------------------------
 # from itertools import product
 from multiprocessing import Lock, Pool, Value
 from numpy import format_float_positional, ndarray
 from scipy.optimize import shgo
-from ....pybiomes.src import lerp, indexedLerp
 # from pybiomes import lerp, indexedLerp
+# Horrific hack until I upload pybiomes as a formal package
+from os import chdir, getcwd
+from os.path import basename, join
+_currentDir = getcwd()
+match basename(_currentDir):
+    case "seedfinding": pass
+    case "Perlin Octave Bounds": chdir(join("..", "..", ".."))
+    case _: raise FileNotFoundError
+from pybiomes.src import lerp, indexedLerp
+if basename(_currentDir) != "seedfinding": chdir(_currentDir)
+del basename, chdir, getcwd, join, _currentDir
 
 # Standardizes MODE as lowercase
 MODE = MODE.lower()
 threshold = Value('d', lock=True)
 filelock = Lock()
 file = open(FILEPATH, "w")
-threshold.value = INIT_THRESHOLD
+threshold.value = INITIAL_THRESHOLD
 
 def isBetter(old: float, new: float, epsilon: float = 0) -> bool:
     """Compares `old` and `new` based on `MODE` and returns whether `new` is "better" or not.
@@ -104,7 +115,7 @@ def writePerlinMin(config: int) -> None:
         configCopy //= 12
     i8, i7, i6, i5, i4, i3, i2, i1 = Is
     # First uses a SciPy global optimaztion algorithm to quickly find the minimum of the function.
-    result = shgo(samplePerlin, BOUNDS, args=(i1, i2, i3, i4, i5, i6, i7, i8))
+    result = shgo(samplePerlin, BOUNDS, args=(i1, i2, i3, i4, i5, i6, i7, i8), options={"maxiter": 5})
     # result = basinhopping(samplePerlin, [0.5]*3, stepsize=0.5, minimizer_kwargs={'args': (i1, i2, i3, i4, i5, i6, i7, i8)})
     # If that failed, print error message and continue to next case
     # if not result['success']:
