@@ -1,6 +1,6 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
-#include "common.h"
+#include "../../common.h"
 
 // Sets the seed to start at and the number of seeds to iterate over.
 const uint64_t GLOBAL_START_SEED = 154778801832;

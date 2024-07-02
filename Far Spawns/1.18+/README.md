@@ -11,14 +11,15 @@ In 1.18, Minecraft: Java Edition and Minecraft: Bedrock Edition switched to usin
 
 The [Forward Checker](./Forward%20Checker/) is usable for "small" ranges of seeds, and (excluding Jereaux's seeds) has been used to find almost all farthest-known spawnpoints below. However, the only true way to find the farthest spawnpoint in the entire seedspace would be by deriving worldseeds from their Perlin octaves. With regards to that, the maximum/minimum possible Perlin sample has been found to be &pm;1.0363538112118025; the next step involves creating a table of all Perlin octave configurations' possible ranges.
 
-| Criteria                                           | Current Farthest-known Spawnpoint from (0, 0) | Distance (blocks) | Seed                 | Discoverer |
-| -------------------------------------------------- | --------------------------------------------- | ----------------- | -------------------- | ---------- |
-| Java 1.18+ normal biomes, L2/Euclidean distance    | (-1343, -1136)                                | 1759.02           | 2242180942571        | NelS       |
-| Java 1.18+ normal biomes, L∞/Chebyshev distance    | x = -1728                                     | 1728              | 690455132394644      | Meox       |
-| Java 1.18+ Large Biomes, L2/Euclidean distance     | (2363, -356)                                  | 2389.67           | 6015757257           | Derm       |
-| Java 1.18+ Large Biomes, L∞/Chebyshev distance     | x = 2363                                      | 2363              | 6015757257           | Derm       |
-| Bedrock 1.18+ normal biomes, L2/Euclidean distance | (1515, 829)                                   | 1726.98           | 8514982786202962122  | Jereaux    |
-| Bedrock 1.18+ normal biomes, L∞/Chebyshev distance | x = 1716                                      | 1716              | -1942038948813007687 | Jereaux    |
+| Criteria                                                            | Current Farthest-known Spawnpoint from (0, 0) | Distance (blocks) | Seed                 | Discoverer |
+| ------------------------------------------------------------------- | --------------------------------------------- | ----------------- | -------------------- | ---------- |
+| Java 1.18+ normal biomes, L<sup>2</sup>/Euclidean distance          | (-1343, -1136)                                | 1759.02           | 2242180942571        | NelS       |
+| Java 1.18+ normal biomes, L<sup>&infin;</sup>/Chebyshev distance    | x = -1728                                     | 1728              | 690455132394644      | Meox       |
+| Java 1.18+ normal biomes, L<sup>-&infin;</sup> distance             | x = -1728                                     | 1728              | 690455132394644      | Meox       |
+| Java 1.18+ Large Biomes, L<sup>2</sup>/Euclidean distance           | (2363, -356)                                  | 2389.67           | 6015757257           | Derm       |
+| Java 1.18+ Large Biomes, L<sup>&infin;</sup>/Chebyshev distance     | x = 2363                                      | 2363              | 6015757257           | Derm       |
+| Bedrock 1.18+ normal biomes, L<sup>2</sup>/Euclidean distance       | (1515, 829)                                   | 1726.98           | 8514982786202962122  | Jereaux    |
+| Bedrock 1.18+ normal biomes, L<sup>&infin;</sup>/Chebyshev distance | x = 1716                                      | 1716              | -1942038948813007687 | Jereaux    |
 
 ## Contributors
 <table>
@@ -26,19 +27,19 @@ The [Forward Checker](./Forward%20Checker/) is usable for "small" ranges of seed
 		<tr> <th>Contributor</th> <th>First Seed in Checked Range</th> <th>Last Seed in Checked Range</th> <th>Total Seeds Checked</th> </tr>
 	</thead>
 	<tbody>
-		<tr> <td rowspan=6><b>Jereaux</b></td> <td>? (included 136139140363362)</td>                    <td>?</td> <td rowspan=6>6.109 trillion (Normal)</td> </tr>
-		<tr>                                           <td>-1942039172054938501</td> <td>-1942038920489576373</td>                                            </tr>
-		<tr>                                           <td>-2086446383076507923</td> <td>-2086442811344446008</td>                                            </tr>
-		<tr>                                            <td>8514982163198740964</td>  <td>8514982827054712191</td>                                            </tr>
-		<tr>                                           <td>-1519791477682421020</td> <td>-1519790283805697334</td>                                            </tr>
-		<tr>                                           <td>-7221474987810836822</td> <td>-7221474578187462918</td>                                            </tr>
+		<tr> <td rowspan=6><b>Jereaux</b></td> <td>? (included 136139140363362)</td> <td>?</td> <td rowspan=6>11.401 trillion (Normal)</td> </tr>
+		<tr>                                   <td>-1942039172054938501</td>         <td>-1942033628660909384</td>                          </tr>
+		<tr>                                   <td>-2086446383076507923</td>         <td>-2086442811344446008</td>                          </tr>
+		<tr>                                   <td>8514982163198740964</td>          <td>8514982827054712191</td>                           </tr>
+		<tr>                                   <td>-1519791477682421020</td>         <td>-1519790283805697334</td>                          </tr>
+		<tr>                                   <td>-7221474987810836822</td>         <td>-7221474578187462918</td>                          </tr>
 		<tr> <td rowspan=3><b>Meox</b></td> <td>215772259249 (48-bit)</td> <td>215773147572 (48-bit)</td> <td rowspan=3>2.871 trillion (Normal)</td> </tr>
-		<tr>                                        <td>3366025373172</td>         <td>3426926457792</td>                                            </tr>
-		<tr>                                      <td>690000000000000</td>       <td>692752814164988</td>                                            </tr>
+		<tr>                                <td>3366025373172</td>         <td>3426926457792</td>                                                    </tr>
+		<tr>                                <td>690000000000000</td>       <td>692752814164988</td>                                                  </tr>
 		<tr> <td><b>Philipp_DE<br />BoySanic<br />Derm<br />Meox<br />SundayMC<br />Acebase<br />MPM<br />[Anonymous]</b></td> <td>320416846294</td> <td>2210416846294</td> <td>1.89 trillion (Normal)</td> </tr>
-		<tr> <td rowspan=3><b>NelS</b></td> <td>0</td>                <td>320416846294</td> <td rowspan=3>1.476 trillion (Normal)<br>154 billion (Large Biomes)</td> </tr>
-		<tr>                    <td>2210416846294</td>               <td>3366025373172</td>                                                                          </tr>
-		<tr>        <td>6209940093 (Large Biomes)</td> <td>160265862227 (Large Biomes)</td>                                                                          </tr>
+		<tr> <td rowspan=3><b>NelS</b></td> <td>0</td>                         <td>320416846294</td> <td rowspan=3>1.476 trillion (Normal)<br>154 billion (Large Biomes)</td> </tr>
+		<tr>                                <td>2210416846294</td>             <td>3366025373172</td>                                                                         </tr>
+		<tr>                                <td>6209940093 (Large Biomes)</td> <td>160265862227 (Large Biomes)</td>                                                           </tr>
 		<tr> <td><b>Derm</b></td> <td>0 (Large Biomes)</td> <td>6209940093 (Large Biomes)</td> <td>6.2 billion (Large Biomes)</td> </tr>
 	</tbody>
 </table>

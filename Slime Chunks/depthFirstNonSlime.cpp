@@ -1,5 +1,5 @@
-#include "common.h"
-#include "utilities/cubiomes/finders.h"
+#include "../common.h"
+#include "../utilities/cubiomes/finders.h"
 #include <unordered_set>
 #include <utility>
 

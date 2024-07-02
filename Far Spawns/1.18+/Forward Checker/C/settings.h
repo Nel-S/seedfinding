@@ -1,8 +1,8 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
 
-#include "common.h"
-#include "Utilities/Spawn.h"
+#include "../../../../common.h"
+#include "../../../../Utilities/Spawn.h"
 
 // The seed to start from.
 const uint64_t GLOBAL_START_SEED = 3426926457792;

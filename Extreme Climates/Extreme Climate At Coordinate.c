@@ -1,5 +1,5 @@
-#include "common.h"
-#include "Utilities/Climates.h"
+#include "../common.h"
+#include "../Utilities/Climates.h"
 #include <pthread.h>
 
 // const uint64_t GLOBAL_START_SEED = 110546880051;
@@ -51,11 +51,11 @@ void *runWorker(void *workerIndex) {
 	do {
 		double px = origPx, pz = origPz, sample;
 		if (CHECK_PX_FLAG) {
-			U_initClimate(NP_SHIFT, octaves, seed);
-			U_sampleClimate(NP_SHIFT, octaves, &px, &pz);
+			U_initClimate(NP_SHIFT, octaves, seed, LARGE_BIOMES_FLAG);
+			U_sampleClimate(NP_SHIFT, octaves, &px, &pz, LARGE_BIOMES_FLAG);
 		}
 
-		if (U_initAndSampleClimateBounded(CLIMATE, octaves, &px, &pz, INITIAL_THRESHOLD >= 0 ? climateBounds : NULL, INITIAL_THRESHOLD >= 0 ? NULL : climateBounds, &seed, &sample) < U_CLIMATE_NUMBER_OF_OCTAVES[CLIMATE]) continue;
+		if (U_initAndSampleClimateBounded(CLIMATE, octaves, &px, &pz, INITIAL_THRESHOLD >= 0 ? climateBounds : NULL, INITIAL_THRESHOLD >= 0 ? NULL : climateBounds, &seed, LARGE_BIOMES_FLAG, &sample) < U_CLIMATE_NUMBER_OF_OCTAVES[CLIMATE]) continue;
 		/*Prints the seed.*/
 		outputValue("%" PRId64 "\t%f\t%f\n", seed, sample, sample/U_MAX_CLIMATE_AMPLITUDES[CLIMATE]);
 		if (UPDATE_THRESHOLD) {

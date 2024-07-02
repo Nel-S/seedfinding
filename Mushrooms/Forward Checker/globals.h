@@ -2,7 +2,7 @@
 #define _GLOBALS_H
 
 #include "settings.h"
-#include "Utilities/Spawn.h"
+#include "../../utilities/Spawn.h"
 
 uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
 int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;

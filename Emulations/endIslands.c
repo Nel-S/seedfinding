@@ -1,4 +1,4 @@
-#include "utilities/cubiomes/finders.h"
+#include "../utilities/cubiomes/finders.h"
 
 STRUCT(EndIsland) {
 	Pos3 topPos;

@@ -1,4 +1,4 @@
-#include "common.h"
+#include "../common.h"
 #include <pthread.h>
 
 FILE *inputFile = NULL, *outputFile = NULL;

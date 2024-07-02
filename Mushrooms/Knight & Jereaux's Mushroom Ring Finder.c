@@ -1,7 +1,7 @@
-#include "common.h"
-#include "Utilities/Climates.h"
-// #include "utilities/cubiomes/finders.c"
-// #include "utilities/cubiomes/biomenoise.c"
+#include "../common.h"
+#include "../utilities/Climates.h"
+// #include "../utilities/cubiomes/finders.c"
+// #include "../utilities/cubiomes/biomenoise.c"
 
 // const uint64_t GLOBAL_START_SEED = -230734003789;
 const uint64_t GLOBAL_START_SEED = 0;
@@ -24,7 +24,7 @@ void initGlobals() {}
 void *runWorker(void *workerIndex) {
     Generator g;
     setupGenerator(&g, MC_NEWEST, LARGE_BIOMES_FLAG);
-    U_manualBNinit(&g.bn);
+    U_manualBNinit(&g.bn, LARGE_BIOMES_FLAG);
     double Cdouble[U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]];
     U_initClimateBoundsArray(NP_CONTINENTALNESS, -0.87, PERCENTILE, Cdouble, U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]);
     PerlinNoise *oct = g.bn.oct;
@@ -35,8 +35,8 @@ void *runWorker(void *workerIndex) {
     do {
 		double px = 480, pz = 480;
 		if (!DELAY_SHIFT) {
-			U_initClimate(NP_SHIFT, oct, seed);
-            U_sampleClimate(NP_SHIFT, oct, &px, &pz);
+			U_initClimate(NP_SHIFT, oct, seed, LARGE_BIOMES_FLAG);
+            U_sampleClimate(NP_SHIFT, oct, &px, &pz, LARGE_BIOMES_FLAG);
         } else {
             px = floor(px/4.);
             pz = floor(pz/4.);
@@ -56,7 +56,7 @@ void *runWorker(void *workerIndex) {
         if (npC > -0.35) continue;
 
         px = -416, pz = -416;
-        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz);
+        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz, LARGE_BIOMES_FLAG);
         else {
             px = floor(px/4.);
             pz = floor(pz/4.);
@@ -65,7 +65,7 @@ void *runWorker(void *workerIndex) {
         if (npC > -0.25) continue;
 
         px = -416, pz = 480;
-        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz);
+        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz, LARGE_BIOMES_FLAG);
         else {
             px = floor(px/4.);
             pz = floor(pz/4.);
@@ -74,42 +74,42 @@ void *runWorker(void *workerIndex) {
         if (npC > -0.25) continue;
 
         px = 544, pz = 480;
-        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz);
+        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz, LARGE_BIOMES_FLAG);
         else {
             px = floor(px/4.);
             pz = floor(pz/4.);
         }
-        if (U_initAndSampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, &seed, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
+        if (U_initAndSampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, &seed, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
 
         px = -416, pz = -480;
-        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz);
+        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz, LARGE_BIOMES_FLAG);
         else {
             px = floor(px/4.);
             pz = floor(pz/4.);
         }
-        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
+        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
 
         px = -416, pz = 480;
-        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz);
+        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz, LARGE_BIOMES_FLAG);
         else {
             px = floor(px/4.);
             pz = floor(pz/4.);
         }
-        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
+        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
 
         px = 544, pz = -480;
-        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz);
+        if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz, LARGE_BIOMES_FLAG);
         else {
             px = floor(px/4.);
             pz = floor(pz/4.);
         }
-        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
+        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
 
-        if (DELAY_SHIFT) U_initClimate(NP_SHIFT, oct, seed);
-        U_initClimate(NP_TEMPERATURE, oct, seed);
-        U_initClimate(NP_HUMIDITY, oct, seed);
-        U_initClimate(NP_EROSION, oct, seed);
-        U_initClimate(NP_WEIRDNESS, oct, seed);
+        if (DELAY_SHIFT) U_initClimate(NP_SHIFT, oct, seed, LARGE_BIOMES_FLAG);
+        U_initClimate(NP_TEMPERATURE, oct, seed, LARGE_BIOMES_FLAG);
+        U_initClimate(NP_HUMIDITY, oct, seed, LARGE_BIOMES_FLAG);
+        U_initClimate(NP_EROSION, oct, seed, LARGE_BIOMES_FLAG);
+        U_initClimate(NP_WEIRDNESS, oct, seed, LARGE_BIOMES_FLAG);
 
         // TODO: Remove
         setBiomeSeed(&g.bn, seed, LARGE_BIOMES_FLAG);

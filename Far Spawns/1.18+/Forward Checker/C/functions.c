@@ -27,24 +27,24 @@ void *runWorker(void *workerIndex) {
 	if (!getNextSeed(workerIndex, &seed)) return NULL;
 	do {
 		double px = pxs[0], pz = pzs[0], npC;
-		if (!DELAY_SHIFT) U_initAndSampleClimateBounded(NP_SHIFT, oct, &px, &pz, NULL, NULL, &seed, NULL);
-		if (U_initAndSampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble[0], &seed, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
+		if (!DELAY_SHIFT) U_initAndSampleClimateBounded(NP_SHIFT, oct, &px, &pz, NULL, NULL, &seed, LARGE_BIOMES_FLAG, NULL);
+		if (U_initAndSampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble[0], &seed, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
 
 		// If a 1st-ring spawn is all that is needed, we can stop here; otherwise, we repeat the process again for each position in each ring below the desired one.
 		for (uint_fast8_t i = 1; i < ringStartingIndex; ++i) {
 			px = pxs[i], pz = pzs[i];
-			if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz);
-			if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble[i], &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) goto skip;
+			if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz, LARGE_BIOMES_FLAG);
+			if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble[i], LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) goto skip;
 		}
 		/*At this point, a seed *could* be an Nth-ring spawn, but we need to verify that it truly is.
 			This does require initializing the other 4 climates (and consequently 22 more octaves).*/
 		// TODO: Only initialize a climate when actually necessary
-		if (DELAY_SHIFT) U_initClimate(NP_SHIFT, oct, seed);
+		if (DELAY_SHIFT) U_initClimate(NP_SHIFT, oct, seed, LARGE_BIOMES_FLAG);
         if (SAMPLE_ALL_CLIMATES) {
-			U_initClimate(NP_TEMPERATURE, oct, seed);
-			U_initClimate(NP_HUMIDITY, oct, seed);
-			U_initClimate(NP_EROSION, oct, seed);
-			U_initClimate(NP_WEIRDNESS, oct, seed);
+			U_initClimate(NP_TEMPERATURE, oct, seed, LARGE_BIOMES_FLAG);
+			U_initClimate(NP_HUMIDITY, oct, seed, LARGE_BIOMES_FLAG);
+			U_initClimate(NP_EROSION, oct, seed, LARGE_BIOMES_FLAG);
+			U_initClimate(NP_WEIRDNESS, oct, seed, LARGE_BIOMES_FLAG);
         }
 		/* Emulates the first round of the spawn algorithm, updating minI and fitness if the values turn out to be the lowest thus far, or doing nothing otherwise.
   		   Uses samples of all five climates because e.g. 34788113448 is marked as a second-ring spawn instead of a third-ring if only continentalness is measured.*/

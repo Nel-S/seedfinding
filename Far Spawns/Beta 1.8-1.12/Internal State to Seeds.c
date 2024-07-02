@@ -1,30 +1,33 @@
-#include "common.h"
-#include "utilities/cubiomes/finders.h"
-#include <math.h>
+#include "../../common.h"
+#include "../../utilities/cubiomes/finders.h"
+#include <pthread.h>
 
-const uint64_t BASE_STATES[] = {1459339358529, 5159848224617, 90311412211, 8062451346052};
+const uint64_t GLOBAL_START_SEED = 0, GLOBAL_SEEDS_TO_CHECK = 0;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const int SECOND_CHANCES = 0;
-const int MC_VERSION = MC_1_8;
-const char *INPUT_FILEPATH  = NULL;
+const int MC_VERSION = MC_1_6_4;
+const char *INPUT_FILEPATH  = "C:\\msys64\\home\\seedfinding\\Far Spawns\\Beta 1.8-1.12\\Internal States (36178138).txt";
 const char *OUTPUT_FILEPATH = NULL;
 const bool LARGE_BIOMES_FLAG = false;
 const bool TIME_PROGRAM = false;
-
-int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
-
+const uint64_t INITIAL_THRESHOLD = 0;
+const bool UPDATE_THRESHOLD = true;
 
 const uint64_t g_spawn_biomes_17 = (1ULL << forest) | (1ULL << plains) | (1ULL << taiga) | (1ULL << taiga_hills) | (1ULL << wooded_hills) | (1ULL << jungle) |(1ULL << jungle_hills);
 const uint64_t g_spawn_biomes_1  = (1ULL << forest) | (1ULL << swamp) | (1ULL << taiga);
 
-uint64_t farthestDist = 0;
-// const uint64_t farthestDist = 14776985;
+uint64_t farthestDist = INITIAL_THRESHOLD;
+pthread_mutex_t mutex;
 
 void initGlobals() {}
 
 // Steps the given java.util.Random internal state backwards once.
 static inline void stepBackState(uint64_t *state) {
 	*state = (*state * 246154705703781 + 107048004364969) & 0xffffffffffff;
+}
+
+static int id_matches(int id, uint64_t b, uint64_t m) {
+    return id < 128 ? !!(b & (1ULL << id)) : !!(m & (1ULL << (id-128)));
 }
 
 // From Cubiomes
@@ -99,7 +102,6 @@ bool mapApproxHeight2(const Generator *g, const SurfaceNoise *sn, int x, int z) 
 
 void *runWorker(void *workerIndex) {
 	Generator g;
-	// setupGenerator(&g, MC_1_12, LARGE_BIOMES_FLAG);
 	setupGenerator(&g, MC_VERSION, LARGE_BIOMES_FLAG);
 	g.dim = DIM_OVERWORLD;
 	SurfaceNoise sn;
@@ -161,8 +163,8 @@ void *runWorker(void *workerIndex) {
 				int chances = 0, bestChance = 0;
 				uint64_t currentBestDist = 0;
 				initSurfaceNoise(&sn, DIM_OVERWORLD, g.seed);
-				float y;
-				int id, grass = 0;
+				// float y;
+				// int id, grass = 0;
 				for (int i = 0; i < 1000; i++) {
 					// mapApproxHeight2(&y, &id, &g, &sn, out.x >> 2, out.z >> 2);
 					// float y2;
@@ -189,7 +191,11 @@ void *runWorker(void *workerIndex) {
 				if (currentBestDist < farthestDist) goto nextTopSeed;
 
 				outputValue("%" PRId64 "\t%d\t%f\n", seed, bestChance, sqrt(currentBestDist));
-				if (currentBestDist > farthestDist) farthestDist = currentBestDist;
+				if (UPDATE_THRESHOLD) {
+					pthread_mutex_lock(&mutex);
+					if (currentBestDist > farthestDist) farthestDist = currentBestDist;
+					pthread_mutex_unlock(&mutex);
+				}
 				nextTopSeed: continue;
 			}
 			stepBackState(&initialState);

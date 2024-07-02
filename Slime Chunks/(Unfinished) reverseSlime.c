@@ -1,4 +1,4 @@
-#include "common.h"
+#include "../common.h"
 
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const bool TIME_PROGRAM = false;

@@ -1,4 +1,4 @@
-#include "common.h"
+#include "../common.h"
 #include <limits.h>
 #include <mpi.h>
 #include <string.h>
