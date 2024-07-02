@@ -55,11 +55,11 @@ void *runWorker(void *workerIndex) {
   		   Uses samples of all five climates because e.g. 34788113448 is marked as a second-ring spawn instead of a third-ring if only continentalness is measured.*/
 		int firstStageIndex, secondStageIndex;
 		double fitness;
-		if (!U_firstStageSpawnBounded(oct, FITNESS, &firstStageIndex, &fitness)) continue;
+		if (!U_firstStageSpawnBounded(oct, FITNESS, &firstStageIndex, &fitness, LARGE_BIOMES_FLAG)) continue;
 
 		/* At this point, we know the seed is an nth ring spawn, so we now just need to ensure the second stage of the spawn algorithm places its spawn beyond
 		   (the square root of) MIN_DISTANCE_SQUARED blocks.*/
-		if (!U_secondStageSpawnBounded(oct, firstStageIndex, fitness, FITNESS, &secondStageIndex, &fitness)) continue;
+		if (!U_secondStageSpawnBounded(oct, firstStageIndex, fitness, FITNESS, &secondStageIndex, LARGE_BIOMES_FLAG, &fitness)) continue;
 		Pos approxSpawn = {((int)U_SPAWN_SECOND_STAGE_VALS[firstStageIndex][secondStageIndex][U_spawn_table_x] & -16) + 8, ((int)U_SPAWN_SECOND_STAGE_VALS[firstStageIndex][secondStageIndex][U_spawn_table_z] & -16) + 8};
 		
 		double highestCont = -INFINITY, lowestCont = INFINITY;

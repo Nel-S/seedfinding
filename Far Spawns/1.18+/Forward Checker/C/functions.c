@@ -52,14 +52,14 @@ void *runWorker(void *workerIndex) {
 		// int firstStageIndex, secondStageIndex;
 		// if (!U_firstStageSpawnBounded(oct, FITNESS, &firstStageIndex, &fitness)) continue;
 		Pos firstStagePos, approxSpawn;
-		if (!U_firstStageSpawnBounded_noTable(oct, FITNESS, &firstStagePos, &fitness)) continue;
+		if (!U_firstStageSpawnBounded_noTable(oct, FITNESS, &firstStagePos, LARGE_BIOMES_FLAG, &fitness)) continue;
 
 		#if CHECK_DISTANCES
 		/* At this point, we know the seed is an nth ring spawn, so we now just need to ensure the second stage of the spawn algorithm places its spawn beyond
 		   (the square root of) MIN_DISTANCE_SQUARED blocks.*/
 		// if (!U_secondStageSpawnBounded(oct, firstStageIndex, FITNESS, &secondStageIndex, &fitness)) continue;
 		// Pos approxSpawn = {U_SPAWN_SECOND_STAGE_VALS[firstStageIndex][secondStageIndex][U_spawn_table_x], U_SPAWN_SECOND_STAGE_VALS[firstStageIndex][secondStageIndex][U_spawn_table_z]};
-		if (!U_secondStageSpawnBounded_noTable(oct, &firstStagePos, fitness, FITNESS, &approxSpawn, &fitness)) continue;
+		if (!U_secondStageSpawnBounded_noTable(oct, &firstStagePos, fitness, FITNESS, &approxSpawn, LARGE_BIOMES_FLAG, &fitness)) continue;
 		Pos centeredSpawn = {(approxSpawn.x & -16) + 8, (approxSpawn.z & -16) + 8};
 		uint32_t distSquared = centeredSpawn.x * centeredSpawn.x + centeredSpawn.z * centeredSpawn.z;
 		/* Prints the seed if its squared second-stage approximate distance is further than MIN_RADIAL_DISTANCE blocks away, or either axis is further than MIN_AXIAL_DISTANCE 
