@@ -4,12 +4,10 @@
 FILE *inputFile = NULL, *outputFile = NULL;
 pthread_mutex_t outputMutex;
 
-bool getNextSeed(const void* workerIndex, uint64_t *seed) {
-	if (INPUT_FILEPATH) return fscanf(inputFile, " %" PRId64 " \n", (int64_t *)seed) == 1;
-	else {
-		*seed = workerIndex ? *(int *)workerIndex + localStartSeed : *seed + localNumberOfWorkers;
-		return *seed - localStartSeed < localSeedsToCheck;
-	}
+bool getNextSeed(const void *workerIndex, uint64_t *seed) {
+	if (INPUT_FILEPATH) return fscanf(inputFile, " %" PRId64 "\n", (int64_t *)seed) == 1;
+	*seed = workerIndex ? *(int *)workerIndex + localStartSeed : *seed + localNumberOfWorkers;
+	return *seed - localStartSeed < localSeedsToCheck;
 }
 
 void outputValue(const char *format, ...) {

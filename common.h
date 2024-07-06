@@ -17,6 +17,8 @@ extern const bool TIME_PROGRAM;
 // These are global variables that will by default be set to their constant equivalents, but can be modified as needed.
 extern uint64_t localStartSeed, localSeedsToCheck;
 extern int localNumberOfWorkers;
+// 
+#define CHECK_THIS_SEED_AND_FOLLOWING(startSeed) UINT64_MAX - startSeed + (!!startSeed)
 
 // This is defined in the filtering program.
 // It must initialize all global variables prior to any workers being created.

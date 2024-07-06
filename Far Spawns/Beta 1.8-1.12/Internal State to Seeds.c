@@ -5,13 +5,16 @@
 const uint64_t GLOBAL_START_SEED = 0, GLOBAL_SEEDS_TO_CHECK = 0;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const int SECOND_CHANCES = 0;
-const int MC_VERSION = MC_1_6_4;
+const int MC_VERSION = MC_B1_8;
 const char *INPUT_FILEPATH  = "C:\\msys64\\home\\seedfinding\\Far Spawns\\Beta 1.8-1.12\\Internal States (36178138).txt";
 const char *OUTPUT_FILEPATH = NULL;
 const bool LARGE_BIOMES_FLAG = false;
 const bool TIME_PROGRAM = false;
 const uint64_t INITIAL_THRESHOLD = 0;
 const bool UPDATE_THRESHOLD = true;
+
+uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
+int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
 
 const uint64_t g_spawn_biomes_17 = (1ULL << forest) | (1ULL << plains) | (1ULL << taiga) | (1ULL << taiga_hills) | (1ULL << wooded_hills) | (1ULL << jungle) |(1ULL << jungle_hills);
 const uint64_t g_spawn_biomes_1  = (1ULL << forest) | (1ULL << swamp) | (1ULL << taiga);
@@ -188,14 +191,14 @@ void *runWorker(void *workerIndex) {
 					out.x += nextInt(&rng, 64) - nextInt(&rng, 64);
 					out.z += nextInt(&rng, 64) - nextInt(&rng, 64);
 				}
-				if (currentBestDist < farthestDist) goto nextTopSeed;
-
-				outputValue("%" PRId64 "\t%d\t%f\n", seed, bestChance, sqrt(currentBestDist));
-				if (UPDATE_THRESHOLD) {
-					pthread_mutex_lock(&mutex);
-					if (currentBestDist > farthestDist) farthestDist = currentBestDist;
+				pthread_mutex_lock(&mutex);
+				if (currentBestDist < farthestDist) {
 					pthread_mutex_unlock(&mutex);
+					goto nextTopSeed;
 				}
+				outputValue("%" PRId64 "\t%d\t%f\n", seed, bestChance, sqrt(currentBestDist));
+				if (UPDATE_THRESHOLD && currentBestDist > farthestDist) farthestDist = currentBestDist;
+				pthread_mutex_unlock(&mutex);
 				nextTopSeed: continue;
 			}
 			stepBackState(&initialState);

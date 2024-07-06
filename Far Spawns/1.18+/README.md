@@ -2,12 +2,12 @@
 
 In 1.18, Minecraft: Java Edition and Minecraft: Bedrock Edition switched to using a fitness-based approach for their spawn algorithms: the games attempt to find a coordinate that balances being near (0, 0), not having climate values beyond &pm;1, and not having climate values liable to induce ocean or river generation. A fuller explanation of the algorithm is given underneath [this tool](https://nel-s.github.io/efc-calc/).
 
-| Criteria                             | <ins>Theoretical</ins> Farthest Spawnpoint from (0, 0) | Distance (blocks) |
-| ------------------------------------ | ------------------------------------------------------ | ----------------- |
-| Java 1.18+, L2/Euclidean distance    | (1599, -2160)                                          | 2687.45           |
-| Java 1.18+, L∞/Chebyshev distance    | x = 2647                                               | 2647              |
-| Bedrock 1.18+, L2/Euclidean distance | (0, 2560)                                              | 2560              |
-| Bedrock 1.18+, L∞/Chebyshev distance | x = 2560                                               | 2560              |
+| Criteria                                              | <ins>Theoretical</ins> Farthest Spawnpoint from (0, 0) | Distance (blocks) |
+| ----------------------------------------------------- | ------------------------------------------------------ | ----------------- |
+| Java 1.18+, L<sup>2</sup>/Euclidean distance          | (1599, -2160)                                          | 2687.45           |
+| Java 1.18+, L<sup>&infin;</sup>/Chebyshev distance    | x = 2647                                               | 2647              |
+| Bedrock 1.18+, L<sup>2</sup>/Euclidean distance       | (0, 2560)                                              | 2560              |
+| Bedrock 1.18+, L<sup>&infin;</sup>/Chebyshev distance | x = 2560                                               | 2560              |
 
 The [Forward Checker](./Forward%20Checker/) is usable for "small" ranges of seeds, and (excluding Jereaux's seeds) has been used to find almost all farthest-known spawnpoints below. However, the only true way to find the farthest spawnpoint in the entire seedspace would be by deriving worldseeds from their Perlin octaves. With regards to that, the maximum/minimum possible Perlin sample has been found to be &pm;1.0363538112118025; the next step involves creating a table of all Perlin octave configurations' possible ranges.
 
