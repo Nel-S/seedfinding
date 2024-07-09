@@ -19,7 +19,7 @@ A Minecraft@Home video documenting this find and revealing the seed will (hopefu
 		<tr> <td><b>Meox</b></td> <td>6900000000000000</td> <td>6901084674656939</td> <td>1.084 trillion</td> </tr>
         <tr> <td rowspan=2><b>NelS</b></td> <td>0</td>                    <td>146188867239</td> <td rowspan=2>698 billion</td> </tr>
 		<tr>                                <td>-9197754073709551616</td> <td>-9197753521771100348</td>                        </tr>
-		<tr> <td rowspan=3><b>ShowMe7</b></td> <td>146188867240</td>        <td>222008539926</td> <td rowspan=2>666 billion</td> </tr>
+		<tr> <td rowspan=3><b>ShowMe7</b></td> <td>146188867240</td>        <td>222008539926</td> <td rowspan=3>666 billion</td> </tr>
 		<tr>                                   <td>1099511627776(?)</td>    <td>1321052383728</td>                               </tr>
 		<tr>                                   <td>7777777777777777777</td> <td>7777778147062766941</td>                         </tr>
 		<tr> <td><b>Colin</b></td> <td>146188867240</td> <td>1245700495016</td> <td>1.099 trillion (Possibly bugged)</td> </tr>
