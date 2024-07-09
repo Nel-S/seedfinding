@@ -13,14 +13,14 @@ A Cubiomes Viewer session file was created to search for these, which was later 
 		<tr> <th>Contributor</th> <th>First Seed in Checked Range</th> <th>Last Seed in Checked Range</th> <th>Total Seeds Checked</th> </tr>
 	</thead>
 	<tbody>
+        <tr> <td><b>Pidge</b></td> <td>4000000000000000</td> <td>4003673549577810</td> <td>3.673 trillion</td> </tr>
 		<tr> <td><b>Jereaux</b></td> <td>8810000000000000000</td> <td>8810001174887528740</td> <td>1.174 trillion</td> </tr>
-        <tr> <td><b>Pidge</b></td> <td>4000000000000000</td>     <td>4001160885850225</td> <td>1.16 trillion</td> </tr>
+		<tr> <td><b>Meox</b></td> <td>6900000000000000</td> <td>6901084674656939</td> <td>1.084 trillion</td> </tr>
+        <tr> <td rowspan=2><b>NelS</b></td> <td>0</td>                    <td>146188867239</td> <td rowspan=2>682 billion</td> </tr>
+		<tr>                                <td>-9197754073709551616</td> <td>-9197753537675933132</td>                        </tr>
 		<tr> <td rowspan=2><b>ShowMe7</b></td> <td>146188867240</td>     <td>222008539926</td> <td rowspan=2>297 billion</td> </tr>
 		<tr>                                   <td>1099511627776(?)</td> <td>1321052383728</td>                               </tr>
-		<tr> <td rowspan=2><b>NelS</b></td> <td>0</td>                    <td>146188867239</td> <td rowspan=2>231 billion</td> </tr>
-		<tr>                                <td>-9197754073709551616</td> <td>-9197753988381059087</td>                        </tr>
-        <!-- <tr> <td><b>Meox</b></td> <td>6900000000000000</td> <td>??</td> <td>??</td> </tr> -->
-		<tr> <td><b>Colin</b></td> <td>146188867240</td> <td>1245700495016</td> <td>1.09 trillion (Possibly bugged)</td> </tr>
+		<tr> <td><b>Colin</b></td> <td>146188867240</td> <td>1245700495016</td> <td>1.099 trillion (Possibly bugged)</td> </tr>
 	</tbody>
 </table>
 
