@@ -10,7 +10,7 @@ def hashcode(string: str) -> int:
     for character in string: h = 31 * h + ord(character)
     return ((h + 0x80000000) & 0xffffffff) - 0x80000000
 
-def reverseHashcode(originalValue: int, lengthRange: int | Sequence[int, int | None] | None = None, maxOutputs: int | None = None, file: TextIOWrapper | None = None, printVerification: bool = False) -> None:
+def reverseHashcode(originalValue: int, lengthRange: int | tuple[int, int | None] | None = None, maxOutputs: int | None = None, file: TextIOWrapper | None = None, printVerification: bool = False) -> None:
     """Given a hashcode `originalValue`, returns up to `maxOutputs` alphabetical strings (or an infinite number if not specified) that hash to `originalValue`.
     "Alphabetical string" here is a string of consecutive English uppercase or lowercase letters.
     
@@ -20,11 +20,12 @@ def reverseHashcode(originalValue: int, lengthRange: int | Sequence[int, int | N
     # `originalValue` should be in the range [-2^31, 2^31 - 1], or when shifted to unsigned integers, [0, 2^32 - 1].
     originalValue &= 0xffffffff
     stringLength = lengthRange if isinstance(lengthRange, int) else lengthRange[0] if isinstance(lengthRange, tuple) else 1
+    maxLength = lengthRange[1] if isinstance(lengthRange, tuple) else lengthRange
     # 31^stringLength, calculated incrementally during each iteration
     thirtyOnePower = 31**stringLength
     outputCount = 0
     # Until we reach the maximum number of outputs (if there is one):
-    while (maxOutputs is None or outputCount < maxOutputs) and ((lengthRange[1] if isinstance(lengthRange, tuple) else lengthRange) is None or stringLength <= (lengthRange[1] if isinstance(lengthRange, tuple) else lengthRange)):
+    while (maxOutputs is None or outputCount < maxOutputs) and (maxLength is None or stringLength <= maxLength):
         # The strings are restricted to being A-Z/a-z only, which restricts each character's value to the range 65-90 for lowercase letters or 97-122 for uppercase letters. Therefore, for a k-character string, the total hash value of the string prior to the modulo can be at minimum 13/6*(31^k - 1) (for all 'A's) and at maximum 61/15*(31^k - 1) (for all 'z's).
         # At the same time, the pre-mod hash value must be `originalValue` plus some multiple of 2^32 (`offset`). Therefore, for an `offset` multiple to be valid, it must satisfy the equation 13/6*(31^k - 1) <= originalValue + 2^32*offset <= 61/15*(31^k - 1), or ceil(13/6*(31^k - 1)) <= offset <= floor(61/15*(31^k - 1)).
         for offset in range(ceil(((thirtyOnePower - 1)//6*13 - originalValue)/(1 << 32)), int(((thirtyOnePower - 1)//15*61 - originalValue)//(1 << 32)) + 1):
@@ -49,7 +50,6 @@ def reverseHashcode(originalValue: int, lengthRange: int | Sequence[int, int | N
                 if currentDifference <= maxDifference:
                     maxDifference -= currentDifference
                     maxCombo |= 1 << (stringLength - i - 1)
-            
             # Then at this point we simply through all of the viable uppercase/lowercase combinations. (This is why we stored them as binary integers.)
             for letterCase in range(minCombo, maxCombo + 1):
                 # For each one, we split the case's binary bits into a list, and then reverse the list since we'd always be iterating over it in backwards order. (The conversion to binary will remove leading zeroes from the representation, but we add these back later on, when we actually care about the list's length instead of just the 1s in the list like immediately below.)
