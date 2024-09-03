@@ -65,7 +65,7 @@ void *runWorker(void *workerIndex) {
             if (currentScore > bestScore) continue;
             bestScore = currentScore;
         }
-        outputValue("%" PRIu64 "\t%" PRIu64 "\t(%d, %d, %d) - (%d, %d, %d)\t%" PRIu64 "\n", seed, bb.count, bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z, currentScore);
+        outputValues("%" PRIu64 "\t%" PRIu64 "\t(%d, %d, %d) - (%d, %d, %d)\t%" PRIu64 "\n", seed, bb.count, bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z, currentScore);
         bestCount = bb.count;
         // nextSeed: continue;
     } while (getNextSeed(NULL, &seed));

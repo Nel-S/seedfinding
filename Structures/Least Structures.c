@@ -2,7 +2,7 @@
 #include "../utilities/cubiomes/finders.h"
 #include <pthread.h>
 
-const uint64_t GLOBAL_START_SEED = 0;
+const uint64_t GLOBAL_START_SEED = 0; //735673042
 const uint64_t GLOBAL_SEEDS_TO_CHECK = CHECK_THIS_SEED_AND_FOLLOWING(GLOBAL_START_SEED);
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const char *INPUT_FILEPATH = NULL;
@@ -68,7 +68,7 @@ Pos getStructureBoundsRange(const int structure) {
 		case Mansion:
 			return (Pos){-RADIUS_TO_CHECK/1280 - 1, RADIUS_TO_CHECK/1280};
 	};
-	return (Pos){INT32_MIN, INT32_MAX}; 
+	return (Pos){0, -1}; 
 }
 
 const uint64_t MAXIMUM_RADIUS = (RADIUS_TO_CHECK - 1) * (uint64_t)(RADIUS_TO_CHECK - 1) + 1;
@@ -124,9 +124,9 @@ void *runWorker(void *workerIndex) {
 			continue;
 		}
 		if (FILTER_BY_SCORE_FLAG) {
-			if (FILTER_BY_COUNT_FLAG) outputValue("%" PRId64 "\t%d\t%" PRIu64 "\n", seed, count, score);
-			else outputValue("%" PRId64 "\t%" PRIu64 "\n", seed, score);
-		} else outputValue("%" PRId64 "\t%d\n", seed, count);
+			if (FILTER_BY_COUNT_FLAG) outputValues("%" PRId64 "\t%d\t%" PRIu64 "\n", seed, count, score);
+			else outputValues("%" PRId64 "\t%" PRIu64 "\n", seed, score);
+		} else outputValues("%" PRId64 "\t%d\n", seed, count);
 		if (count < minCount || ((!FILTER_BY_COUNT_FLAG || count == minCount) && score < minScore)) {
 			minCount = count;
 			minScore = score;

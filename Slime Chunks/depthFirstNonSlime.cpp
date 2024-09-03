@@ -15,18 +15,20 @@ const bool TIME_PROGRAM = false;
 uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
 int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
 
-int bestCount = INITIAL_BEST_COUNT;
+int bestCount;
 
 struct pair_hash {
-    std::size_t operator()(std::pair<int, int> const &v) const {
+    [[nodiscard]] std::size_t operator()(std::pair<int, int> const &v) const {
         // return ((v.first + v.second) * (v.first + v.second + 1) / 2) + v.second;
         return (v.second << 16) ^ v.first;
     }
 };
 
-void initGlobals() {}
+void initGlobals() {
+    bestCount = INITIAL_BEST_COUNT;
+}
 
-int testForSlimeAt(uint64_t seed, int chunkX, int chunkZ, std::unordered_set<std::pair<int, int>, pair_hash> *set, int depth) {
+[[nodiscard]] int testForSlimeAt(uint64_t seed, int chunkX, int chunkZ, std::unordered_set<std::pair<int, int>, pair_hash> *set, int depth) {
     if (depth > MAX_EMPTY_AREA + 1) return -100;
     set->insert(std::pair(chunkX, chunkZ));
     if (isSlimeChunk(seed, chunkX, chunkZ)) return 0;
@@ -46,7 +48,7 @@ void *runWorker(void *workerIndex) {
         checkedChunks.clear();
         int currentCount = testForSlimeAt(seed, COORDINATE_TO_CHECK.x, COORDINATE_TO_CHECK.z, &checkedChunks, 0);
         if (currentCount < bestCount) continue;
-        outputValue("%" PRId64 "\t%d\n", seed, currentCount);
+        outputValues("%" PRId64 "\t%d\n", seed, currentCount);
         if (currentCount > bestCount) bestCount = currentCount;
     } while (getNextSeed(NULL, &seed));
     return NULL;
