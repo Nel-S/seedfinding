@@ -65,9 +65,9 @@ void *runWorker(void *workerIndex) {
 		/* Prints the seed if its squared second-stage approximate distance is further than MIN_RADIAL_DISTANCE blocks away, or either axis is further than MIN_AXIAL_DISTANCE 
 		blocks away.*/
 		if (distSquared < MIN_RADIAL_DISTANCE * MIN_RADIAL_DISTANCE && abs(approxSpawn.x) < MIN_AXIAL_DISTANCE && abs(approxSpawn.z) < MIN_AXIAL_DISTANCE) continue;
-		outputValue("%" PRId64 "\t%d\t%d\t%f\n", seed, approxSpawn.x, approxSpawn.z, sqrt(distSquared));
+		outputValues("%" PRId64 "\t%d\t%d\t%f\n", seed, approxSpawn.x, approxSpawn.z, sqrt(distSquared));
 		#else
-		outputValue("%" PRId64 "\t%d\n", seed, firstStageIndex);
+		outputValues("%" PRId64 "\t%d\n", seed, firstStageIndex);
 		#endif
 		skip: continue;
 	} while (getNextSeed(NULL, &seed));

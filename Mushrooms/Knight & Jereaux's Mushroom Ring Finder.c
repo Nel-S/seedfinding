@@ -117,7 +117,7 @@ void *runWorker(void *workerIndex) {
         // printf("%d %d\n", spawn.x, spawn.z);
         if (abs(spawn.x - 64) > 350 || abs(spawn.z) > 350) continue;
 
-        outputValue("%" PRId64 "\n", seed);
+        outputValues("%" PRId64 "\n", seed);
     } while (getNextSeed(NULL, &seed));
     return NULL;
 }

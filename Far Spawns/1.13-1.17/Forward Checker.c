@@ -132,7 +132,7 @@ void *runWorker(void *workerIndex) {
 			if (UPDATE_THRESHOLD) pthread_mutex_unlock(&mutex);
 			continue;
 		}
-		outputValue("%" PRId64 "\t%d\t%d\t%f\t(%d)\n", seed, spawn.x, spawn.z, sqrt(currentSquaredRadialDist), records);
+		outputValues("%" PRId64 "\t%d\t%d\t%f\t(%d)\n", seed, spawn.x, spawn.z, sqrt(currentSquaredRadialDist), records);
 		if (UPDATE_THRESHOLD) {
 			if (records & 4) farthestSquaredRadialDist = currentSquaredRadialDist;
 			if (records & 2) farthestMinAxialDist = currentMinAxialDist;

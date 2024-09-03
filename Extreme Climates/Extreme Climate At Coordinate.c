@@ -57,7 +57,7 @@ void *runWorker(void *workerIndex) {
 
 		if (U_initAndSampleClimateBounded(CLIMATE, octaves, &px, &pz, INITIAL_THRESHOLD >= 0 ? climateBounds : NULL, INITIAL_THRESHOLD >= 0 ? NULL : climateBounds, &seed, LARGE_BIOMES_FLAG, &sample) < U_CLIMATE_NUMBER_OF_OCTAVES[CLIMATE]) continue;
 		/*Prints the seed.*/
-		outputValue("%" PRId64 "\t%f\t%f\n", seed, sample, sample/U_MAX_CLIMATE_AMPLITUDES[CLIMATE]);
+		outputValues("%" PRId64 "\t%f\t%f\n", seed, sample, sample/U_MAX_CLIMATE_AMPLITUDES[CLIMATE]);
 		if (UPDATE_THRESHOLD) {
 			pthread_mutex_lock(&mutex);
 			if (fabs(currentThreshold) < fabs(sample/(AS_PERCENT ? U_MAX_CLIMATE_AMPLITUDES[CLIMATE] : 1))) {

@@ -1,4 +1,4 @@
-# Templates
+# Backends
 These are templated `main()` functions one can link this repository's programs to.
 
 Alternatively, you can create your own `main()` function and link the programs in this repository to it. For compatibility, custom main functions must

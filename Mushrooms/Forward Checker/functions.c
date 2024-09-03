@@ -127,7 +127,7 @@ void *runWorker(void *workerIndex) {
 
 		if (!mushroomExists) continue;
 
-		outputValue("%" PRId64 "\t%d\n", seed, mushroomDist);
+		outputValues("%" PRId64 "\t%d\n", seed, mushroomDist);
 		skip: continue;
 	} while (getNextSeed(NULL, &seed));
 	return NULL;

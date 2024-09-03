@@ -2,15 +2,23 @@
 #include <pthread.h>
 
 FILE *inputFile = NULL, *outputFile = NULL;
-pthread_mutex_t outputMutex;
+pthread_mutex_t nextSeedMutex, outputMutex;
 
+#ifndef USE_CUSTOM_GET_NEXT_SEED
 bool getNextSeed(const void *workerIndex, uint64_t *seed) {
-	if (INPUT_FILEPATH) return fscanf(inputFile, " %" PRId64 "\n", (int64_t *)seed) == 1;
+	if (INPUT_FILEPATH) {
+		pthread_mutex_lock(&nextSeedMutex);
+		int valuesRead = fscanf(inputFile, " %" PRIdFAST64 " \n", (int_fast64_t *)seed);
+		pthread_mutex_unlock(&nextSeedMutex);
+		return valuesRead == 1;
+	}
 	*seed = workerIndex ? *(int *)workerIndex + localStartSeed : *seed + localNumberOfWorkers;
 	return *seed - localStartSeed < localSeedsToCheck;
 }
+#endif
 
-void outputValue(const char *format, ...) {
+#ifndef USE_CUSTOM_OUTPUT_VALUES
+void outputValues(const char *format, ...) {
 	// vfprintf is thread-safe when printing to stdout, but not when printing to a file.
 	// TODO: Is there any way to do this without mutexes?
 	if (OUTPUT_FILEPATH) pthread_mutex_lock(&outputMutex);
@@ -25,6 +33,7 @@ void outputValue(const char *format, ...) {
 	va_end(args);
 	if (OUTPUT_FILEPATH) pthread_mutex_unlock(&outputMutex);
 }
+#endif
 
 int main() {
 	if (INPUT_FILEPATH) {

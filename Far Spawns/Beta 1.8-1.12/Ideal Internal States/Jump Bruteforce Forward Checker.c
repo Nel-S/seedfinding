@@ -45,7 +45,7 @@ void *runWorker(void *workerIndex) {
 		}
 		if (localFarthestDist < farthestDist) continue;
 		if (farthestDist < localFarthestDist) farthestDist = localFarthestDist;
-		outputValue("%" PRId64 "\t%d\t%d\t%d\t%f\n", seed, bestI, localBestPos.x, localBestPos.z, sqrt(localFarthestDist));
+		outputValues("%" PRId64 "\t%d\t%d\t%d\t%f\n", seed, bestI, localBestPos.x, localBestPos.z, sqrt(localFarthestDist));
 		// skipSeed: continue;
 	} while (getNextSeed(NULL, &seed));
 	return NULL;

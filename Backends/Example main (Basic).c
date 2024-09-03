@@ -2,20 +2,22 @@
 
 FILE *inputFile = NULL, *outputFile = NULL;
 
+#ifndef USE_CUSTOM_GET_NEXT_SEED
 bool getNextSeed(const void* workerIndex, uint64_t *seed) {
 	if (INPUT_FILEPATH) return fscanf(inputFile, " %" PRId64 " \n", (int64_t *)seed) == 1;
-	else {
-		*seed = workerIndex ? *(int *)workerIndex + localStartSeed : *seed + localNumberOfWorkers;
-		return *seed - localStartSeed < localSeedsToCheck;
-	}
+	*seed = workerIndex ? *(int *)workerIndex + localStartSeed : *seed + localNumberOfWorkers;
+	return *seed - localStartSeed < localSeedsToCheck;
 }
+#endif
 
-void outputValue(const char *format, ...) {
+#ifndef USE_CUSTOM_OUTPUT_VALUES
+void outputValues(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
 	vfprintf(OUTPUT_FILEPATH ? outputFile : stdout, format, args);
 	va_end(args);
 }
+#endif
 
 int main() {
 	if (INPUT_FILEPATH) {

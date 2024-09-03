@@ -10,6 +10,7 @@ FILE *inputFile = NULL;
 // TODO: Generalize
 const char *FORMAT = "%" PRId64 "\t%d\t%d";
 
+#ifndef USE_CUSTOM_GET_NEXT_SEED
 bool getNextSeed(const void* workerIndex, uint64_t *seed) {
 	if (INPUT_FILEPATH) {
 		// TODO: Seriously needs to be tested
@@ -17,11 +18,11 @@ bool getNextSeed(const void* workerIndex, uint64_t *seed) {
 			if (fscanf(inputFile, " %" PRId64 " \n", (int64_t *)seed) != 1) return false;
 		}
 		return fscanf(inputFile, " %" PRId64 " \n", (int64_t *)seed) == 1;
-	} else {
-		*seed = workerIndex ? *(int *)workerIndex + localStartSeed : *seed + localNumberOfWorkers;
-		return *seed - localStartSeed < localSeedsToCheck;
 	}
+	*seed = workerIndex ? *(int *)workerIndex + localStartSeed : *seed + localNumberOfWorkers;
+	return *seed - localStartSeed < localSeedsToCheck;
 }
+#endif
 
 static inline size_t getMessageSize(const char *format) {
 	size_t size = 0;
@@ -31,7 +32,8 @@ static inline size_t getMessageSize(const char *format) {
 	return size;
 }
 
-void outputValue(const char *format, ...) {
+#ifndef USE_CUSTOM_OUTPUT_VALUES
+void outputValues(const char *format, ...) {
 	va_list args;
 	// Each process has its own copy of _messageSize, so there is no risk of race conditions here.
 	if (!_messageSize) _messageSize = getMessageSize(format);
@@ -42,6 +44,7 @@ void outputValue(const char *format, ...) {
 	va_end(args);
 	MPI_Send(message, _messageSize, MPI_UNSIGNED_LONG_LONG, 0, 0, MPI_COMM_WORLD);
 }
+#endif
 
 int main() {
 	initGlobals();

@@ -44,7 +44,7 @@ void *runWorker(void *workerIndex) {
         checkedChunks.clear();
         int currentCount = testForSlimeAt(seed, COORDINATE_TO_CHECK.x, COORDINATE_TO_CHECK.z, &checkedChunks);
         if (currentCount < bestCount) continue;
-        outputValue("%" PRId64 "\t%d\n", seed, currentCount);
+        outputValues("%" PRId64 "\t%d\n", seed, currentCount);
         if (bestCount < currentCount) bestCount = currentCount;
     } while (getNextSeed(NULL, &seed));
     return NULL;
