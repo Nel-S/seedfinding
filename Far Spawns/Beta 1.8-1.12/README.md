@@ -1,5 +1,6 @@
 # Beta 1.8 - 1.12
 
+Between Beta 1.8 and 1.12.2, Minecraft: Java Edition searched for a valid biome in the area ((-256, -256), (256, 256)). In Beta 1.8-1.0, this comprised of forests, swamps, or taigas; after that this comprised of forests, plains, taigas, taiga hills, wooded hills, jungles, or jungle_hills. Then the game looks for a grass block, jumping between -63 and 63 blocks in the x- and z-directions up to 1000 times in its attempts to find one.
 Between Beta 1.8 and 1.12.2, Minecraft: Java Edition searched for a valid biome in the area ((-256, -256), (256, 256)). In Beta 1.8-1.0, this comprised of forests, swamps, or taigas; after that, this comprised of forests, plains, taigas, taiga hills, wooded hills, jungles, or jungle_hills. Then the game looks for a grass block, jumping between -63 and 63 blocks in the x- and z-directions up to 1000 times in its attempts to find one.
 
 | Criteria                               | <ins>Theoretical</ins> Farthest Spawnpoint from (0, 0) | Distance (blocks) | Required Internal java.util.Random State |
