@@ -10,22 +10,22 @@ Between 1.13 and 1.17, Minecraft: Java Edition still searches for a valid biome 
 
 The only way to achieve such a spawnpoint is for a suitable biome to be at (256, 256); then for the initial biome search to pick exactly that coordinate; then for the spiral iteration to not find any sky-exposed grass blocks until (527, 527).
 
-| Criteria                                              | Current Farthest-known Spawnpoint from (0, 0) | Distance (blocks) | Seed      | Discoverer |
-| ----------------------------------------------------- | --------------------------------------------- | ----------------- | --------- | ---------- |
-| Normal biomes, L<sup>2</sup>/Euclidean distance       | (257, 447)                                    | 515.61            | 40593770  | NelS       |
-| Normal biomes, L<sup>&infin;</sup>/Chebyshev distance | z = 447                                       | 447               | 40593770  | NelS       |
-| Normal biomes, L<sup>-&infin;</sup> distance          | x = 296                                       | 296               | 719387297 | NelS       |
-| Large Biomes, L<sup>2</sup>/Euclidean distance        | (384, 412)                                    | 563.21            | 390301013 | NelS       |
-| Large Biomes, L<sup>&infin;</sup>/Chebyshev distance  | z = 412                                       | 412               | 390301013 | NelS       |
-| Large Biomes, L<sup>-&infin;</sup> distance           | x = 384                                       | 384               | 390301013 | NelS       |
-| Superflat, L<sup>2</sup>/Euclidean distance           |                                               |                   |           |            |
-| Superflat, L<sup>&infin;</sup>/Chebyshev distance     |                                               |                   |           |            |
-| Superflat, L<sup>-&infin;</sup> distance              |                                               |                   |           |            |
-<!--
-| Single Biome, L<sup>2</sup>/Euclidean distance        |                                               |                   |           |            |
-| Single Biome, L<sup>&infin;</sup>/Chebyshev distance  |                                               |                   |           |            |
-| Single Biome, L<sup>-&infin;</sup> distance           |                                               |                   |           |            |
--->
+<table>
+	<thead>
+		<tr> <th>Distance metric</th> <th>Generation mode</th> <th>Version range</th> <th>Current Farthest-known Spawnpoint from (0, 0)</th> <th>Distance (blocks)</th> <th>Seed</th> <th>Discoverer</th> </tr>
+	</thead>
+	<tbody>
+		<tr> <td rowspan=3>L<sup>2</sup> (Euclidean)</td> <td>Default</td>      <td>1.13-1.17.1</td> <td>(257, 447)</td> <td>515.61</td> <td>40593770</td> <td rowspan=9>NelS</td> </tr>
+		<tr>                                              <td>Large Biomes</td> <td>1.13-1.17.1</td> <td>(384, 412)</td> <td>563.21</td> <td>390301013</td> </tr>
+		<tr>                                              <td>Superflat</td>    <td>1.13-1.17.1</td> <td>(256, 256)</td> <td>362.03</td> <td>None yet</td>  </tr>
+		<tr> <td rowspan=3>L<sup>&infin;</sup> (Chebyshev)</td> <td>Default</td>      <td>1.13-1.17.1</td> <td>z = 447</td> <td>447</td> <td>40593770</td>  </tr>
+		<tr>                                                    <td>Large Biomes</td> <td>1.13-1.17.1</td> <td>z = 412</td> <td>412</td> <td>390301013</td> </tr>
+		<tr>                                                    <td>Superflat</td>    <td>1.13-1.17.1</td> <td>x = 256</td> <td>256</td> <td>None yet</td>  </tr>
+		<tr> <td rowspan=3>L<sup>-&infin;</sup></td> <td>Default</td>      <td>1.13-1.17.1</td> <td>x = 296</td> <td>296</td> <td>719387297</td> </tr>
+		<tr>                                         <td>Large Biomes</td> <td>1.13-1.17.1</td> <td>x = 384</td> <td>384</td> <td>390301013</td> </tr>
+		<tr>                                         <td>Superflat</td>    <td>1.13-1.17.1</td> <td>x = 256</td> <td>256</td> <td>None yet</td>  </tr>
+	</tbody>
+</table>
 
 ## Contributors
 <table>
