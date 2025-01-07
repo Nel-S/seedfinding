@@ -1,13 +1,13 @@
-#include "../common.h"
+#include "../Utilities/core/common_seedfinding.h"
 #include "../Utilities/Climates.h"
 #include <pthread.h>
 
 // const uint64_t GLOBAL_START_SEED = 110546880051;
 const uint64_t GLOBAL_START_SEED = 0;
-const uint64_t GLOBAL_SEEDS_TO_CHECK = -1;
-const int      GLOBAL_NUMBER_OF_WORKERS = 4;
-const char    *INPUT_FILEPATH  = NULL;
-const char    *OUTPUT_FILEPATH = NULL;
+const uint64_t GLOBAL_SEEDS_TO_CHECK = CHECK_THIS_SEED_AND_FOLLOWING(GLOBAL_START_SEED);
+const int GLOBAL_NUMBER_OF_WORKERS = 4;
+const char *INPUT_FILEPATH  = NULL;
+const char *OUTPUT_FILEPATH = NULL;
 
 const int CLIMATE = NP_TEMPERATURE;
 const Pos COORD = {0, 0};
@@ -17,23 +17,22 @@ const int PERCENTILE = FIFTIETH_PERCENTILE;
    If AS_PERCENT is false, it instead specifies the direct 
    E.g. -0.2 if AS_PERCENT = true will look for seeds with continentalnesses 20% that of the minimum, while if AS_PERCENT is false it will look for seeds with continentalnesses of -0.2 or less.*/
 const double INITIAL_THRESHOLD = 0.59;
-const bool   AS_PERCENT        = true;
-const bool   UPDATE_THRESHOLD  = true;
+const bool AS_PERCENT = true;
+const bool UPDATE_THRESHOLD = true;
 
 const bool LARGE_BIOMES_FLAG = false;
-const bool CHECK_PX_FLAG     = false;
-const bool TIME_PROGRAM      = false;
+const bool CHECK_PX_FLAG = false;
+const bool TIME_PROGRAM = false;
 
 
 
-uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
-int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
-
+DEFAULT_LOCALS_INITIALIZATION
 double climateBounds[sizeof(U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS)/sizeof(*U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS)];
-double currentThreshold = INITIAL_THRESHOLD;
+double currentThreshold;
 pthread_mutex_t mutex;
 
 void initGlobals() {
+	currentThreshold = INITIAL_THRESHOLD;
 	U_initClimateBoundsArray(CLIMATE, AS_PERCENT ? U_MAX_CLIMATE_AMPLITUDES[CLIMATE] * INITIAL_THRESHOLD : (INITIAL_THRESHOLD >= 0 ? min(INITIAL_THRESHOLD, U_MAX_CLIMATE_AMPLITUDES[CLIMATE]) : max(INITIAL_THRESHOLD, U_MIN_CLIMATE_AMPLITUDES[CLIMATE])), PERCENTILE, climateBounds, U_CLIMATE_NUMBER_OF_OCTAVES[CLIMATE]);
 }
 

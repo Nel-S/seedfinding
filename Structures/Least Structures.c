@@ -1,5 +1,5 @@
-#include "../common.h"
 #include "../utilities/cubiomes/finders.h"
+#include "../Utilities/core/common_seedfinding.h"
 #include <pthread.h>
 
 const uint64_t GLOBAL_START_SEED = 0; //735673042
@@ -19,8 +19,7 @@ const bool FILTER_BY_SCORE_FLAG = true;
 const bool CHECK_TERRAIN_FLAG   = true;
 const bool TIME_PROGRAM         = false;
 
-uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
-int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+DEFAULT_LOCALS_INITIALIZATION
 
 typedef struct {
 	int structure;
@@ -79,7 +78,6 @@ pthread_mutex_t mutex;
 void initGlobals() {
 	minCount = INITIAL_COUNT_THRESHOLD;
 	minScore = INITIAL_SCORE_THRESHOLD;
-	pthread_mutex_init(&mutex, NULL);
 }
 
 void *runWorker(void *workerIndex) {

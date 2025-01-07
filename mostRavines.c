@@ -1,5 +1,5 @@
-#include "common.h"
-#include "utilities/Chunkbiomes/Bfinders.c"
+#include "Utilities/core/common_seedfinding.h"
+#include "Chunkbiomes/Bfinders.h"
 #include <string.h>
 
 const int MAX_RADIUS = 3;

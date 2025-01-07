@@ -1,29 +1,32 @@
-#include "../../common.h"
 #include "../../utilities/cubiomes/finders.h"
-#include "../../utilities/Math.h"
+#include "../../Utilities/core/common_seedfinding.h"
+#include "../../Utilities/U_Math.h"
 #include <pthread.h>
 
-const uint64_t GLOBAL_START_SEED = 160091761;
+// const uint64_t GLOBAL_START_SEED = 160091761;
+const uint64_t GLOBAL_START_SEED = INT64_MIN;
 const uint64_t GLOBAL_SEEDS_TO_CHECK = CHECK_THIS_SEED_AND_FOLLOWING(GLOBAL_START_SEED);
 // const uint64_t GLOBAL_SEEDS_TO_CHECK = 1000000;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const char *INPUT_FILEPATH = NULL;
 const char *OUTPUT_FILEPATH = NULL;
-const bool LARGE_BIOMES_FLAG = true;
+const bool LARGE_BIOMES_FLAG = false;
 const bool TIME_PROGRAM = false;
 
 const int VERSION = MC_1_16_5;
 // const uint64_t INITIAL_SQUARED_RADIAL_THRESHOLD = 398 * 398;
 // const uint64_t INITIAL_MAX_AXIAL_THRESHOLD = 285;
 // const uint64_t INITIAL_MIN_AXIAL_THRESHOLD = 280;
-const uint64_t INITIAL_SQUARED_RADIAL_THRESHOLD = 288*288 + 303*303;
-const uint64_t INITIAL_MAX_AXIAL_THRESHOLD = 300;
-const uint64_t INITIAL_MIN_AXIAL_THRESHOLD = 288;
+// const uint64_t INITIAL_SQUARED_RADIAL_THRESHOLD = 288*288 + 303*303;
+// const uint64_t INITIAL_MAX_AXIAL_THRESHOLD = 300;
+// const uint64_t INITIAL_MIN_AXIAL_THRESHOLD = 288;
+const uint64_t INITIAL_SQUARED_RADIAL_THRESHOLD = 256*256 + 257*257;
+const uint64_t INITIAL_MAX_AXIAL_THRESHOLD = 257;
+const uint64_t INITIAL_MIN_AXIAL_THRESHOLD = 257;
 const bool UPDATE_THRESHOLD = true;
 
 
-uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
-int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+DEFAULT_LOCALS_INITIALIZATION
 
 // valid spawn biomes up to 1.17
 const uint64_t VALID_SPAWN_BIOMES = (1ULL << forest) |
@@ -57,7 +60,7 @@ void initGlobals() {
 	farthestSquaredRadialDist = INITIAL_SQUARED_RADIAL_THRESHOLD;
 	farthestMinAxialDist = INITIAL_MIN_AXIAL_THRESHOLD;
 	farthestMaxAxialDist = INITIAL_MAX_AXIAL_THRESHOLD;
-	if (UPDATE_THRESHOLD) pthread_mutex_init(&mutex, NULL);
+	pthread_mutex_init(&mutex, NULL);
 }
 
 void *runWorker(void *workerIndex) {
@@ -83,14 +86,19 @@ void *runWorker(void *workerIndex) {
 
 		/* Otherwise perform the biome search and breaks if a different coordinate would be picked. */
 		setSeed(&random, seed);
-		int found = 0;
-		Pos estimatedSpawn = locateBiome(&g, 0, 63, 0, 256, VALID_SPAWN_BIOMES, 0, &random, &found);
+		Pos estimatedSpawn = locateBiome(&g, 0, 63, 0, 256, VALID_SPAWN_BIOMES, 0, &random, NULL);
 		if (estimatedSpawn.x != 256 || estimatedSpawn.z != 256) continue;
 
-		/* Then check if (527, 527) would (be likely to) have a grass block. If not, break.*/
+		/* Then check if (256, 256) would NOT (be likely to) have a grass block. If not, break.*/
 		initSurfaceNoise(&sn, DIM_OVERWORLD, seed);
-		mapApproxHeight(y, ids, &g, &sn, 527 >> 2, 527 >> 2, 1, 1);
+		mapApproxHeight(y, ids, &g, &sn, 256 >> 2, 256 >> 2, 1, 1);
 		int grassStartsAt = 0;
+		getBiomeDepthAndScale(ids[0], NULL, NULL, &grassStartsAt);
+		if (grassStartsAt && y[0] >= grassStartsAt) continue;
+
+		/* Then check if (527, 527) would (be likely to) have a grass block. If not, break.*/
+		mapApproxHeight(y, ids, &g, &sn, 527 >> 2, 527 >> 2, 1, 1);
+		grassStartsAt = 0;
 		getBiomeDepthAndScale(ids[0], NULL, NULL, &grassStartsAt);
 		if (!grassStartsAt || y[0] < grassStartsAt) continue;
 
@@ -132,7 +140,7 @@ void *runWorker(void *workerIndex) {
 			if (UPDATE_THRESHOLD) pthread_mutex_unlock(&mutex);
 			continue;
 		}
-		outputValues("%" PRId64 "\t%d\t%d\t%f\t(%d)\n", seed, spawn.x, spawn.z, sqrt(currentSquaredRadialDist), records);
+		outputValues("%" PRId64 "\t%d\t%d\t%f\t%d\n", seed, spawn.x, spawn.z, sqrt(currentSquaredRadialDist), records);
 		if (UPDATE_THRESHOLD) {
 			if (records & 4) farthestSquaredRadialDist = currentSquaredRadialDist;
 			if (records & 2) farthestMinAxialDist = currentMinAxialDist;

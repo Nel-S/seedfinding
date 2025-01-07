@@ -21,7 +21,7 @@ The [Forward Checker](./Forward%20Checker/) is usable for "small" ranges of seed
 	<tbody>
 		<tr> <td rowspan=5>L<sup>2</sup> (Euclidean)</td> <td rowspan=3>Default</td> <td>Java 1.18-1.21.1</td> <td>(-1343, -1136)</td> <td>1759.02</td> <td>2242180942571</td> <td>NelS</td> </tr>
 		<tr>                                                                         <td>Bedrock 1.18-1.21.1</td> <td>(1515, 829)</td> <td>1726.98</td> <td>8514982786202962122</td> <td>Jereaux</td> </tr>
-		<tr>                                                                         <td>Java 1.21.2+</td> <td>(-352, -2544)</td> <td>2568.23</td> <td>1100226945118265</td> <td>Zennith</td> </tr>
+		<tr>                                                                         <td>Java 1.21.2+</td> <td>(-1392, -2160)</td> <td>2569.68</td> <td>1100809258860442</td> <td>Zennith</td> </tr>
 		<tr>                                              <td rowspan=2>Large Biomes</td> <td>Java 1.18-1.21.1</td> <td>(-1560, -1816)</td> <td>2394.05</td> <td>1100968538880257</td> <td>Zennith</td> </tr>
 		<tr>                                                                              <td>Java 1.21.2+</td> <td>(1599, -2160)</td> <td>2687.45</td> <td>530524958</td> <td>NelS</td> </tr>
 		<tr> <td rowspan=5>L<sup>&infin;</sup> (Chebyshev)</td> <td rowspan=3>Default</td> <td>Java 1.18-1.21.1</td> <td>x = -1728</td> <td>1728</td> <td>690455132394644</td> <td>Meox</td> </tr>
@@ -49,9 +49,9 @@ The [Forward Checker](./Forward%20Checker/) is usable for "small" ranges of seed
 		<tr> <td rowspan=3><b>Meox</b></td> <td>215772259249 (48-bit)</td> <td>215773147572 (48-bit)</td> <td rowspan=3>2.871 trillion (1.18-1.21.1 Default)</td> </tr>
 		<tr>                                <td>3366025373172</td>         <td>3426926457792</td>                                                                 </tr>
 		<tr>                                <td>690000000000000</td>       <td>692752814164988</td>                                                               </tr>
-		<tr> <td rowspan=3><b>Zennith</b></td> <td>1100000000000000</td>                <td>1101229653433314</td> <td rowspan=3>1.229 trillion (1.18-1.21.1 Default)<br>500 billion (1.18-1.21.1 Large Biomes)<br>226 billion (1.21.2+)</td> </tr>
+		<tr> <td rowspan=3><b>Zennith</b></td> <td>1100000000000000</td>                <td>1101229653433314</td> <td rowspan=3>1.229 trillion (1.18-1.21.1 Default)<br>500 billion (1.18-1.21.1 Large Biomes)<br>809 billion (1.21.2+)</td> </tr>
 		<tr>                                   <td>1100500000000000 (Large Biomes)</td> <td>1101000000000000 (Large Biomes)</td>                                                 </tr>
-		<tr>                                   <td>1100000000000000 (1.21.2+)</td>      <td>1100226945118265 (1.21.2+)</td>                                                      </tr>
+		<tr>                                   <td>1100000000000000 (1.21.2+)</td>      <td>1100809258860442 (1.21.2+)</td>                                                      </tr>
 		<tr> <td rowspan=5><b>NelS</b></td> <td>0</td>                            <td>320416846294</td> <td rowspan=5>1.476 trillion (1.18-1.21.1 Default)<br>154 billion (1.18-1.21.1 Large Biomes)<br>288 billion (1.21.2+ Default)<br>530 million (1.21.2+ Large Biomes)</td> </tr>
 		<tr>                                <td>2210416846294</td>                <td>3366025373172</td>                                                                         </tr>
 		<tr>                                <td>6209940093 (Large Biomes)</td>    <td>160265862227 (Large Biomes)</td>                                                           </tr>

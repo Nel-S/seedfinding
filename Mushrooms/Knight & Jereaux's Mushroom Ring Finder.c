@@ -1,12 +1,12 @@
-#include "../common.h"
-#include "../utilities/Climates.h"
+#include "../Utilities/core/common_seedfinding.h"
+#include "../Utilities/Climates.h"
 // #include "../utilities/cubiomes/finders.c"
 // #include "../utilities/cubiomes/biomenoise.c"
 
 // const uint64_t GLOBAL_START_SEED = -230734003789;
 const uint64_t GLOBAL_START_SEED = 0;
 // const uint64_t GLOBAL_SEEDS_TO_CHECK = 100000000;
-const uint64_t GLOBAL_SEEDS_TO_CHECK = -1;
+const uint64_t GLOBAL_SEEDS_TO_CHECK = CHECK_THIS_SEED_AND_FOLLOWING(GLOBAL_START_SEED);
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const int PERCENTILE = FIFTIETH_PERCENTILE;
 const char *INPUT_FILEPATH  = NULL;
@@ -16,10 +16,7 @@ const bool LARGE_BIOMES_FLAG = false;
 const bool TIME_PROGRAM = false;
 const bool DELAY_SHIFT = true;
 
-uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
-int localNumberOfProcesses = GLOBAL_NUMBER_OF_WORKERS;
-
-void initGlobals() {}
+DEFAULT_LOCALS_INITIALIZATION
 
 void *runWorker(void *workerIndex) {
     Generator g;
@@ -114,7 +111,7 @@ void *runWorker(void *workerIndex) {
         // TODO: Remove
         setBiomeSeed(&g.bn, seed, LARGE_BIOMES_FLAG);
         Pos spawn = getSpawn(&g);
-        // printf("%d %d\n", spawn.x, spawn.z);
+        // outputValues("%d %d\n", spawn.x, spawn.z);
         if (abs(spawn.x - 64) > 350 || abs(spawn.z) > 350) continue;
 
         outputValues("%" PRId64 "\n", seed);

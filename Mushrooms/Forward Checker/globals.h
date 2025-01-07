@@ -4,8 +4,7 @@
 #include "settings.h"
 #include "../../utilities/Spawn.h"
 
-uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
-int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+DEFAULT_LOCALS_INITIALIZATION
 
 const double CONT_FITNESS_SQRT = MOST_POSITIVE_CONT < -0.11 ? 10000*(MOST_POSITIVE_CONT + 0.11) : 0;
 const double FITNESS = CONT_FITNESS_SQRT * CONT_FITNESS_SQRT;
@@ -15,7 +14,7 @@ const double FITNESS = CONT_FITNESS_SQRT * CONT_FITNESS_SQRT;
 double Cdouble[sizeof(U_SPAWN_FIRST_STAGE_VALS)/sizeof(*U_SPAWN_FIRST_STAGE_VALS)][sizeof(U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS)/sizeof(*U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS)];
 uint_fast8_t ringStartingIndex;
 
-const size_t BIOME_CACHE_SIZE = (size_t)RADIUS * RADIUS + 3*(((RADIUS + 3) >> 2) + 2)*(((RADIUS + 3) >> 2) + 2);
+const size_t BIOME_CACHE_SIZE = (size_t)RADIUS * RADIUS + 3*(((RADIUS + 3ULL) >> 2) + 2)*(((RADIUS + 3ULL) >> 2) + 2);
 // const size_t BIOME_CACHE_SIZE = (size_t)3*(((2*RADIUS + 3) >> 2) + 2)*(((2*RADIUS + 3) >> 2) + 2);
 
 #endif

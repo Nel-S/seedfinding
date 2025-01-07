@@ -1,10 +1,10 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
-#include "../../common.h"
+#include "../../Utilities/core/common_seedfinding.h"
 
 // Sets the seed to start at and the number of seeds to iterate over.
-const uint64_t GLOBAL_START_SEED = 154778801832;
-const uint64_t GLOBAL_SEEDS_TO_CHECK = 1ULL << 40;
+const uint64_t GLOBAL_START_SEED = 4000000000300814;
+const uint64_t GLOBAL_SEEDS_TO_CHECK = 1000000;
 // (If one's main() file uses multithreading), sets the number of threads to create.
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 
@@ -12,12 +12,12 @@ const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const double MOST_POSITIVE_CONT = -0.4;
 // The radius (half-edge-length) of the bounding box surrounding the chunk-centered second-stage spawnpoint to search within.
 // (For context, the real spawn algorithm uses a radius of 88.)
-// const int RADIUS = 105;
-const int RADIUS = 400;
+const int RADIUS = 105;
+// const int RADIUS = 400;
 
 // (If one's main() file prints to a file) The filepath to print results to.
 const char *INPUT_FILEPATH  = NULL;
-const char *OUTPUT_FILEPATH = "mushroomSeeds.txt";
+const char *OUTPUT_FILEPATH = NULL;
 
 // Set to false for normal generation, or true for Large Biomes generation.
 const bool LARGE_BIOMES_FLAG = false;

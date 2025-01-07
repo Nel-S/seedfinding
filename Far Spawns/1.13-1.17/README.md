@@ -15,7 +15,7 @@ The only way to achieve such a spawnpoint is for a suitable biome to be at (256,
 		<tr> <th>Distance metric</th> <th>Generation mode</th> <th>Version range</th> <th>Current Farthest-known Spawnpoint from (0, 0)</th> <th>Distance (blocks)</th> <th>Seed</th> <th>Discoverer</th> </tr>
 	</thead>
 	<tbody>
-		<tr> <td rowspan=3>L<sup>2</sup> (Euclidean)</td> <td>Default</td>      <td>1.13-1.17.1</td> <td>(-464,-480)</td> <td>667.60</td> <td>9000000061086707</td> <td>M33_Galaxy</td> </tr>
+		<tr> <td rowspan=3>L<sup>2</sup> (Euclidean)</td> <td>Default</td>      <td>1.13-1.17.1</td> <td>(-480, 484)</td> <td>681.65</td> <td>5000000000061795105</td> <td>Fragrant_Result_186</td> </tr>
 		<tr>                                              <td>Large Biomes</td> <td>1.13-1.17.1</td> <td>(384, 412)</td> <td>563.21</td> <td>390301013</td> <td>NelS</td>        </tr>
 		<tr>                                              <td>Superflat</td>    <td>1.13-1.17.1</td> <td>(256, 256)</td> <td>362.03</td> <td>None yet</td> <td>N/A</td>          </tr>
 		<tr> <td rowspan=3>L<sup>&infin;</sup> (Chebyshev)</td> <td>Default</td>      <td>1.13-1.17.1</td> <td>z = 524</td> <td>524</td> <td>199000008157440</td> <td>M33_Galaxy</td> </tr>
@@ -37,6 +37,7 @@ The only way to achieve such a spawnpoint is for a suitable biome to be at (256,
 		<tr>                                <td>0 (Large Biomes)</td> <td>577447509 (Large Biomes)</td>                                                        </tr>
 		<tr> <td rowspan=2><b>M33_Galaxy</b></td> <td>199000000000000</td>  <td>199000008157440</td> <td rowspan=2>69 million (Normal)</td> </tr>
 		<tr>                                      <td>9000000000000000</td> <td>9000000061086707</td>                                       </tr>
+		<tr> <td><b>Fragrant_Result_186</b></td> <td>5000000000000000000</td>  <td>5000000000061795105</td> <td>61 million (Normal)</td> </tr>
 	</tbody>
 </table>
 

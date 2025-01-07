@@ -1,11 +1,12 @@
-#include "../common.h"
+#include "../Utilities/core/common_seedfinding.h"
 
+const uint64_t GLOBAL_START_SEED = 0, GLOBAL_SEEDS_TO_CHECK = 0;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const bool TIME_PROGRAM = false;
 const char *INPUT_FILEPATH = NULL;
 const char *OUTPUT_FILEPATH = NULL;
 
-localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+DEFAULT_LOCALS_INITIALIZATION
 
 
 bool testForSlime(uint64_t seed, int chunkX, int chunkZ) {

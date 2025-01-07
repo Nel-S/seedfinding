@@ -1,4 +1,4 @@
-#include "../../../common.h"
+#include "../../../Utilities/core/common_seedfinding.h"
 #include "../../../Utilities/Climates.h"
 #include <math.h>
 
@@ -9,8 +9,7 @@ const char *INPUT_FILEPATH  = NULL;
 const char *OUTPUT_FILEPATH = NULL;
 const bool TIME_PROGRAM = false;
 
-uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
-int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+DEFAULT_LOCALS_INITIALIZATION
 
 uint64_t farthestDist = 0;
 // 138728061      (3890, -2996) = 24108116 (4910.001629)

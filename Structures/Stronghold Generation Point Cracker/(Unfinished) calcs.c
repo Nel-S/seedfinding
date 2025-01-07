@@ -1,6 +1,6 @@
 #include "settings.h"
 #include "../../utilities/cubiomes/util.h"
-#include "../../utilities/Math.h"
+#include "../../Utilities/U_Math.h"
 
 typedef struct {
 	uint64_t lower, upper;

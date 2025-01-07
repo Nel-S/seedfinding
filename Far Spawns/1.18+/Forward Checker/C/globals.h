@@ -4,17 +4,18 @@
 // Imports settings
 #include "settings.h"
 
-uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
-int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+DEFAULT_LOCALS_INITIALIZATION
 
 /* Index at which each ring begins. Given the U_SPAWN_FIRST_STAGE_VALS[] coordinates are sorted by ascending distance, this is also the index of the smallest distance in each ring, while this minus one
    is the index of the largest distance in the previous ring.*/
 uint8_t ringStartingIndex;
 					                  						   
 #if CHECK_DISTANCES
-const double MIN_DIST = (MIN_RADIAL_DISTANCE < MIN_AXIAL_DISTANCE ? MIN_RADIAL_DISTANCE : MIN_AXIAL_DISTANCE)/25;
-const double CONT_FITNESS_SQRT = MOST_POSITIVE_CONT < -0.11 ? 10000*MOST_POSITIVE_CONT + 1100 : 0;
-const double FITNESS = MIN_DIST * MIN_DIST * MIN_DIST * MIN_DIST + CONT_FITNESS_SQRT * CONT_FITNESS_SQRT;
+const double MIN_DIST = MIN_RADIAL_DISTANCE < MIN_AXIAL_DISTANCE ? MIN_RADIAL_DISTANCE : MIN_AXIAL_DISTANCE;
+// const double CONT_FITNESS_SQRT = MOST_POSITIVE_CONT < -0.11 ? 10000*MOST_POSITIVE_CONT + 1100 : 0;
+// const double FITNESS = MIN_DIST * MIN_DIST * MIN_DIST * MIN_DIST + CONT_FITNESS_SQRT * CONT_FITNESS_SQRT;
+const double CONT_FITNESS_SQRT = MOST_POSITIVE_CONT < -0.11 ? (POST_1_21_1 ? 20480000. : 10000.)*(MOST_POSITIVE_CONT + 0.11) : 0;
+const double FITNESS = MIN_DIST * MIN_DIST * (POST_1_21_1 ? 1 : MIN_DIST * MIN_DIST/390625.) + CONT_FITNESS_SQRT * CONT_FITNESS_SQRT;
 #else
 const double FITNESS = (!MIN_DESIRED_RING     ) ? 0        /* U_SPAWN_FIRST_STAGE_VALS[0 ][U_spawn_table_fitness] */ :
 					   ( MIN_DESIRED_RING == 1) ? 174491   /* U_SPAWN_FIRST_STAGE_VALS[1 ][U_spawn_table_fitness] */ :

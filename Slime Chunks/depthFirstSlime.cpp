@@ -1,4 +1,4 @@
-#include "../common.h"
+#include "../utilities/core/common_seedfinding.h"
 #include "../utilities/cubiomes/finders.h"
 #include <unordered_set>
 #include <utility>
@@ -6,13 +6,14 @@
 const uint64_t GLOBAL_START_SEED = 0;
 const uint64_t GLOBAL_SEEDS_TO_CHECK = 1ULL << 48;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
+const char *INPUT_FILEPATH = NULL;
+const char *OUTPUT_FILEPATH = NULL;
 const Pos COORDINATE_TO_CHECK = {-27, 16};
 const int INITIAL_BEST_COUNT = 2;
 const bool TIME_PROGRAM = false;
 
 
-uint64_t localStartSeed = GLOBAL_START_SEED, localSeedsToCheck = GLOBAL_SEEDS_TO_CHECK;
-int localNumberOfWorkers = GLOBAL_NUMBER_OF_WORKERS;
+DEFAULT_LOCALS_INITIALIZATION
 
 int bestCount;
 
