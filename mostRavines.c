@@ -1,4 +1,4 @@
-#include "Utilities/core/common_seedfinding.h"
+#include "core/common_seedfinding.h"
 #include "Chunkbiomes/Bfinders.h"
 #include <string.h>
 

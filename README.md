@@ -1,6 +1,6 @@
 # Seedfinding
 This repository holds almost all of my seedfinding-related files and code.
-
+<!-- 
 ## C/C++ Compiling
 This repository is loosely split into three parts.
 - The programs themselves.
@@ -8,6 +8,6 @@ This repository is loosely split into three parts.
 
 As an example, compiling [`Extreme Climates/Extreme Climate At Coordinate.c`](./Extreme%20Climates/Extreme%20Climate%20At%20Coordinate.c) with pthreads would be done with
 ```bash
-gcc "Extreme Climates/Extreme Climate At Coordinate.c" "Templates/Example main (pthreads).c" "Utilities/U_Math.c" "Utilities/Climates.c" "Utilities/Spawn.c" "libcubiomes.a" -o "<executable name>"
+gcc "Extreme Climates/Extreme Climate At Coordinate.c" "core/Example main (pthreads).c" "Utilities/U_Math.c" "Utilities/Climates.c" "Utilities/Spawn.c" "libcubiomes.a" -o "<executable name>"
 ```
-with optional compilation flags (`-O3`, `-fwrapv`, `-Wall`, etc.) listed afterwards.
+with optional compilation flags (`-O3`, `-fwrapv`, `-Wall`, etc.) listed afterwards. -->

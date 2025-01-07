@@ -1,5 +1,5 @@
 #include "../utilities/cubiomes/finders.h"
-#include "../Utilities/core/common_seedfinding.h"
+#include "../core/common_seedfinding.h"
 #include <pthread.h>
 
 const uint64_t GLOBAL_START_SEED = 0; //735673042

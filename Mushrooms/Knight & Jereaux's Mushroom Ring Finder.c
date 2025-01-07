@@ -1,4 +1,4 @@
-#include "../Utilities/core/common_seedfinding.h"
+#include "../core/common_seedfinding.h"
 #include "../Utilities/Climates.h"
 // #include "../utilities/cubiomes/finders.c"
 // #include "../utilities/cubiomes/biomenoise.c"
@@ -84,7 +84,7 @@ void *runWorker(void *workerIndex) {
             px = floor(px/4.);
             pz = floor(pz/4.);
         }
-        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
+        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, px, pz, NULL, Cdouble, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
 
         px = -416, pz = 480;
         if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz, LARGE_BIOMES_FLAG);
@@ -92,7 +92,7 @@ void *runWorker(void *workerIndex) {
             px = floor(px/4.);
             pz = floor(pz/4.);
         }
-        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
+        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, px, pz, NULL, Cdouble, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
 
         px = 544, pz = -480;
         if (!DELAY_SHIFT) U_sampleClimate(NP_SHIFT, oct, &px, &pz, LARGE_BIOMES_FLAG);
@@ -100,7 +100,7 @@ void *runWorker(void *workerIndex) {
             px = floor(px/4.);
             pz = floor(pz/4.);
         }
-        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, &px, &pz, NULL, Cdouble, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
+        if (U_sampleClimateBounded(NP_CONTINENTALNESS, oct, px, pz, NULL, Cdouble, LARGE_BIOMES_FLAG, &npC) < U_CLIMATE_NUMBER_OF_OCTAVES[NP_CONTINENTALNESS]) continue;
 
         if (DELAY_SHIFT) U_initClimate(NP_SHIFT, oct, seed, LARGE_BIOMES_FLAG);
         U_initClimate(NP_TEMPERATURE, oct, seed, LARGE_BIOMES_FLAG);

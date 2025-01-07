@@ -1,4 +1,4 @@
-#include "../Utilities/core/common_seedfinding.h"
+#include "../core/common_seedfinding.h"
 #include "../utilities/cubiomes/finders.h"
 #include <unordered_set>
 #include <utility>

@@ -1,7 +1,7 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
 
-#include "../../../../Utilities/core/common_seedfinding.h"
+#include "../../../../core/common_seedfinding.h"
 #include "../../../../Utilities/Spawn.h"
 
 // The seed to start from.

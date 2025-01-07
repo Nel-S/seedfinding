@@ -1,5 +1,5 @@
 #include "../../utilities/cubiomes/finders.h"
-#include "../../Utilities/core/common_seedfinding.h"
+#include "../../core/common_seedfinding.h"
 #include "../../Utilities/U_Math.h"
 #include <pthread.h>
 

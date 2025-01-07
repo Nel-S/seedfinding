@@ -1,9 +1,12 @@
-[submodule "pybiomes"]
-	path = pybiomes
-	url = https://github.com/Nel-S/pybiomes
+[submodule "core"]
+	path = core
+	url = https://github.com/Nel-S/core.git
 [submodule "Chunkbiomes"]
 	path = Chunkbiomes
-	url = https://github.com/Nel-S/Chunkbiomes
+	url = https://github.com/Nel-S/Chunkbiomes.git
+[submodule "pybiomes"]
+	path = pybiomes
+	url = https://github.com/Nel-S/pybiomes.git
 [submodule "Utilities"]
 	path = Utilities
-	url = https://github.com/Nel-S/Utilities
+	url = https://github.com/Nel-S/Utilities.git

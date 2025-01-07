@@ -46,12 +46,12 @@ The [Forward Checker](./Forward%20Checker/) is usable for "small" ranges of seed
 		<tr>                                   <td>8514982163198740964</td>          <td>8514982827054712191</td>                                        </tr>
 		<tr>                                   <td>-1519791477682421020</td>         <td>-1519790283805697334</td>                                       </tr>
 		<tr>                                   <td>-7221474987810836822</td>         <td>-7221474578187462918</td>                                       </tr>
+		<tr> <td rowspan=3><b>Zennith</b></td> <td>1100000000000000</td>                <td>1101229653433314</td> <td rowspan=3>1.229 trillion (1.18-1.21.1 Default)<br>500 billion (1.18-1.21.1 Large Biomes)<br>1.601 trillion (1.21.2+)</td> </tr>
+		<tr>                                   <td>1100500000000000 (Large Biomes)</td> <td>1101000000000000 (Large Biomes)</td>                                                 </tr>
+		<tr>                                   <td>1100000000000000 (1.21.2+)</td>      <td>1101601744820334 (1.21.2+)</td>                                                      </tr>
 		<tr> <td rowspan=3><b>Meox</b></td> <td>215772259249 (48-bit)</td> <td>215773147572 (48-bit)</td> <td rowspan=3>2.871 trillion (1.18-1.21.1 Default)</td> </tr>
 		<tr>                                <td>3366025373172</td>         <td>3426926457792</td>                                                                 </tr>
 		<tr>                                <td>690000000000000</td>       <td>692752814164988</td>                                                               </tr>
-		<tr> <td rowspan=3><b>Zennith</b></td> <td>1100000000000000</td>                <td>1101229653433314</td> <td rowspan=3>1.229 trillion (1.18-1.21.1 Default)<br>500 billion (1.18-1.21.1 Large Biomes)<br>809 billion (1.21.2+)</td> </tr>
-		<tr>                                   <td>1100500000000000 (Large Biomes)</td> <td>1101000000000000 (Large Biomes)</td>                                                 </tr>
-		<tr>                                   <td>1100000000000000 (1.21.2+)</td>      <td>1100809258860442 (1.21.2+)</td>                                                      </tr>
 		<tr> <td rowspan=5><b>NelS</b></td> <td>0</td>                            <td>320416846294</td> <td rowspan=5>1.476 trillion (1.18-1.21.1 Default)<br>154 billion (1.18-1.21.1 Large Biomes)<br>288 billion (1.21.2+ Default)<br>530 million (1.21.2+ Large Biomes)</td> </tr>
 		<tr>                                <td>2210416846294</td>                <td>3366025373172</td>                                                                         </tr>
 		<tr>                                <td>6209940093 (Large Biomes)</td>    <td>160265862227 (Large Biomes)</td>                                                           </tr>

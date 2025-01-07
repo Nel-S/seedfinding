@@ -1,4 +1,4 @@
-#include "../Utilities/core/common_seedfinding.h"
+#include "../core/common_seedfinding.h"
 
 const uint64_t GLOBAL_START_SEED = 0, GLOBAL_SEEDS_TO_CHECK = 0;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;

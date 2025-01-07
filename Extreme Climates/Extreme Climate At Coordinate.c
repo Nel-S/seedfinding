@@ -1,4 +1,4 @@
-#include "../Utilities/core/common_seedfinding.h"
+#include "../core/common_seedfinding.h"
 #include "../Utilities/Climates.h"
 #include <pthread.h>
 
