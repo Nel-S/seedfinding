@@ -1,12 +1,12 @@
 # Mushrooms
 
-These are files relating to finding a normal biomes mushroom-island spawn in Java 1.18+, **which was ultimately found by a contributor on July 8th, 2024**.
+These are files relating to finding a normal biomes mushroom-island spawn in Java 1.18-1.21.1, **which was ultimately found by Jereaux on July 8th, 2024: 8810001646648042238**.
 
 The spawn algorithm used in those versions heavily discourages coordinates with extremely low continentalnesses (which is the defining feature of mushroom islands), so having the algorithm directly choose a coordinate on a mushroom island is *de facto* impossible. However, since the last stage of the spawn algorithm can move spawnpoints from water onto land at most five chunks away, achieving a second-stage spawnpoint within five chunks of a mushroom island, with no other land blocks in that radius, will theoretically result in a mushroom island spawn just the same.
 
 A Cubiomes Viewer session file was created to search for these, which was later converted into a (possibly bugged) C program to run on Colin's computing cluster. Later, Jereaux sped up the search conditions and combined it with a filter also looking for far spawnpoints, which was used by the majority of contributors.
 
-A Minecraft@Home video documenting this find and revealing the seed will (hopefully) be made at some point.
+A Minecraft@Home video documenting this find and revealing the seed has been released: https://youtu.be/s7QCkAXD1xY .
 
 ## Contributors
 <table>
