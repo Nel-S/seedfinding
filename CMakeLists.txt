@@ -14,7 +14,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 if (WIN32)
 	set(CMAKE_C_FLAGS "-D_WIN32")
 endif()
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -fwrapv -ffast-math -Wall -Wextra -pedantic")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -fwrapv -ffast-math -Wall -Wextra -pedantic -I ${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g3 -DDEBUG")
 
 # Add static submodules

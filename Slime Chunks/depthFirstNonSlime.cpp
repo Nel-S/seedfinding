@@ -1,10 +1,10 @@
-#include "../core/common_seedfinding.h"
-#include "../utilities/cubiomes/finders.h"
+#include "core/bruteforce.h"
+#include "utilities/cubiomes/finders.h"
 #include <unordered_set>
 #include <utility>
 
-const uint64_t GLOBAL_START_SEED = 0;
-const uint64_t GLOBAL_SEEDS_TO_CHECK = 1ULL << 48;
+const uint64_t GLOBAL_START_INTEGER = 0;
+const uint64_t GLOBAL_NUMBER_OF_INTEGERS = 1ULL << 48;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const char *INPUT_FILEPATH = NULL;
 const char *OUTPUT_FILEPATH = NULL;
@@ -26,7 +26,7 @@ struct pair_hash {
     }
 };
 
-void initGlobals() {
+void initializeGlobals() {
     bestCount = INITIAL_BEST_COUNT;
 }
 
@@ -45,13 +45,13 @@ void initGlobals() {
 void *runWorker(void *workerIndex) {
     std::unordered_set<std::pair<int, int>, pair_hash> checkedChunks;
     uint64_t seed;
-    if (!getNextSeed(workerIndex, &seed)) return NULL; 
+    if (!getNextInteger(workerIndex, &seed)) return NULL; 
     do {
         checkedChunks.clear();
         int currentCount = testForSlimeAt(seed, COORDINATE_TO_CHECK.x, COORDINATE_TO_CHECK.z, &checkedChunks, 0);
         if (currentCount < bestCount) continue;
-        outputValues("%" PRId64 "\t%d\n", seed, currentCount);
+        outputString("%" PRId64 "\t%d\n", seed, currentCount);
         if (currentCount > bestCount) bestCount = currentCount;
-    } while (getNextSeed(NULL, &seed));
+    } while (getNextInteger(NULL, &seed));
     return NULL;
 }

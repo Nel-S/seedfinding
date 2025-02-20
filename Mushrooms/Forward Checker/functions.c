@@ -3,7 +3,7 @@
 
 #include "globals.h"
 
-void initGlobals() {
+void initializeGlobals() {
 	for (ringStartingIndex = 0; ringStartingIndex < sizeof(U_SPAWN_FIRST_STAGE_VALS)/sizeof(*U_SPAWN_FIRST_STAGE_VALS) && U_SPAWN_FIRST_STAGE_VALS[ringStartingIndex][U_spawn_table_fitness] <= FITNESS; ++ringStartingIndex);
 
 	for (uint_fast8_t i = 0; i < ringStartingIndex; ++i) {
@@ -30,7 +30,7 @@ void *runWorker(void *workerIndex) {
 
 	// Iterates over N seeds, beginning at the one originally specified by the user
 	uint64_t seed;
-	if (!getNextSeed(workerIndex, &seed)) return NULL;
+	if (!getNextInteger(workerIndex, &seed)) return NULL;
 	do {
 		double px = pxs[0], pz = pzs[0], npC;
 		if (!DELAY_SHIFT) U_initAndSampleClimateBounded(NP_SHIFT, oct, &px, &pz, NULL, NULL, &seed, LARGE_BIOMES_FLAG, NULL);
@@ -89,9 +89,9 @@ void *runWorker(void *workerIndex) {
 
 		bool mushroomExists = false;
 		int mushroomDist = INT_MAX;
-		outputValues("(%" PRId64 ")", seed);
+		outputString("(%" PRId64 ")", seed);
 		genBiomeNoiseScaled(&bn, ids, (Range){1, approxSpawn.x - RADIUS, approxSpawn.z - RADIUS, 2*RADIUS, 2*RADIUS, 63, 1}, getVoronoiSHA(seed));
-		outputValues("(%" PRId64 ")", seed);
+		outputString("(%" PRId64 ")", seed);
 		for (size_t i = 0; i < 4*RADIUS*RADIUS; ++i) {
 			if (ids[i] == mushroom_fields) {
 				mushroomExists = true;
@@ -137,9 +137,9 @@ void *runWorker(void *workerIndex) {
 
 		if (!mushroomExists) continue;
 
-		outputValues("%" PRId64 "\t%d\n", seed, mushroomDist);
+		outputString("%" PRId64 "\t%d\n", seed, mushroomDist);
 		skip: continue;
-	} while (getNextSeed(NULL, &seed));
+	} while (getNextInteger(NULL, &seed));
 	return NULL;
 }
 

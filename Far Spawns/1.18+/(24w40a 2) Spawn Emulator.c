@@ -1,8 +1,8 @@
-#include "../../../Utilities/Spawn.h"
-#include "../../../core/common_seedfinding.h"
+#include "Utilities/Spawn.h"
+#include "core/bruteforce.h"
 
-const uint64_t GLOBAL_START_SEED = 0;
-const uint64_t GLOBAL_SEEDS_TO_CHECK = 0;
+const uint64_t GLOBAL_START_INTEGER = 0;
+const uint64_t GLOBAL_NUMBER_OF_INTEGERS = 0;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const char *INPUT_FILEPATH = "C:\\msys64\\home\\seedfinding\\Far Spawns\\1.18+\\24w40a First-Stage Continentalness below -0.110125.txt";
 const char *OUTPUT_FILEPATH = NULL;
@@ -16,7 +16,7 @@ const int JAVA_L_INFINITY_THRESHOLD = 1696;
 
 DEFAULT_LOCALS_INITIALIZATION
 
-void initGlobals() {}
+void initializeGlobals() {}
 
 void fitnessAlg(const PerlinNoise *oct, const double r, const double k, Pos *p, double *fitness) {
 // void fitnessAlg(const PerlinNoise *oct, const double r, const double k, Pos *p, double *fitness, const Generator *g) {
@@ -49,7 +49,7 @@ void *runWorker(void *workerIndex) {
 	setupGenerator(&g, MC_NEWEST, LARGE_BIOMES_FLAG);
 
 	uint64_t seed = 0;
-	if (!getNextSeed(workerIndex, &seed)) return NULL;
+	if (!getNextInteger(workerIndex, &seed)) return NULL;
 	do {
 		applySeed(&g, DIM_OVERWORLD, seed);
 		// g->bn.nptype = NP_CONTINENTALNESS;
@@ -65,15 +65,15 @@ void *runWorker(void *workerIndex) {
 		int flags = 0;
 		flags = (((offsetSpawn.x + (offsetSpawn.x > 0 ? 87 : -88)) * (offsetSpawn.x + (offsetSpawn.x > 0 ? 87 : -88)) + (offsetSpawn.z + (offsetSpawn.z > 0 ? 87 : -88)) * (offsetSpawn.z + (offsetSpawn.z > 0 ? 87 : -88)) >= JAVA_RADIAL_THRESHOLD*JAVA_RADIAL_THRESHOLD) << 2) | ((max(abs(offsetSpawn.x), abs(offsetSpawn.z)) >= JAVA_AXIAL_THRESHOLD - 88) << 1) | (min(abs(offsetSpawn.x), abs(offsetSpawn.z)) >= JAVA_L_INFINITY_THRESHOLD - 88);
 		if (!flags) continue;
-		outputValues("%" PRIu64 "\t%d\t%d\t%f\t%d\n", seed, spawn.x, spawn.z, sqrt(spawn.x * spawn.x + spawn.z * spawn.z), flags);
+		outputString("%" PRIu64 "\t%d\t%d\t%f\t%d\n", seed, spawn.x, spawn.z, sqrt(spawn.x * spawn.x + spawn.z * spawn.z), flags);
 		// double efc = -sqrt(fitness - (spawn.x*spawn.x + spawn.z*spawn.z))/20480000. - 0.11;
 		// if (efc > -0.19) continue;
-		// outputValues("%" PRIu64 "\t%f\n", seed, efc);
+		// outputString("%" PRIu64 "\t%f\n", seed, efc);
 		// Pos estimate = estimateSpawn(&g, NULL);
 		// printf("Estimate: (%d, %d) vs (%d, %d)\n", estimate.x, estimate.z, spawn.x, spawn.z);
 		// estimate = getSpawn(&g);
 		// printf("Estimate 2: (%d, %d)\n", estimate.x, estimate.z);
-	} while (getNextSeed(NULL, &seed));
+	} while (getNextInteger(NULL, &seed));
 
 	return 0;
 }

@@ -1,9 +1,9 @@
-#include "../../../core/common_seedfinding.h"
-#include "../../../Utilities/Climates.h"
+#include "core/bruteforce.h"
+#include "Utilities/Climates.h"
 #include <math.h>
 
-const uint64_t GLOBAL_START_SEED = 0;
-const uint64_t GLOBAL_SEEDS_TO_CHECK = (1ULL << 48) - GLOBAL_START_SEED;
+const uint64_t GLOBAL_START_INTEGER = 0;
+const uint64_t GLOBAL_NUMBER_OF_INTEGERS = (1ULL << 48) - GLOBAL_START_INTEGER;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const char *INPUT_FILEPATH  = NULL;
 const char *OUTPUT_FILEPATH = NULL;
@@ -14,11 +14,11 @@ DEFAULT_LOCALS_INITIALIZATION
 uint64_t farthestDist = 0;
 // 138728061      (3890, -2996) = 24108116 (4910.001629)
 
-void initGlobals() {}
+void initializeGlobals() {}
 
 void *runWorker(void *workerIndex) {
 	uint64_t seed;
-	if (!getNextSeed(workerIndex, &seed)) return NULL;
+	if (!getNextInteger(workerIndex, &seed)) return NULL;
 	do {
 		// setSeed(&rng, seed);
 		uint64_t rng = seed;
@@ -44,8 +44,8 @@ void *runWorker(void *workerIndex) {
 		}
 		if (localFarthestDist < farthestDist) continue;
 		if (farthestDist < localFarthestDist) farthestDist = localFarthestDist;
-		outputValues("%" PRId64 "\t%d\t%d\t%d\t%f\n", seed, bestI, localBestPos.x, localBestPos.z, sqrt(localFarthestDist));
+		outputString("%" PRId64 "\t%d\t%d\t%d\t%f\n", seed, bestI, localBestPos.x, localBestPos.z, sqrt(localFarthestDist));
 		// skipSeed: continue;
-	} while (getNextSeed(NULL, &seed));
+	} while (getNextInteger(NULL, &seed));
 	return NULL;
 }

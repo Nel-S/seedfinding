@@ -1,6 +1,6 @@
 # 1.13-1.17
 
-Between 1.13 and 1.17, Minecraft: Java Edition still searches for a valid biome in the area ((-256, -256), (256, 256)), then subsequently looks for a grass block. However, the game now performs a spiral iteration up to 16 chunks away (offset by one chunk to the Southeast) instead of jumping using nextInts, which significantly shrinks the range spawnpoints can fall within.
+Between 1.13 and 1.17, Minecraft: Java Edition still searches for a valid biome in the area ((-256, -256), (256, 256)), then subsequently looks for a grass block. However, the game now performed a spiral iteration up to 16 chunks away (offset by one chunk to the Southeast) instead of jumping using nextInts, which significantly shrinks the range spawnpoints can fall within.
 
 | Criteria                               | <ins>Theoretical</ins> Farthest Spawnpoint from (0, 0) | Distance (blocks) |
 | -------------------------------------- | ------------------------------------------------------ | ----------------- |
@@ -15,13 +15,14 @@ The only way to achieve such a spawnpoint is for a suitable biome to be at (256,
 		<tr> <th>Distance metric</th> <th>Generation mode</th> <th>Version range</th> <th>Current Farthest-known Spawnpoint from (0, 0)</th> <th>Distance (blocks)</th> <th>Seed</th> <th>Discoverer</th> </tr>
 	</thead>
 	<tbody>
-		<tr> <td rowspan=3>L<sup>2</sup> (Euclidean)</td> <td>Default</td>      <td>1.13-1.17.1</td> <td>(-480, 484)</td> <td>681.65</td> <td>5000000000061795105</td> <td>Fragrant_Result_186</td> </tr>
-		<tr>                                              <td>Large Biomes</td> <td>1.13-1.17.1</td> <td>(384, 412)</td> <td>563.21</td> <td>390301013</td> <td>NelS</td>        </tr>
-		<tr>                                              <td>Superflat</td>    <td>1.13-1.17.1</td> <td>(256, 256)</td> <td>362.03</td> <td>None yet</td> <td>N/A</td>          </tr>
+		<tr> <td rowspan=4>L<sup>2</sup> (Euclidean)</td> <td rowspan=2>Default</td> <td>1.13-1.14.4</td> <td>(515, 495)</td> <td>714.31</td> <td rowspan=2>1004045132</td> <td rowspan=2>NathanVH8</td> </tr> 
+		<tr>                                                                         <td>1.15-1.17.1</td> <td>(513, 495)</td> <td>712.87</td> </tr>
+		<tr>                                              <td>Large Biomes</td>      <td>1.13-1.17.1</td> <td>(384, 412)</td> <td>563.21</td> <td>390301013</td> <td>NelS</td>        </tr>
+		<tr>                                              <td>Superflat</td>         <td>1.13-1.17.1</td> <td>(256, 256)</td> <td>362.03</td> <td>None yet</td> <td>N/A</td>          </tr>
 		<tr> <td rowspan=3>L<sup>&infin;</sup> (Chebyshev)</td> <td>Default</td>      <td>1.13-1.17.1</td> <td>z = 524</td> <td>524</td> <td>199000008157440</td> <td>M33_Galaxy</td> </tr>
 		<tr>                                                    <td>Large Biomes</td> <td>1.13-1.17.1</td> <td>z = 412</td> <td>412</td> <td>390301013</td> <td>NelS</td> </tr>
 		<tr>                                                    <td>Superflat</td>    <td>1.13-1.17.1</td> <td>x = 256</td> <td>256</td> <td>None yet</td> <td>N/A</td>   </tr>
-		<tr> <td rowspan=3>L<sup>-&infin;</sup></td> <td>Default</td>      <td>1.13-1.17.1</td> <td>x = 296</td> <td>296</td> <td>719387297</td> <td>NelS</td> </tr>
+		<tr> <td rowspan=3>L<sup>-&infin;</sup></td> <td>Default</td>      <td>1.13-1.17.1</td> <td>z = 495</td> <td>495</td> <td>1004045132</td> <td>NathanVH8</td> </tr>
 		<tr>                                         <td>Large Biomes</td> <td>1.13-1.17.1</td> <td>x = 384</td> <td>384</td> <td>390301013</td> <td>NelS</td> </tr>
 		<tr>                                         <td>Superflat</td>    <td>1.13-1.17.1</td> <td>x = 256</td> <td>256</td> <td>None yet</td> <td>N/A</td>   </tr>
 	</tbody>
@@ -37,7 +38,8 @@ The only way to achieve such a spawnpoint is for a suitable biome to be at (256,
 		<tr>                                <td>0 (Large Biomes)</td> <td>577447509 (Large Biomes)</td>                                                        </tr>
 		<tr> <td rowspan=2><b>M33_Galaxy</b></td> <td>199000000000000</td>  <td>199000008157440</td> <td rowspan=2>69 million (Normal)</td> </tr>
 		<tr>                                      <td>9000000000000000</td> <td>9000000061086707</td>                                       </tr>
-		<tr> <td><b>Fragrant_Result_186</b></td> <td>5000000000000000000</td>  <td>5000000000061795105</td> <td>61 million (Normal)</td> </tr>
+		<tr> <td><b>Fragrant_Result_186</b></td> <td>5000000000000000000</td> <td>5000000000061795105</td> <td>61 million (Normal)</td> </tr>
+		<tr> <td><b>NathanVH8</b></td> <td>1000000000</td> <td>1004045132</td> <td>4 million (Normal)</td> </tr>
 	</tbody>
 </table>
 

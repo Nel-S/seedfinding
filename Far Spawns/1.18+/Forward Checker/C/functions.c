@@ -3,7 +3,7 @@
 
 #include "globals.h"
 
-void initGlobals() {
+void initializeGlobals() {
 	for (ringStartingIndex = 0; ringStartingIndex < sizeof(U_SPAWN_FIRST_STAGE_VALS)/sizeof(*U_SPAWN_FIRST_STAGE_VALS) && U_SPAWN_FIRST_STAGE_VALS[ringStartingIndex][U_spawn_table_fitness] <= FITNESS; ++ringStartingIndex);
 
 	for (uint8_t i = 0; i < ringStartingIndex; ++i) U_initClimateBoundsArray(NP_CONTINENTALNESS, U_getEffectiveContinentalness(FITNESS - U_SPAWN_FIRST_STAGE_VALS[i][U_spawn_table_fitness], POST_1_21_1), CLIMATE_PERCENTILE, Cdouble[i], sizeof(*Cdouble)/sizeof(**Cdouble));
@@ -29,7 +29,7 @@ void *runWorker(void *workerIndex) {
 
 	// Iterates over N seeds, beginning at the one originally specified by the user
 	uint64_t seed;
-	if (!getNextSeed(workerIndex, &seed)) return NULL;
+	if (!getNextInteger(workerIndex, &seed)) return NULL;
 	do {
 		double px = 0., pz = 0., npC;
 		if (!DELAY_SHIFT) U_initAndSampleClimateBounded(NP_SHIFT, oct, &px, &pz, NULL, NULL, &seed, LARGE_BIOMES_FLAG, NULL);
@@ -72,17 +72,17 @@ void *runWorker(void *workerIndex) {
 			approxSpawn.x = secondStageResult.pos.x;
 			approxSpawn.z = secondStageResult.pos.z;
 		}
-		Pos centeredSpawn = {(approxSpawn.x & -16) + 8, (approxSpawn.z & -16) + 8};
-		uint32_t distSquared = centeredSpawn.x * centeredSpawn.x + centeredSpawn.z * centeredSpawn.z;
+		Pos offsetSpawn = JAVA_SPAWN ? (Pos){(approxSpawn.x & -16) + (approxSpawn.x >= 0 ? 95 : -80), (approxSpawn.z & -16) + (approxSpawn.z >= 0 ? 95 : -80)} : approxSpawn;
+		uint32_t distSquared = offsetSpawn.x * offsetSpawn.x + offsetSpawn.z * offsetSpawn.z;
 		/* Prints the seed if its squared second-stage approximate distance is further than MIN_RADIAL_DISTANCE blocks away, or either axis is further than MIN_AXIAL_DISTANCE 
 		blocks away.*/
-		if (distSquared < MIN_RADIAL_DISTANCE * MIN_RADIAL_DISTANCE && abs(approxSpawn.x) < MIN_AXIAL_DISTANCE && abs(approxSpawn.z) < MIN_AXIAL_DISTANCE) continue;
-		outputValues("%" PRId64 "\t%d\t%d\t%f\n", seed, approxSpawn.x, approxSpawn.z, sqrt(distSquared));
+		if (distSquared < MIN_RADIAL_DISTANCE * MIN_RADIAL_DISTANCE && abs(offsetSpawn.x) < MIN_AXIAL_DISTANCE && abs(offsetSpawn.z) < MIN_AXIAL_DISTANCE) continue;
+		outputString("%" PRId64 "\t%d\t%d\t%f\n", seed, approxSpawn.x, approxSpawn.z, sqrt(approxSpawn.x * approxSpawn.x + approxSpawn.z * approxSpawn.z));
 		#else
-		outputValues("%" PRId64 "\t%d\n", seed, firstStageIndex);
+		outputString("%" PRId64 "\t%d\n", seed, firstStageIndex);
 		#endif
 		skip: continue;
-	} while (getNextSeed(NULL, &seed));
+	} while (getNextInteger(NULL, &seed));
 	return NULL;
 }
 

@@ -11,6 +11,7 @@ In 1.21.2+, the same algorithm is used, but the penalty for undesirable climates
 | Java 1.18+, L<sup>-&infin;</sup> distance             | x = -1888                                              | 1888              |
 | Bedrock 1.18+, L<sup>2</sup>/Euclidean distance       | (0, 2560)                                              | 2560              |
 | Bedrock 1.18+, L<sup>&infin;</sup>/Chebyshev distance | z = 2560                                               | 2560              |
+| Bedrock 1.18+, L<sup>-&infin;</sup> distance          | x = -1805                                              | 1805              |
 
 The [Forward Checker](./Forward%20Checker/) is usable for "small" ranges of seeds, and (excluding Jereaux's seeds) has been used to find almost all farthest-known 1.18-1.21.1 spawnpoints below. However, the only true way to find the farthest spawnpoint in the entire seedspace would be by deriving worldseeds from their Perlin octaves. With regards to that, the maximum/minimum possible Perlin sample has been found to be &pm;1.0363538112118025; the next step involves creating a table of all Perlin octave configurations' possible ranges.
 
@@ -29,7 +30,7 @@ The [Forward Checker](./Forward%20Checker/) is usable for "small" ranges of seed
 		<tr>                                                                               <td>Java 1.21.2+</td> <td>x = -2560</td> <td>2560</td> <td>9000000126799615201</td> <td>Fragrant_Result_186</td> </tr>
 		<tr>                                                     <td rowspan=2>Large Biomes</td> <td>Java 1.18-1.21.1</td> <td>z = -2376</td> <td>2376</td> <td>1100951982918886</td> <td>Zennith</td> </tr>
 		<tr>                                                                                     <td>Java 1.21.2+</td> <td>z = 2655</td> <td>2655</td> <td>53854196</td> <td>NelS</td> </tr>
-		<tr> <td rowspan=2>L<sup>-&infin;</sup></td> <td>Default</td> <td>Java 1.21.2+</td> <td>x = -1744</td> <td>1744</td> <td>223527517729</td> <td>NelS</td> </tr>
+		<tr> <td rowspan=2>L<sup>-&infin;</sup></td> <td>Default</td> <td>Java 1.21.2+</td> <td>x = 1776</td> <td>1776</td> <td>1102208760935054</td> <td>Zennith</td> </tr>
 		<tr>                                         <td>Large Biomes</td> <td>Java 1.21.2+</td> <td>x = -1888</td> <td>1888</td> <td>5631362</td> <td>NelS</td> </tr>
 	</tbody>
 </table>
@@ -48,7 +49,7 @@ The [Forward Checker](./Forward%20Checker/) is usable for "small" ranges of seed
 		<tr>                                   <td>-7221474987810836822</td>         <td>-7221474578187462918</td>                                       </tr>
 		<tr> <td rowspan=3><b>Zennith</b></td> <td>1100000000000000</td>                <td>1101229653433314</td> <td rowspan=3>1.229 trillion (1.18-1.21.1 Default)<br>500 billion (1.18-1.21.1 Large Biomes)<br>1.601 trillion (1.21.2+)</td> </tr>
 		<tr>                                   <td>1100500000000000 (Large Biomes)</td> <td>1101000000000000 (Large Biomes)</td>                                                 </tr>
-		<tr>                                   <td>1100000000000000 (1.21.2+)</td>      <td>1101601744820334 (1.21.2+)</td>                                                      </tr>
+		<tr>                                   <td>1100000000000000 (1.21.2+)</td>      <td>1102208760935054 (1.21.2+)</td>                                                      </tr>
 		<tr> <td rowspan=3><b>Meox</b></td> <td>215772259249 (48-bit)</td> <td>215773147572 (48-bit)</td> <td rowspan=3>2.871 trillion (1.18-1.21.1 Default)</td> </tr>
 		<tr>                                <td>3366025373172</td>         <td>3426926457792</td>                                                                 </tr>
 		<tr>                                <td>690000000000000</td>       <td>692752814164988</td>                                                               </tr>

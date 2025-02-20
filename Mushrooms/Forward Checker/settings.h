@@ -1,10 +1,10 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
-#include "../../core/common_seedfinding.h"
+#include "core/bruteforce.h"
 
 // Sets the seed to start at and the number of seeds to iterate over.
-const uint64_t GLOBAL_START_SEED = 4000000000300814;
-const uint64_t GLOBAL_SEEDS_TO_CHECK = 1000000;
+const uint64_t GLOBAL_START_INTEGER = 4000000000300814;
+const uint64_t GLOBAL_NUMBER_OF_INTEGERS = 1000000;
 // (If one's main() file uses multithreading), sets the number of threads to create.
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 

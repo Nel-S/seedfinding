@@ -1,12 +1,12 @@
-#include "../../utilities/cubiomes/finders.h"
-#include "../../core/common_seedfinding.h"
-#include "../../Utilities/U_Math.h"
+#include "utilities/cubiomes/finders.h"
+#include "core/bruteforce.h"
+#include "Utilities/U_Math.h"
 #include <pthread.h>
 
-// const uint64_t GLOBAL_START_SEED = 160091761;
-const uint64_t GLOBAL_START_SEED = INT64_MIN;
-const uint64_t GLOBAL_SEEDS_TO_CHECK = CHECK_THIS_SEED_AND_FOLLOWING(GLOBAL_START_SEED);
-// const uint64_t GLOBAL_SEEDS_TO_CHECK = 1000000;
+// const uint64_t GLOBAL_START_INTEGER = 160091761;
+const uint64_t GLOBAL_START_INTEGER = INT64_MIN;
+const uint64_t GLOBAL_NUMBER_OF_INTEGERS = CHECK_THIS_INTEGER_AND_FOLLOWING(GLOBAL_START_INTEGER, 64);
+// const uint64_t GLOBAL_NUMBER_OF_INTEGERS = 1000000;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const char *INPUT_FILEPATH = NULL;
 const char *OUTPUT_FILEPATH = NULL;
@@ -56,7 +56,7 @@ volatile uint64_t farthestSquaredRadialDist;
 volatile int farthestMinAxialDist, farthestMaxAxialDist;
 pthread_mutex_t mutex;
 
-void initGlobals() {
+void initializeGlobals() {
 	farthestSquaredRadialDist = INITIAL_SQUARED_RADIAL_THRESHOLD;
 	farthestMinAxialDist = INITIAL_MIN_AXIAL_THRESHOLD;
 	farthestMaxAxialDist = INITIAL_MAX_AXIAL_THRESHOLD;
@@ -75,7 +75,7 @@ void *runWorker(void *workerIndex) {
 	float y[16];
 	int ids[16];
 	uint64_t random, seed;
-	if (!getNextSeed(workerIndex, &seed)) return NULL;
+	if (!getNextInteger(workerIndex, &seed)) return NULL;
 	// printf("(%" PRId64 ")", seed);
 	do {
 		/* The farthest possible 1.13-1.17 spawnpoint can only occur if the initial 513x513 biome search around the origin picks (256, 256).
@@ -140,13 +140,13 @@ void *runWorker(void *workerIndex) {
 			if (UPDATE_THRESHOLD) pthread_mutex_unlock(&mutex);
 			continue;
 		}
-		outputValues("%" PRId64 "\t%d\t%d\t%f\t%d\n", seed, spawn.x, spawn.z, sqrt(currentSquaredRadialDist), records);
+		outputString("%" PRId64 "\t%d\t%d\t%f\t%d\n", seed, spawn.x, spawn.z, sqrt(currentSquaredRadialDist), records);
 		if (UPDATE_THRESHOLD) {
 			if (records & 4) farthestSquaredRadialDist = currentSquaredRadialDist;
 			if (records & 2) farthestMinAxialDist = currentMinAxialDist;
 			if (records & 1) farthestMaxAxialDist = currentMaxAxialDist;
 			pthread_mutex_unlock(&mutex);
 		}
-	} while (getNextSeed(NULL, &seed));
+	} while (getNextInteger(NULL, &seed));
 	return NULL;
 }

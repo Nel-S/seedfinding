@@ -1,24 +1,27 @@
-#include "../core/common_seedfinding.h"
-#include "../Utilities/Climates.h"
+#include "core/bruteforce.h"
+#include "Utilities/Climates.h"
 #include <pthread.h>
 
-// const uint64_t GLOBAL_START_SEED = 110546880051;
-const uint64_t GLOBAL_START_SEED = 0;
-const uint64_t GLOBAL_SEEDS_TO_CHECK = CHECK_THIS_SEED_AND_FOLLOWING(GLOBAL_START_SEED);
+// const uint64_t GLOBAL_START_INTEGER = 110546880051;
+const uint64_t GLOBAL_START_INTEGER = 614254868672;
+const uint64_t GLOBAL_NUMBER_OF_INTEGERS = CHECK_THIS_INTEGER_AND_FOLLOWING(GLOBAL_START_INTEGER, 64);
+// const uint64_t GLOBAL_NUMBER_OF_INTEGERS = 10000000;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const char *INPUT_FILEPATH  = NULL;
 const char *OUTPUT_FILEPATH = NULL;
 
 const int CLIMATE = NP_TEMPERATURE;
+// const int CLIMATE = NP_CONTINENTALNESS;
 const Pos COORD = {0, 0};
-const int PERCENTILE = FIFTIETH_PERCENTILE;
+// const int PERCENTILE = FIFTIETH_PERCENTILE;
+const int PERCENTILE = ONE_HUNDREDTH_PERCENTILE;
 /* The sign of this indicates whether to look for minimum or maximum continentalnesses.
    The value of this specifies, if AS_PERCENT_ is true, what percentage of the maximum possible climate amplitude (between 0 and 1) to use as a threshold.
    If AS_PERCENT is false, it instead specifies the direct 
    E.g. -0.2 if AS_PERCENT = true will look for seeds with continentalnesses 20% that of the minimum, while if AS_PERCENT is false it will look for seeds with continentalnesses of -0.2 or less.*/
-const double INITIAL_THRESHOLD = 0.59;
+const double INITIAL_THRESHOLD = -0.75;
 const bool AS_PERCENT = true;
-const bool UPDATE_THRESHOLD = true;
+const bool UPDATE_THRESHOLD = false;
 
 const bool LARGE_BIOMES_FLAG = false;
 const bool CHECK_PX_FLAG = false;
@@ -31,7 +34,7 @@ double climateBounds[sizeof(U_MAX_CONT_OCTAVE_AMPLITUDE_SUMS)/sizeof(*U_MAX_CONT
 double currentThreshold;
 pthread_mutex_t mutex;
 
-void initGlobals() {
+void initializeGlobals() {
 	currentThreshold = INITIAL_THRESHOLD;
 	U_initClimateBoundsArray(CLIMATE, AS_PERCENT ? U_MAX_CLIMATE_AMPLITUDES[CLIMATE] * INITIAL_THRESHOLD : (INITIAL_THRESHOLD >= 0 ? min(INITIAL_THRESHOLD, U_MAX_CLIMATE_AMPLITUDES[CLIMATE]) : max(INITIAL_THRESHOLD, U_MIN_CLIMATE_AMPLITUDES[CLIMATE])), PERCENTILE, climateBounds, U_CLIMATE_NUMBER_OF_OCTAVES[CLIMATE]);
 }
@@ -46,7 +49,7 @@ void *runWorker(void *workerIndex) {
 	}
 
 	uint64_t seed;
-	if (!getNextSeed(workerIndex, &seed)) return NULL;
+	if (!getNextInteger(workerIndex, &seed)) return NULL;
 	do {
 		double px = origPx, pz = origPz, sample;
 		if (CHECK_PX_FLAG) {
@@ -56,7 +59,7 @@ void *runWorker(void *workerIndex) {
 
 		if (U_initAndSampleClimateBounded(CLIMATE, octaves, &px, &pz, INITIAL_THRESHOLD >= 0 ? climateBounds : NULL, INITIAL_THRESHOLD >= 0 ? NULL : climateBounds, &seed, LARGE_BIOMES_FLAG, &sample) < U_CLIMATE_NUMBER_OF_OCTAVES[CLIMATE]) continue;
 		/*Prints the seed.*/
-		outputValues("%" PRId64 "\t%f\t%f\n", seed, sample, sample/U_MAX_CLIMATE_AMPLITUDES[CLIMATE]);
+		outputString("%" PRId64 "\t%f\t%f\n", seed, sample, sample/U_MAX_CLIMATE_AMPLITUDES[CLIMATE]);
 		if (UPDATE_THRESHOLD) {
 			pthread_mutex_lock(&mutex);
 			if (fabs(currentThreshold) < fabs(sample/(AS_PERCENT ? U_MAX_CLIMATE_AMPLITUDES[CLIMATE] : 1))) {
@@ -65,6 +68,6 @@ void *runWorker(void *workerIndex) {
 			}
 			pthread_mutex_unlock(&mutex);
 		}
-	} while (getNextSeed(NULL, &seed));
+	} while (getNextInteger(NULL, &seed));
 	return NULL;
 }

@@ -1,4 +1,4 @@
-#include "../../utilities/cubiomes/finders.h"
+#include "utilities/cubiomes/finders.h"
 #include <stdbool.h>
 
 typedef struct CheckData {
@@ -88,7 +88,7 @@ void *thread(void *workerIndex) {
     return NULL;
 }
 
-// TODO: Move to initGlobals()
+// TODO: Move to initializeGlobals()
 int main() {
     uint64_t seed;
     setSeed(&seed, 1234);

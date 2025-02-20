@@ -1,6 +1,6 @@
-#include "../../utilities/cubiomes/finders.h"
-#include "../../core/common_seedfinding.h"
-#include "../../Utilities/U_Math.h"
+#include "utilities/cubiomes/finders.h"
+#include "core/bruteforce.h"
+#include "Utilities/U_Math.h"
 #include <pthread.h>
 
 enum {Default, LargeBiomes, SuperflatAllGrass /* Not implemented accurately yet, at least for 1.6.4 */, SuperflatNoGrass};
@@ -11,7 +11,7 @@ STRUCT(SeedCoordBiome) {
 	int biome;
 };
 
-const uint64_t GLOBAL_START_SEED = 0, GLOBAL_SEEDS_TO_CHECK = 0;
+const uint64_t GLOBAL_START_INTEGER = 0, GLOBAL_NUMBER_OF_INTEGERS = 0;
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const int MC_VERSION = MC_B1_8;
 const int GENERATION_MODE = Default;
@@ -54,7 +54,7 @@ uint64_t farthestSquaredRadialDistance;
 int farthestAxialDistance, farthestMinCoordinateDistance;
 pthread_mutex_t mutex;
 
-void initGlobals() {
+void initializeGlobals() {
 	farthestSquaredRadialDistance = INITIAL_SQUARED_RADIAL_THRESHOLD;
 	farthestAxialDistance = INITIAL_AXIAL_THRESHOLD;
 	farthestMinCoordinateDistance = INITIAL_MIN_COORD_THRESHOLD;
@@ -161,7 +161,7 @@ void *runWorker(void *workerIndex) {
 
 	// Chooses a base state to test.
 	uint64_t origInitialState;
-	if (!getNextSeed(workerIndex, &origInitialState)) return NULL;
+	if (!getNextInteger(workerIndex, &origInitialState)) return NULL;
 	do {
 		uint64_t initialState = origInitialState;
 		// This tracks how many state advancements there should be between the XORed worldseed and the chosen base state.
@@ -248,18 +248,18 @@ void *runWorker(void *workerIndex) {
 					pthread_mutex_unlock(&mutex);
 					goto nextTopSeed;
 				}
-				outputValues("%" PRId64 "\t%d\t%f\t%d\t%d\t%d\t%" PRIu64 "\n", seed, bestChance, sqrt(currentBestRadialDist), currentBestAxialDist, currentBestMinDist, updateFlags, seed & 0xffffffffffff);
+				outputString("%" PRId64 "\t%d\t%f\t%d\t%d\t%d\t%" PRIu64 "\n", seed, bestChance, sqrt(currentBestRadialDist), currentBestAxialDist, currentBestMinDist, updateFlags, seed & 0xffffffffffff);
 				if (UPDATE_THRESHOLDS) {
 					if (currentBestRadialDist > farthestSquaredRadialDistance) farthestSquaredRadialDistance = currentBestRadialDist;
 					if (currentBestAxialDist > farthestAxialDistance) farthestAxialDistance = currentBestAxialDist;
 					if (currentBestMinDist > farthestMinCoordinateDistance) farthestMinCoordinateDistance = currentBestMinDist;
 				}
 				pthread_mutex_unlock(&mutex);
-				// outputValues("%" PRId64 "\n", seed);
+				// outputString("%" PRId64 "\n", seed);
 				nextTopSeed: continue;
 			}
 			stepBackState(&initialState);
 		}
-	} while (getNextSeed(NULL, &origInitialState));
+	} while (getNextInteger(NULL, &origInitialState));
 	return NULL;
 }

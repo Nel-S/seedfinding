@@ -1,9 +1,9 @@
-#include "../utilities/cubiomes/finders.h"
-#include "../core/common_seedfinding.h"
+#include "utilities/cubiomes/finders.h"
+#include "core/bruteforce.h"
 #include <pthread.h>
 
-const uint64_t GLOBAL_START_SEED = 0; //735673042
-const uint64_t GLOBAL_SEEDS_TO_CHECK = CHECK_THIS_SEED_AND_FOLLOWING(GLOBAL_START_SEED);
+const uint64_t GLOBAL_START_INTEGER = 0; //735673042
+const uint64_t GLOBAL_NUMBER_OF_INTEGERS = CHECK_THIS_INTEGER_AND_FOLLOWING(GLOBAL_START_INTEGER, 64);
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const char *INPUT_FILEPATH = NULL;
 const char *OUTPUT_FILEPATH = NULL;
@@ -75,7 +75,7 @@ int minCount;
 uint64_t minScore;
 pthread_mutex_t mutex;
 
-void initGlobals() {
+void initializeGlobals() {
 	minCount = INITIAL_COUNT_THRESHOLD;
 	minScore = INITIAL_SCORE_THRESHOLD;
 }
@@ -89,7 +89,7 @@ void *runWorker(void *workerIndex) {
 	Pos structureBounds[sizeof(STRUCTURES_TO_CHECK)/sizeof(*STRUCTURES_TO_CHECK)];
 	for (size_t i = 0; i < sizeof(structureBounds)/sizeof(*structureBounds); ++i) structureBounds[i] = getStructureBoundsRange(STRUCTURES_TO_CHECK[i].structure);
 
-	if (!getNextSeed(workerIndex, &seed)) return NULL;
+	if (!getNextInteger(workerIndex, &seed)) return NULL;
 	applySeed(&g, DIM_OVERWORLD, seed);
 	do {
 		int count = 0;
@@ -122,9 +122,9 @@ void *runWorker(void *workerIndex) {
 			continue;
 		}
 		if (FILTER_BY_SCORE_FLAG) {
-			if (FILTER_BY_COUNT_FLAG) outputValues("%" PRId64 "\t%d\t%" PRIu64 "\n", seed, count, score);
-			else outputValues("%" PRId64 "\t%" PRIu64 "\n", seed, score);
-		} else outputValues("%" PRId64 "\t%d\n", seed, count);
+			if (FILTER_BY_COUNT_FLAG) outputString("%" PRId64 "\t%d\t%" PRIu64 "\n", seed, count, score);
+			else outputString("%" PRId64 "\t%" PRIu64 "\n", seed, score);
+		} else outputString("%" PRId64 "\t%d\n", seed, count);
 		if (count < minCount || ((!FILTER_BY_COUNT_FLAG || count == minCount) && score < minScore)) {
 			minCount = count;
 			minScore = score;
@@ -132,6 +132,6 @@ void *runWorker(void *workerIndex) {
 		pthread_mutex_unlock(&mutex);
 
 		skipSeed: continue;
-	} while (getNextSeed(NULL, &seed));
+	} while (getNextInteger(NULL, &seed));
 	return NULL;
 }

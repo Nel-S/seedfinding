@@ -1,21 +1,21 @@
-#include "../utilities/cubiomes/finders.h"
+#include "utilities/cubiomes/finders.h"
 
-STRUCT(EndIsland) {
+STRUCT(End_Island) {
 	Pos3 topPos;
 	int radius, depth;
 };
 
 /* Returns the number of End islands in a particular chunk.
    If not `NULL`, the End islands' data are stored in `island1` and `island2`.*/
-int getSmallEndIslands(uint64_t lower48, int chunkX, int chunkZ, EndIsland *island1, EndIsland *island2) {
+int getSmallEnd_Islands(uint64_t lower48, int chunkX, int chunkZ, End_Island *island1, End_Island *island2) {
 	// Initializes RNG
 	uint64_t rng;
 	setSeed(&rng, lower48);
 	setSeed(&rng, 16*(chunkX*(nextLong(&rng) | 1) + chunkZ*(nextLong(&rng) | 1)) ^ lower48);
 
-	/* If island1/island2 are NULL, the island's data is saved to a temporary EndIsland that's ultimately discarded, which the compiler should optimize out.
+	/* If island1/island2 are NULL, the island's data is saved to a temporary End_Island that's ultimately discarded, which the compiler should optimize out.
 	   (We still need to emulate the RNG calls if e.g. island1 is NULL but island2 isn't.)*/
-	EndIsland *saveData1, *saveData2;
+	End_Island *saveData1, *saveData2;
 	if (island1) saveData1 = island1;
 	if (island2) saveData2 = island2;
 	int count = 0;

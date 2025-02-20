@@ -2,7 +2,7 @@
 #define _GLOBALS_H
 
 #include "settings.h"
-#include "../../utilities/Spawn.h"
+#include "utilities/Spawn.h"
 
 DEFAULT_LOCALS_INITIALIZATION
 

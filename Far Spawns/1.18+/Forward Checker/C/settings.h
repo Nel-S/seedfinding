@@ -1,17 +1,17 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
 
-#include "../../../../core/common_seedfinding.h"
-#include "../../../../Utilities/Spawn.h"
+#include "core/bruteforce.h"
+#include "Utilities/Spawn.h"
 
 // The seed to start from.
-// const uint64_t GLOBAL_START_SEED = 3426926457792;
-const uint64_t GLOBAL_START_SEED = 0;
-// const uint64_t GLOBAL_START_SEED = 159316728991;
+// const uint64_t GLOBAL_START_INTEGER = 3426926457792;
+const uint64_t GLOBAL_START_INTEGER = 0;
+// const uint64_t GLOBAL_START_INTEGER = 159316728991;
 // The number of seeds to iterate over.
 // (Note to self: redoing 2481627134962 up to 2612082682250 might be needed worst-case scenario, but I seriously doubt any candidates were missed)
-// const uint64_t GLOBAL_SEEDS_TO_CHECK = CHECK_THIS_SEED_AND_FOLLOWING(GLOBAL_START_SEED);
-const uint64_t GLOBAL_SEEDS_TO_CHECK = 10000000;
+// const uint64_t GLOBAL_NUMBER_OF_INTEGERS = CHECK_THIS_INTEGER_AND_FOLLOWING(GLOBAL_START_INTEGER, 64);
+const uint64_t GLOBAL_NUMBER_OF_INTEGERS = 10000000;
 // If running with multithreading/multiprocessing, sets the number of workers to create.
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 
@@ -56,6 +56,8 @@ const uint8_t MIN_DESIRED_RING = 3;
 const bool POST_1_21_1 = true;
 const bool LARGE_BIOMES_FLAG = false;
 // const bool LARGE_BIOMES_FLAG = true;
+
+const bool JAVA_SPAWN = true;
 
 // Set to true to ignore shift for the initial continentalness checks, or false to still sample it.
 // (Speeds up the search at the cost of slight accuracy.)

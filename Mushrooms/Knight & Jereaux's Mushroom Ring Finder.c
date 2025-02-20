@@ -1,12 +1,12 @@
-#include "../core/common_seedfinding.h"
-#include "../Utilities/Climates.h"
-// #include "../utilities/cubiomes/finders.c"
-// #include "../utilities/cubiomes/biomenoise.c"
+#include "core/bruteforce.h"
+#include "Utilities/Climates.h"
+// #include "utilities/cubiomes/finders.c"
+// #include "utilities/cubiomes/biomenoise.c"
 
-// const uint64_t GLOBAL_START_SEED = -230734003789;
-const uint64_t GLOBAL_START_SEED = 0;
-// const uint64_t GLOBAL_SEEDS_TO_CHECK = 100000000;
-const uint64_t GLOBAL_SEEDS_TO_CHECK = CHECK_THIS_SEED_AND_FOLLOWING(GLOBAL_START_SEED);
+// const uint64_t GLOBAL_START_INTEGER = -230734003789;
+const uint64_t GLOBAL_START_INTEGER = 0;
+// const uint64_t GLOBAL_NUMBER_OF_INTEGERS = 100000000;
+const uint64_t GLOBAL_NUMBER_OF_INTEGERS = CHECK_THIS_INTEGER_AND_FOLLOWING(GLOBAL_START_INTEGER, 64);
 const int GLOBAL_NUMBER_OF_WORKERS = 4;
 const int PERCENTILE = FIFTIETH_PERCENTILE;
 const char *INPUT_FILEPATH  = NULL;
@@ -28,7 +28,7 @@ void *runWorker(void *workerIndex) {
     Xoroshiro pxr, pxr2;
 
     uint64_t seed;
-    if (!getNextSeed(workerIndex, &seed)) return NULL;
+    if (!getNextInteger(workerIndex, &seed)) return NULL;
     do {
 		double px = 480, pz = 480;
 		if (!DELAY_SHIFT) {
@@ -111,10 +111,10 @@ void *runWorker(void *workerIndex) {
         // TODO: Remove
         setBiomeSeed(&g.bn, seed, LARGE_BIOMES_FLAG);
         Pos spawn = getSpawn(&g);
-        // outputValues("%d %d\n", spawn.x, spawn.z);
+        // outputString("%d %d\n", spawn.x, spawn.z);
         if (abs(spawn.x - 64) > 350 || abs(spawn.z) > 350) continue;
 
-        outputValues("%" PRId64 "\n", seed);
-    } while (getNextSeed(NULL, &seed));
+        outputString("%" PRId64 "\n", seed);
+    } while (getNextInteger(NULL, &seed));
     return NULL;
 }

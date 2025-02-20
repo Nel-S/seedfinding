@@ -1,4 +1,4 @@
-#include "../../utilities/cubiomes/noise.h"
+#include "utilities/cubiomes/noise.h"
 #include <stdio.h>
 
 const int RADIUS = 10000;
